@@ -112,6 +112,10 @@ async function main() {
 
   }
 
+
+  // -------------------- Inputs -----------------------------
+
+
   gl.canvas.addEventListener('mousemove', (e) => {
      const rect = canvas.getBoundingClientRect();
      mouseX = e.clientX - rect.left;
@@ -183,6 +187,19 @@ async function main() {
     isDragging = true;
 
   });
+
+  canvas.addEventListener("wheel", (e) => {
+      event.preventDefault();
+
+      grid.update_zoom(e.deltaY);
+
+      if (e.deltaY < 0) {
+          console.log("Scrolled up");
+      } else {
+          console.log("Scrolled down");
+      }
+  });
+
 
   canvas.addEventListener('mouseup', () => {
     isDragging = false;

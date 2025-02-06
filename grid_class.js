@@ -10,6 +10,7 @@ export class Grid
   {
     this.color = color;
     this.zoom = zoom;
+    this.zoomSpeed = 0.05;
 
     this.gl = gl;
     this.VAO = null;
@@ -20,7 +21,7 @@ export class Grid
   async build()
   {
     const gl = this.gl;
-    gl.lineWidth(1.0);
+    gl.lineWidth(2.0);
 
     // ---------------- VAO construction. -----------
     const vao = gl.createVertexArray();
@@ -37,8 +38,8 @@ export class Grid
     const pointsY = []
     for(let i = 0; i <= n_p; i++)
     {
-      pointsX.push(2.0/n_p * i - 1.0);pointsX.push(-1);
-      pointsY.push(-1);pointsY.push(2.0/n_p * i - 1.0);
+      pointsX.push(4.0/n_p * i - 2.0);pointsX.push(-2);
+      pointsY.push(-2);pointsY.push(4.0/n_p * i - 2.0);
     }
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pointsX.concat(pointsY)), gl.STATIC_DRAW);
@@ -78,11 +79,41 @@ export class Grid
     this.update_color(this.color);
 
   }
-
-  update_zoom(zoom)
+/*
+  update_zoom(deltaZoom)
   {
+    // Maps + to [1,0] and - to [0, infy]
+    //this.zoom -= deltaZoom * this.zoomSpeed;
+
+    if (deltaZoom < 0) {
+        this.zoom *= (1 + this.zoomSpeed); // Zoom in
+    } else {
+        this.zoom *= (1 - this.zoomSpeed); // Zoom out
+    }
+
+    console.log(this.zoom)
+
     this.gl.useProgram(this.Shader);
-    this.gl.uniform1f(this.zoomLocation, zoom);
+    this.gl.uniform1f(this.zoomLocation, this.zoom);
+  }
+*/
+
+  update_zoom(deltaZoom) {
+      if (deltaZoom < 0) {
+          this.zoom *= (1 + this.zoomSpeed); // Zoom in
+      } else {
+          this.zoom *= (1 - this.zoomSpeed); // Zoom out
+      }
+
+      // Zoom wrapping logic
+      const MAX_ZOOM = 4; // Example maximum zoom
+      const MIN_ZOOM = 1; // Example minimum zoom
+
+      if(this.zoom > MAX_ZOOM || this.zoom < MIN_ZOOM) this.zoom = 2;
+
+
+      this.gl.useProgram(this.Shader);
+      this.gl.uniform1f(this.zoomLocation, this.zoom);
   }
 
   update_color(color)
@@ -103,11 +134,11 @@ export class Grid
     
     // X
     gl.uniform2f(this.xyLocation, 0, 1);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, 50);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, 51);
     
     // Y
     gl.uniform2f(this.xyLocation, 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, 50);
+    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, 51);
 
   }
 }
