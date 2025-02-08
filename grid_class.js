@@ -6,11 +6,11 @@ const n_p = 100;
 
 export class Grid
 {
-  constructor(gl, color = [1.0, 1.0, 1.0, 1.0], zoom = 1.0)
+  constructor(gl, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
   {
     this.color = color;
     this.zoom = zoom;
-    this.zoomSpeed = 0.05;
+    this.zoomSpeed = 0.02;
 
     this.gl = gl;
     this.VAO = null;
@@ -74,9 +74,9 @@ export class Grid
     this.zoomLocation = gl.getUniformLocation(program, "u_zoom");
     this.xyLocation = gl.getUniformLocation(program, "u_xy");
 
-
-    this.update_zoom(this.zoom);
-    this.update_color(this.color);
+    gl.useProgram(this.Shader)
+    gl.uniform1f(this.zoomLocation, this.zoom);
+    gl.uniform4f(this.colorLocation, this.color[0], this.color[1], this.color[2], this.color[3]);
 
   }
 /*
@@ -99,6 +99,7 @@ export class Grid
 */
 
   update_zoom(deltaZoom) {
+
       if (deltaZoom < 0) {
           this.zoom *= (1 + this.zoomSpeed); // Zoom in
       } else {
@@ -106,10 +107,14 @@ export class Grid
       }
 
       // Zoom wrapping logic
-      const MAX_ZOOM = 4; // Example maximum zoom
-      const MIN_ZOOM = 1; // Example minimum zoom
+      const MAX_ZOOM = 4;
+      const MIN_ZOOM = 2;
 
-      if(this.zoom > MAX_ZOOM || this.zoom < MIN_ZOOM) this.zoom = 2;
+      //if(this.zoom >= MAX_ZOOM || this.zoom <= MIN_ZOOM) this.zoom = 2.0;
+      if(this.zoom > MAX_ZOOM) this.zoom = 2.0;
+      if(this.zoom < MIN_ZOOM) this.zoom = 4.0;
+
+      console.log("zoom: " + this.zoom);
 
 
       this.gl.useProgram(this.Shader);
@@ -118,6 +123,7 @@ export class Grid
 
   update_color(color)
   {
+    this.color = color;
     this.gl.useProgram(this.Shader);
     this.gl.uniform4f(this.colorLocation, color[0], color[1], color[2], color[3]);
   }

@@ -7,6 +7,7 @@ layout(location = 0) in vec2 a_position;
 uniform float u_aspect;
 uniform float u_zoom;
 uniform vec2 u_xy;
+uniform vec4 u_spanXY;
 
 out vec4 line_color;
 

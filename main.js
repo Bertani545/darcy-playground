@@ -12,8 +12,17 @@ function randomInt(range) {
 }
 
 
+var animate_method = 0;
+var animation_duration = 5;
 
-  // Fills the buffer with the values that define a rectangle.
+var spanX = [-1,1];
+var sizeX = 2;
+var middleX = 0;
+var spanY = [-1,1];
+var sizeY = 2;
+var middleY = 0;
+var spanSpeed = 0.05;
+var spanText = document.getElementById('span_text');
    
 
 async function main() {
@@ -67,6 +76,9 @@ async function main() {
 
 
 
+
+
+
   // --------- Render cycle ------
   var then  = 0;
 
@@ -110,13 +122,18 @@ async function main() {
     theta += 1 * deltaTime;
     requestAnimationFrame(drawScene);
 
+
+    // UI elements
+    spanText.textContent = "width from " + spanX[0] + " to " + spanX[1] + "\n" +
+                            "height from " + spanY[0] + " to " + spanY[1];
+
   }
 
 
   // -------------------- Inputs -----------------------------
 
 
-  gl.canvas.addEventListener('mousemove', (e) => {
+  canvas.addEventListener('mousemove', (e) => {
      const rect = canvas.getBoundingClientRect();
      mouseX = e.clientX - rect.left;
      mouseY = e.clientY - rect.top;
@@ -193,6 +210,52 @@ async function main() {
 
       grid.update_zoom(e.deltaY);
 
+      // Change span
+      if (e.deltaY < 0) {
+        // Zoom in, span shrinks
+          spanX = spanX.map(x => x * (1 - spanSpeed));
+          spanY = spanY.map(y => y * (1 - spanSpeed));
+      } else {
+        // Zoom out, span grows
+          spanX = spanX.map(x => x * (1 + spanSpeed));
+          spanY = spanY.map(y => y * (1 + spanSpeed));
+      }
+
+      // To make it more manageble
+      if(spanX[1] - spanX[0] >= 2 * sizeX)
+      {
+        spanX[1] = middleX + sizeX;
+        spanX[0] = middleX - sizeX;
+        sizeX *= 2;
+      }
+
+      if(spanX[1] - spanX[0] <= 0.5 * sizeX)
+      {
+        spanX[1] = middleX + sizeX * 0.25;
+        spanX[0] = middleX - sizeX * 0.25;
+        sizeX *= 0.5;
+      }
+
+      if(spanY[1] - spanY[0] >= 2 * sizeY)
+      {
+        spanY[1] = middleY + sizeY;
+        spanY[0] = middleY - sizeY;
+        sizeY *= 2;
+      }
+
+      if(spanY[1] - spanY[0] <= 0.5 * sizeY)
+      {
+        spanY[1] = middleY + sizeY * 0.25;
+        spanY[0] = middleY - sizeY * 0.25;
+        sizeY *= 0.5;
+      }
+
+      console.log("log span: " + (spanX[1]-spanX[0]))
+
+      // When zooming out, zoom = 2 when span 2^n, n\in N
+      // When zooming in,
+
+
       if (e.deltaY < 0) {
           console.log("Scrolled up");
       } else {
@@ -220,9 +283,8 @@ async function main() {
     else animation_duration = numberInput.value;
   });
 
-
 }
 
-var animate_method = 0;
-var animation_duration = 5;
+
+
 main();
