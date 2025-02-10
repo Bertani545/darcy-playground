@@ -18,12 +18,27 @@ var animation_duration = 5;
 var spanX = [-1,1];
 var sizeX = 2;
 var middleX = 0;
+
 var spanY = [-1,1];
 var sizeY = 2;
 var middleY = 0;
+
 var spanSpeed = 0.05;
 var spanText = document.getElementById('span_text');
-   
+
+
+/*
+
+TODO: 
+- Send the span of the axis to the vertex shader. Aka, map [-1, 1] to [span[0], span[1]]
+- Add user being able to input span
+- Add drag to move the grid <- Difficult. It must tile
+- Add the option to draw your vector graphics
+- Add UI element for the span of the axis
+---- MVP ----
+- Add the option to add pictures and edit them
+*/
+
 
 async function main() {
   var canvas = document.querySelector("#c");
@@ -55,6 +70,8 @@ async function main() {
   //Mouse stuff
   let mouseX = -1;
   let mouseY = -1;
+  let mouseClientX = -1;
+  let mouseClientY = -1;
   var isDragging = false;
 
   const devicePixelRatio = window.devicePixelRatio || 1;
@@ -64,8 +81,8 @@ async function main() {
   // To move objects
   var pixelX;
   var pixelY;
-  var mouse_ndcX;
-  var mouse_ndcY;
+  var mouseCoordX;
+  var mouseCoordY;
 
   
 
@@ -80,23 +97,17 @@ async function main() {
 
 
   // --------- Render cycle ------
-  var then  = 0;
+  var timeThen  = 0;
 
   requestAnimationFrame(drawScene);
-  function drawScene(now)
+  function drawScene(timeNow)
   {
     // ---- Time -----
-    now *= 0.001; //To seconds
-    const deltaTime = now - then;
-    then = now;
+    timeNow *= 0.001; //To seconds
+    const deltaTime = timeNow - timeThen;
+    timeThen = timeNow;
 
 
-    // See why if I delete this part it stops rendering
-    pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
-    pixelY = gl.canvas.height - mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
-
-    mouse_ndcX = pixelX / gl.canvas.width * 2 - 1; 
-    mouse_ndcY = pixelY / gl.canvas.height * 2 - 1;
 
     //Render to the screen
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
@@ -109,7 +120,7 @@ async function main() {
 
     // ---------- Animation stuff --------
     //Time in the curve
-    const t = (now % animation_duration) / animation_duration
+    const t = (timeNow % animation_duration) / animation_duration
 
 
 
@@ -135,73 +146,61 @@ async function main() {
 
   canvas.addEventListener('mousemove', (e) => {
      const rect = canvas.getBoundingClientRect();
-     mouseX = e.clientX - rect.left;
-     mouseY = e.clientY - rect.top;
 
 
-     if(isDragging && curr_ID >= 0)
+     if(isDragging)
      {
-        pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
-        pixelY = gl.canvas.height - mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
-        mouse_ndcX = pixelX / gl.canvas.width * 2 - 1; 
-        mouse_ndcY = pixelY / gl.canvas.height * 2 - 1;
+        const currentMouseX = e.clientX;
+        const currentMouseY = e.clientY;
+
+        let dx = currentMouseX - mouseX;
+        let dy = currentMouseY - mouseY;
+
+        // Normalize them
+        dx *= (spanX[1] - spanX[0])  / rect.height; // With aspect transformation
+        dy *= (spanY[1] - spanY[0]) / rect.height;
+
+        // Scale
+        dx *= 2.0;
+        dy *= 2.0;
+
+        spanX[0] -= dx;
+        spanX[1] -= dx;
+        middleX -= dx;
+
+        spanY[0] += dy;
+        spanY[1] += dy;
+        middleY += dy;
+
+        // Update mouse position
+        mouseX = currentMouseX;
+        mouseY = currentMouseY;
+        mouseCoordX = (currentMouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
+        mouseCoordY = (currentMouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
         
-        let ratio = gl.canvas.width / gl.canvas.height;
-        mouse_ndcX *= ratio;
-
-        //Points
-        points[curr_ID].update_translation_matrix([mouse_ndcX, mouse_ndcY]);
-
-
-        //Curve
-        switch(curr_ID)
-        {
-          case 0:
-            {
-              curve.modify_p1(mouse_ndcX, mouse_ndcY); 
-              l1.modify_p1(mouse_ndcX, mouse_ndcY);
-              break;
-            }
-          case 1:
-            {
-              curve.modify_p2(mouse_ndcX, mouse_ndcY); 
-              l1.modify_p2(mouse_ndcX, mouse_ndcY);
-              break;
-            }
-          case 2:
-            {
-              curve.modify_p3(mouse_ndcX, mouse_ndcY); 
-              l2.modify_p2(mouse_ndcX, mouse_ndcY);
-              break;
-            }
-          case 3:
-            {
-              curve.modify_p4(mouse_ndcX, mouse_ndcY); 
-              l2.modify_p1(mouse_ndcX, mouse_ndcY);
-              break;
-            }
-          default: break;
-        }
-
-        //renderCurvesInstance.update_points(gl, curve);
      }
   });
 
   canvas.addEventListener('mousedown', (e) => {
     
     const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
 
+    mouseCoordX = (mouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
+    mouseCoordY = (mouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
+
+    // For later
     // Read the pixel color at the mouse position
-    const pixelData = new Uint8Array(4);
-    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
-
-    curr_ID = webgl_utils.getIdFromColor(pixelData) - 1;
+    //const pixelData = new Uint8Array(4);
+    //gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
+    //curr_ID = webgl_utils.getIdFromColor(pixelData) - 1;
     //console.log('Picked object ID:', curr_ID);
 
 
     isDragging = true;
+
+    console.log(mouseCoordX, mouseCoordY)
 
   });
 
@@ -250,17 +249,15 @@ async function main() {
         sizeY *= 0.5;
       }
 
-      console.log("log span: " + (spanX[1]-spanX[0]))
+      //console.log("log span: " + (spanX[1]-spanX[0]))
 
-      // When zooming out, zoom = 2 when span 2^n, n\in N
-      // When zooming in,
-
-
+/*
       if (e.deltaY < 0) {
           console.log("Scrolled up");
       } else {
           console.log("Scrolled down");
       }
+*/
   });
 
 

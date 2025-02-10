@@ -72,7 +72,7 @@ export class Grid
     this.colorLocation = gl.getUniformLocation(program, "u_color");
     this.aspectLocation = gl.getUniformLocation(program, "u_aspect");
     this.zoomLocation = gl.getUniformLocation(program, "u_zoom");
-    this.xyLocation = gl.getUniformLocation(program, "u_xy");
+    this.lineSpawnDirectionLocation = gl.getUniformLocation(program, "u_lineSpawnDirection");
 
     gl.useProgram(this.Shader)
     gl.uniform1f(this.zoomLocation, this.zoom);
@@ -139,11 +139,11 @@ export class Grid
     gl.uniform1f(this.aspectLocation, gl.canvas.width / gl.canvas.height);
     
     // X
-    gl.uniform2f(this.xyLocation, 0, 1);
+    gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, 51);
     
     // Y
-    gl.uniform2f(this.xyLocation, 1, 0);
+    gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, 51);
 
   }
