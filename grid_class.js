@@ -4,6 +4,12 @@ import {Vector2D} from "./gl_2Dmath.js"
 
 const n_p = 100;
 
+function lessOrEqualPowerOf2(n) {
+  return 1 << 31 - Math.clz32(n);
+}
+
+
+
 export class Grid
 {
   constructor(gl, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
@@ -11,6 +17,9 @@ export class Grid
     this.color = color;
     this.zoom = zoom;
     this.zoomSpeed = 0.02;
+    this.Offset = [0,0];
+    this.sizeSquare = [1,1]
+    this.squareRatio = 1;
 
     this.gl = gl;
     this.VAO = null;
@@ -38,8 +47,8 @@ export class Grid
     const pointsY = []
     for(let i = 0; i <= n_p; i++)
     {
-      pointsX.push(4.0/n_p * i - 2.0);pointsX.push(-2);
-      pointsY.push(-2);pointsY.push(4.0/n_p * i - 2.0);
+      pointsX.push(1.0/n_p * i);pointsX.push(0);
+      pointsY.push(0);pointsY.push(1.0/n_p * i);
     }
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pointsX.concat(pointsY)), gl.STATIC_DRAW);
@@ -70,33 +79,31 @@ export class Grid
 
     //Save shader properties
     this.colorLocation = gl.getUniformLocation(program, "u_color");
-    this.aspectLocation = gl.getUniformLocation(program, "u_aspect");
+    this.aspectScreenLocation = gl.getUniformLocation(program, "u_aspectScreen");
     this.zoomLocation = gl.getUniformLocation(program, "u_zoom");
     this.lineSpawnDirectionLocation = gl.getUniformLocation(program, "u_lineSpawnDirection");
+    this.gridRatioLocation = gl.getUniformLocation(program, "u_gridRatio");
+    this.offsetLocation = gl.getUniformLocation(program, "u_offset");
+    this.spanLocation = gl.getUniformLocation(program, "u_spanXY");
 
     gl.useProgram(this.Shader)
     gl.uniform1f(this.zoomLocation, this.zoom);
-    gl.uniform4f(this.colorLocation, this.color[0], this.color[1], this.color[2], this.color[3]);
+    gl.uniform4f(this.colorLocation, ...this.color);
+
+
+    this.update_squareSize();
 
   }
-/*
-  update_zoom(deltaZoom)
+
+  update_squareSize()
   {
-    // Maps + to [1,0] and - to [0, infy]
-    //this.zoom -= deltaZoom * this.zoomSpeed;
+    const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
+    // 2 divided by the total amount of squares on screen
+    this.sizeSquare[0] = 2 /1
+    this.sizeSquare[1] = 2 / 1
 
-    if (deltaZoom < 0) {
-        this.zoom *= (1 + this.zoomSpeed); // Zoom in
-    } else {
-        this.zoom *= (1 - this.zoomSpeed); // Zoom out
-    }
-
-    console.log(this.zoom)
-
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform1f(this.zoomLocation, this.zoom);
+    console.log(this.sizeSquare);
   }
-*/
 
   update_zoom(deltaZoom) {
 
@@ -125,9 +132,56 @@ export class Grid
   {
     this.color = color;
     this.gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.colorLocation, color[0], color[1], color[2], color[3]);
+    this.gl.uniform4f(this.colorLocation, ...color);
   }
 
+  update_ratio(spanX, spanY)
+  {
+    let lenX = spanX[1] - spanX[0];
+    let lenY = spanY[1] - spanY[0];
+
+    // Get the surrounding powers of 2
+    let bottomX = lessOrEqualPowerOf2(lenX);
+    let topX = bottomX << 1;
+    let bottomY = lessOrEqualPowerOf2(lenY);
+    let topY = bottomY << 1;
+
+    // Map it [4,2]
+    const mapX = (lenX - bottomX) / (topX - bottomX) * 2 + 2;
+    const mapY = (lenY - bottomY) / (topY - bottomY) * 2 + 2;
+
+    // Compute ratio
+    this.squareRatio = mapY / mapX;
+
+
+
+    this.zoom = 3.0;
+
+
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform1f(this.zoomLocation, this.zoom);
+    this.gl.uniform1f(this.gridRatioLocation, this.squareRatio);
+
+  }
+
+  update_offset(dx, dy)
+  {
+    this.Offset[0] += dx;
+    this.Offset[1] -= dy;
+
+    // Check if bigger than a square
+    //if(Math.abs(this.Offset[0]) > this.sizeSquare[0]){ this.Offset[0] = 0; }
+    //if(Math.abs(this.Offset[1]) > this.sizeSquare[1]){ this.Offset[1] = 0; }
+
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform2f(this.offsetLocation, ...this.Offset);
+  }
+
+  update_span(spanX, spanY)
+  {
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
+  }
 
   draw()
   {
@@ -136,15 +190,15 @@ export class Grid
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
 
-    gl.uniform1f(this.aspectLocation, gl.canvas.width / gl.canvas.height);
+    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height / gl.canvas.width);
     
     // X
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, 51);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, 50);
     
     // Y
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, 51);
+    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, 50);
 
   }
 }

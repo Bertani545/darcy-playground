@@ -23,6 +23,7 @@ var spanY = [-1,1];
 var sizeY = 2;
 var middleY = 0;
 
+
 var spanSpeed = 0.05;
 var spanText = document.getElementById('span_text');
 
@@ -62,6 +63,8 @@ async function main() {
 
   const grid = new Grid(gl);
   await grid.build();
+
+  grid.update_ratio(spanX, spanY);
   
 
   let theta = 0.0;
@@ -157,8 +160,16 @@ async function main() {
         let dy = currentMouseY - mouseY;
 
         // Normalize them
-        dx *= (spanX[1] - spanX[0])  / rect.height; // With aspect transformation
-        dy *= (spanY[1] - spanY[0]) / rect.height;
+        dx /= rect.height; // With aspect transformation
+        dy /= rect.height;
+
+        // Update the translation of the grid
+        grid.update_offset(dx, dy);
+
+
+        // Update the transformation of the span
+        dx *= spanX[1] - spanX[0];
+        dy *= spanY[1] - spanY[0];
 
         // Scale
         dx *= 2.0;
@@ -166,11 +177,11 @@ async function main() {
 
         spanX[0] -= dx;
         spanX[1] -= dx;
-        middleX -= dx;
+        //middleX -= dx;
 
         spanY[0] += dy;
         spanY[1] += dy;
-        middleY += dy;
+        //middleY += dy;
 
         // Update mouse position
         mouseX = currentMouseX;
@@ -178,6 +189,7 @@ async function main() {
         mouseCoordX = (currentMouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
         mouseCoordY = (currentMouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
         
+        grid.update_span(spanX, spanY);
      }
   });
 
@@ -249,6 +261,8 @@ async function main() {
         sizeY *= 0.5;
       }
 
+
+      grid.update_span(spanX, spanY);
       //console.log("log span: " + (spanX[1]-spanX[0]))
 
 /*

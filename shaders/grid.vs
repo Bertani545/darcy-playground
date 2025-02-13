@@ -4,20 +4,23 @@
 // It will receive data from a buffer
 layout(location = 0) in vec2 a_position;
 
-uniform float u_aspect;
+uniform float u_aspectScreen;
 uniform float u_zoom;
 uniform vec2 u_lineSpawnDirection;
-
+uniform float u_gridRatio;
 
 // Yet to be used
-uniform vec2 u_centerCoords;
+uniform vec2 u_offset;
 uniform vec4 u_spanXY;
+
 
 
 out vec4 line_color;
 
 #define PI 3.1415926535898
 #define TAU 6.283185307179586
+
+#define TOTAL_LINES 50.0
 
 vec4 domain_color(vec2 coord) {
     //hsv-rgb code taken from https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
@@ -34,33 +37,62 @@ vec4 domain_color(vec2 coord) {
 
 
 void main() {
+  vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
 
-  float line_total = 25.;
+  float dist = 6.0 / TOTAL_LINES;
 
+  vec2 current_position = a_position;
 
-  float dist = 2.0 / line_total;
-
-
-  vec2 offset = u_lineSpawnDirection * vec2(float(gl_InstanceID) * dist);
-  offset.x /= u_aspect;
-
-  vec2 pos = vec2(a_position.x /  u_aspect, a_position.y ) + offset;
-
-  float colorDist = 1./line_total;
-  line_color = domain_color(pos);
+  // Scale it
+  current_position *= 2.0 * u_zoom;
+  
+  
 
 
-  //pos.x = pos.x + 0.5 * pos.y;
-  //pos.y = 1.4 * pos.y;
+  // Position the lines
+  vec2 distanceFromOrigin = u_lineSpawnDirection * vec2(float(gl_InstanceID) * dist) * distortionX;
+  current_position += distanceFromOrigin;
 
-
-
-  pos *= u_zoom;
-
-  gl_Position = vec4(pos, 0.0, 1.0) ;
+  // Position in the beggining of the spawner
+  vec2 startingPoint = -vec2((TOTAL_LINES) * dist) / 2.0 * distortionX;
+  current_position += startingPoint;
 
 
 
+  current_position *= u_zoom;
+  // Ofset caused by the mouse
+  current_position += u_offset * dist * distortionX * 2.0 * u_zoom;
 
-  //gl_Position = vec4(a_position + offset, 0.0, 1.0);
+
+
+  /*
+  current_position *= TOTAL_LINES * dist * distortionX;
+  //current_position += u_offset * TOTAL_LINES * dist * distortionX;
+  current_position += u_offset * TOTAL_LINES * dist * distortionX;
+  //current_position *= TOTAL_LINES * dist;
+  //current_position -= u_offset; //* distortionX * TOTAL_LINES * dist;
+  //current_position += u_offset; // Currenlty spans at (0,0)
+  //current_position *= distortionX;
+  
+  
+  vec2 startingPoint = -vec2((TOTAL_LINES) * dist) / 2.0 * distortionX;
+  current_position += startingPoint;
+  
+
+  vec2 distanceFromOrigin = u_lineSpawnDirection * vec2(float(gl_InstanceID) * dist) * distortionX;
+  current_position += distanceFromOrigin;
+
+*/
+  // Map the coordinates to span and color them acordingly
+  /*
+        Mapping occurs here
+        //pos.x = pos.x + 0.5 * pos.y;
+        //pos.y = 1.4 * pos.y;
+  */
+  line_color = domain_color(current_position);
+
+  //if(gl_InstanceID == 25) line_color = vec4(1.0);
+  
+
+  gl_Position = vec4(current_position, 0.0, 1.0) ;
 }
