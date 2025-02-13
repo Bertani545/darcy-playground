@@ -91,16 +91,14 @@ export class Grid
     gl.uniform4f(this.colorLocation, ...this.color);
 
 
-    this.update_squareSize();
-
   }
 
   update_squareSize()
   {
     const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
     // 2 divided by the total amount of squares on screen
-    this.sizeSquare[0] = 2 /1
-    this.sizeSquare[1] = 2 / 1
+    this.sizeSquare[0] =  6 / 50 * this.zoom * screenRatio * this.squareRatio;//6 / 12 * screenRatio * this.squareRatio;
+    this.sizeSquare[1] =  6 / 50 * this.zoom
 
     console.log(this.sizeSquare);
   }
@@ -164,14 +162,15 @@ export class Grid
 
   }
 
+  // dx and dy between -1 and 1
   update_offset(dx, dy)
   {
-    this.Offset[0] += dx;
-    this.Offset[1] -= dy;
+    this.Offset[0] += dx * this.sizeSquare[0] * 2.0;
+    this.Offset[1] -= dy * this.sizeSquare[1] * 2.0;
 
     // Check if bigger than a square
-    //if(Math.abs(this.Offset[0]) > this.sizeSquare[0]){ this.Offset[0] = 0; }
-    //if(Math.abs(this.Offset[1]) > this.sizeSquare[1]){ this.Offset[1] = 0; }
+    if(Math.abs(this.Offset[0]) > this.sizeSquare[0]){ this.Offset[0] = 0; }
+    if(Math.abs(this.Offset[1]) > this.sizeSquare[1]){ this.Offset[1] = 0; }
 
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);

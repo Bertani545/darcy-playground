@@ -61,7 +61,7 @@ void main() {
 
   current_position *= u_zoom;
   // Ofset caused by the mouse
-  current_position += u_offset * dist * distortionX * 2.0 * u_zoom;
+  current_position += u_offset;
 
 
 

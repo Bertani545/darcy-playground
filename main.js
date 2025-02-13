@@ -15,7 +15,7 @@ function randomInt(range) {
 var animate_method = 0;
 var animation_duration = 5;
 
-var spanX = [-1,1];
+var spanX = [-3,3];
 var sizeX = 2;
 var middleX = 0;
 
@@ -65,6 +65,7 @@ async function main() {
   await grid.build();
 
   grid.update_ratio(spanX, spanY);
+  grid.update_squareSize();
   
 
   let theta = 0.0;
