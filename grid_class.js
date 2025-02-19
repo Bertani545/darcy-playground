@@ -96,8 +96,10 @@ export class Grid
   update_squareSize()
   {
     const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
-    // 2 divided by the total amount of squares on screen
-    this.sizeSquare[0] =  6 / 50 * this.zoom * screenRatio * this.squareRatio;//6 / 12 * screenRatio * this.squareRatio;
+    this.sizeSquare[0] =  6 / 50 * this.zoom * screenRatio * this.squareRatio;
+    // Distance * zoom * screenRatio * squareRatio
+    // Distance = 6 / number of lines
+    // 6 = [-3,3]
     this.sizeSquare[1] =  6 / 50 * this.zoom
 
     console.log(this.sizeSquare);
@@ -121,6 +123,7 @@ export class Grid
 
       console.log("zoom: " + this.zoom);
 
+      this.update_squareSize();
 
       this.gl.useProgram(this.Shader);
       this.gl.uniform1f(this.zoomLocation, this.zoom);
@@ -133,6 +136,7 @@ export class Grid
     this.gl.uniform4f(this.colorLocation, ...color);
   }
 
+  // Used when manually inputing the new span
   update_ratio(spanX, spanY)
   {
     let lenX = spanX[1] - spanX[0];
@@ -178,6 +182,7 @@ export class Grid
 
   update_span(spanX, spanY)
   {
+    console.log("Span updated");
     this.gl.useProgram(this.Shader);
     this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
   }

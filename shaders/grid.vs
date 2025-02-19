@@ -8,10 +8,11 @@ uniform float u_aspectScreen;
 uniform float u_zoom;
 uniform vec2 u_lineSpawnDirection;
 uniform float u_gridRatio;
-
-// Yet to be used
 uniform vec2 u_offset;
 uniform vec4 u_spanXY;
+
+
+
 
 
 
@@ -45,8 +46,6 @@ void main() {
 
   // Scale it
   current_position *= 2.0 * u_zoom;
-  
-  
 
 
   // Position the lines
@@ -64,35 +63,18 @@ void main() {
   current_position += u_offset;
 
 
-
-  /*
-  current_position *= TOTAL_LINES * dist * distortionX;
-  //current_position += u_offset * TOTAL_LINES * dist * distortionX;
-  current_position += u_offset * TOTAL_LINES * dist * distortionX;
-  //current_position *= TOTAL_LINES * dist;
-  //current_position -= u_offset; //* distortionX * TOTAL_LINES * dist;
-  //current_position += u_offset; // Currenlty spans at (0,0)
-  //current_position *= distortionX;
-  
-  
-  vec2 startingPoint = -vec2((TOTAL_LINES) * dist) / 2.0 * distortionX;
-  current_position += startingPoint;
-  
-
-  vec2 distanceFromOrigin = u_lineSpawnDirection * vec2(float(gl_InstanceID) * dist) * distortionX;
-  current_position += distanceFromOrigin;
-
-*/
   // Map the coordinates to span and color them acordingly
-  /*
-        Mapping occurs here
-        //pos.x = pos.x + 0.5 * pos.y;
-        //pos.y = 1.4 * pos.y;
-  */
-  line_color = domain_color(current_position);
+  // [-1,1] -> [span[0], span[1]]
+  vec2 color_position = current_position;
+  color_position.x = ((current_position.x + 1.0) / 2.0) * (u_spanXY[1]-u_spanXY[0]) + u_spanXY[0];
+  color_position.y = ((current_position.y + 1.0) / 2.0) * (u_spanXY[3]-u_spanXY[2]) + u_spanXY[2];  
+  line_color = domain_color(color_position);
 
   //if(gl_InstanceID == 25) line_color = vec4(1.0);
   
+
+  //current_position.x = current_position.x + 0.5 * current_position.y;
+  //current_position.y = 1.4 * current_position.y;
 
   gl_Position = vec4(current_position, 0.0, 1.0) ;
 }

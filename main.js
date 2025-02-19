@@ -15,7 +15,7 @@ function randomInt(range) {
 var animate_method = 0;
 var animation_duration = 5;
 
-var spanX = [-3,3];
+var spanX = [-1,1];
 var sizeX = 2;
 var middleX = 0;
 
@@ -26,6 +26,7 @@ var middleY = 0;
 
 var spanSpeed = 0.05;
 var spanText = document.getElementById('span_text');
+spanText.style.fontSize = "x-large"; 
 
 
 /*
@@ -33,7 +34,6 @@ var spanText = document.getElementById('span_text');
 TODO: 
 - Send the span of the axis to the vertex shader. Aka, map [-1, 1] to [span[0], span[1]]
 - Add user being able to input span
-- Add drag to move the grid <- Difficult. It must tile
 - Add the option to draw your vector graphics
 - Add UI element for the span of the axis
 ---- MVP ----
@@ -66,6 +66,7 @@ async function main() {
 
   grid.update_ratio(spanX, spanY);
   grid.update_squareSize();
+  grid.update_span(spanX, spanY);
   
 
   let theta = 0.0;
@@ -139,8 +140,8 @@ async function main() {
 
 
     // UI elements
-    spanText.textContent = "width from " + spanX[0] + " to " + spanX[1] + "\n" +
-                            "height from " + spanY[0] + " to " + spanY[1];
+    spanText.textContent = "width from " + spanX[0].toFixed(4) + " to " + spanX[1].toFixed(4) + "\n" +
+                            "height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
 
   }
 
@@ -178,11 +179,11 @@ async function main() {
 
         spanX[0] -= dx;
         spanX[1] -= dx;
-        //middleX -= dx;
+        middleX -= dx;
 
         spanY[0] += dy;
         spanY[1] += dy;
-        //middleY += dy;
+        middleY += dy;
 
         // Update mouse position
         mouseX = currentMouseX;
@@ -218,7 +219,7 @@ async function main() {
   });
 
   canvas.addEventListener("wheel", (e) => {
-      event.preventDefault();
+      e.preventDefault();
 
       grid.update_zoom(e.deltaY);
 
