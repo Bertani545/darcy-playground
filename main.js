@@ -32,10 +32,13 @@ spanText.style.fontSize = "x-large";
 /*
 
 TODO: 
-- Send the span of the axis to the vertex shader. Aka, map [-1, 1] to [span[0], span[1]]
 - Add user being able to input span
-- Add the option to draw your vector graphics
+- Add the option to draw your vector graphics <- Let's do a svg path renderer :b
 - Add UI element for the span of the axis
+- Formula parser for expressions of the form
+  x = f(x,y)
+  y = g(x,y)
+  maybe be able to define other expressions?
 ---- MVP ----
 - Add the option to add pictures and edit them
 */
@@ -280,6 +283,57 @@ async function main() {
   canvas.addEventListener('mouseup', () => {
     isDragging = false;
   });
+
+  canvas.addEventListener("dragover", (event) => {
+    event.preventDefault(); // Required to allow dropping
+    console.log("Drop here")
+  });
+
+  // Load file
+  canvas.addEventListener("drop", (event) => {
+    event.preventDefault();
+
+    if (event.dataTransfer.files.length > 0) {
+        const file = event.dataTransfer.files[0];
+        
+        // Check if it's an SVG file
+        if (file.type !== "image/svg+xml") {
+            alert("Please drop a valid XML file.");
+            return;
+        }
+
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const svgText = e.target.result;
+            parseSVG(svgText);
+        };
+        // We read the whole file to parse afterwards
+        reader.readAsText(file);
+    }
+  });
+
+  function parseSVG(svgText) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(svgText, "image/svg+xml");
+
+    // Get the root <svg> element
+    //const svgElement = xmlDoc.documentElement;
+    //console.log("Root element:", svgElement.nodeName);
+
+    // We only care about the paths for now
+    const paths = xmlDoc.getElementsByTagName("path");
+    for (let i = 0; i < paths.length; i++) {
+        console.log("Path:", paths[i].getAttribute("d")); // Get path data
+    }
+
+    // Example: Get all <rect> elements
+    //const rects = xmlDoc.getElementsByTagName("rect");
+    //for (let i = 0; i < rects.length; i++) {
+    //    console.log("Rect:", rects[i].getAttribute("x"), rects[i].getAttribute("y"));
+    //}
+  }
+
 
   document.getElementById('time_button').addEventListener('click', () => {
       animate_method = 0;

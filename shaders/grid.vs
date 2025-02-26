@@ -65,16 +65,22 @@ void main() {
 
   // Map the coordinates to span and color them acordingly
   // [-1,1] -> [span[0], span[1]]
-  vec2 color_position = current_position;
-  color_position.x = ((current_position.x + 1.0) / 2.0) * (u_spanXY[1]-u_spanXY[0]) + u_spanXY[0];
-  color_position.y = ((current_position.y + 1.0) / 2.0) * (u_spanXY[3]-u_spanXY[2]) + u_spanXY[2];  
-  line_color = domain_color(color_position);
+  vec2 real_position = current_position;
+  real_position.x = ((current_position.x + 1.0) / 2.0) * (u_spanXY[1]-u_spanXY[0]) + u_spanXY[0];
+  real_position.y = ((current_position.y + 1.0) / 2.0) * (u_spanXY[3]-u_spanXY[2]) + u_spanXY[2];  
+  line_color = domain_color(real_position);
 
   //if(gl_InstanceID == 25) line_color = vec4(1.0);
   
 
+  real_position.x *= real_position.x;
+  real_position.y *= real_position.y;
   //current_position.x = current_position.x + 0.5 * current_position.y;
   //current_position.y = 1.4 * current_position.y;
+
+  // Re map real_position to screen space [span[0], span[1]] -> [-1, 1]
+  current_position.x = ((real_position.x - u_spanXY[0])/(u_spanXY[1] - u_spanXY[0])) * 2. - 1.;
+  current_position.y = ((real_position.y - u_spanXY[2])/(u_spanXY[3] - u_spanXY[2])) * 2. - 1.;
 
   gl_Position = vec4(current_position, 0.0, 1.0) ;
 }
