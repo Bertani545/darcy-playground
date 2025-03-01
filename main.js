@@ -32,6 +32,9 @@ spanText.style.fontSize = "x-large";
 /*
 
 TODO: 
+
+- The span must also be distorted by the ratio of the screen. That way a circle will look like a circle
+
 - Add user being able to input span
 - Add the option to draw your vector graphics <- Let's do a svg path renderer :b
 - Add UI element for the span of the axis
@@ -45,12 +48,20 @@ TODO:
 
 
 async function main() {
-  var canvas = document.querySelector("#c");
+  const canvas_input = document.querySelector("#Grid01");
   //canvas.width = 400;
   //canvas.height = 300;
 
+  // Check if we should keep this
+  /*
+  const canvas_gui = document.querySelector("#GUI01");
+  const ctx = canvas_gui.getContext("2d");
+  ctx.fillStyle = "rgb(255 255 255)";
+  ctx.fillRect(0, 0, 40, canvas_gui.height);
+  ctx.fillRect(0, 0, canvas_gui.width, 40);
+  */
 
-  var gl = canvas.getContext("webgl2");
+  const gl = canvas_input.getContext("webgl2");
   if (!gl) {
     throw new Error("Error. No se pudo cargar WebGL2");
   }
@@ -62,9 +73,16 @@ async function main() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
 
+  // Get element where the text is going to be displayed
+  const text_container_input = document.querySelector("#text_overlay_input");
+
+
   // ------------------------- Construct necesary VAOS ------------------------
 
-  const grid = new Grid(gl);
+  spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height ); 
+
+
+  const grid = new Grid(gl, text_container_input);
   await grid.build();
 
   grid.update_ratio(spanX, spanY);
@@ -83,8 +101,8 @@ async function main() {
   var isDragging = false;
 
   const devicePixelRatio = window.devicePixelRatio || 1;
-  const pixelWidth = 1 / (canvas.width * devicePixelRatio);
-  const pixelHeight = 1 / (canvas.height * devicePixelRatio);
+  const pixelWidth = 1 / (canvas_input.width * devicePixelRatio);
+  const pixelHeight = 1 / (canvas_input.height * devicePixelRatio);
 
   // To move objects
   var pixelX;
@@ -119,7 +137,7 @@ async function main() {
 
     //Render to the screen
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.viewport(0, 0, canvas_input.width, canvas_input.height);
 
 
     
@@ -152,8 +170,8 @@ async function main() {
   // -------------------- Inputs -----------------------------
 
 
-  canvas.addEventListener('mousemove', (e) => {
-     const rect = canvas.getBoundingClientRect();
+  canvas_input.addEventListener('mousemove', (e) => {
+     const rect = canvas_input.getBoundingClientRect();
 
 
      if(isDragging)
@@ -198,9 +216,9 @@ async function main() {
      }
   });
 
-  canvas.addEventListener('mousedown', (e) => {
+  canvas_input.addEventListener('mousedown', (e) => {
     
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvas_input.getBoundingClientRect();
     mouseX = e.clientX;
     mouseY = e.clientY;
 
@@ -221,7 +239,7 @@ async function main() {
 
   });
 
-  canvas.addEventListener("wheel", (e) => {
+  canvas_input.addEventListener("wheel", (e) => {
       e.preventDefault();
 
       grid.update_zoom(e.deltaY);
@@ -280,17 +298,17 @@ async function main() {
   });
 
 
-  canvas.addEventListener('mouseup', () => {
+  canvas_input.addEventListener('mouseup', () => {
     isDragging = false;
   });
 
-  canvas.addEventListener("dragover", (event) => {
+  canvas_input.addEventListener("dragover", (event) => {
     event.preventDefault(); // Required to allow dropping
     console.log("Drop here")
   });
 
   // Load file
-  canvas.addEventListener("drop", (event) => {
+  canvas_input.addEventListener("drop", (event) => {
     event.preventDefault();
 
     if (event.dataTransfer.files.length > 0) {
@@ -324,7 +342,7 @@ async function main() {
     // We only care about the paths for now
     const paths = xmlDoc.getElementsByTagName("path");
     for (let i = 0; i < paths.length; i++) {
-        console.log("Path:", paths[i].getAttribute("d")); // Get path data
+        console.log("Path:", paths[i].getAttribute("style")); // Get path data
     }
 
     // Example: Get all <rect> elements

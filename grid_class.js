@@ -3,6 +3,7 @@ import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 
 const n_p = 100;
+const n_instances = 50;
 
 function lessOrEqualPowerOf2(n) {
   return 1 << 31 - Math.clz32(n);
@@ -12,7 +13,7 @@ function lessOrEqualPowerOf2(n) {
 
 export class Grid
 {
-  constructor(gl, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
+  constructor(gl, text_container, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
   {
     this.color = color;
     this.zoom = zoom;
@@ -25,6 +26,9 @@ export class Grid
     this.VAO = null;
     this.Shader = null;
     this.colorLocation = null;
+
+    this.textContainer = text_container;
+    this.create_text_instances();
   }
 
   async build()
@@ -93,6 +97,83 @@ export class Grid
 
   }
 
+  create_text_instances()
+  {
+    for(let i = 0; i < n_instances * 2; i++)
+    {
+      const temp_div = document.createElement("div");
+      temp_div.className = "grid_numbers";
+      const textNode = document.createTextNode("");
+      temp_div.appendChild(textNode);
+      this.textContainer.appendChild(temp_div);
+    }
+  }
+
+  // Assumes that we are starting at -3 and end at 3
+  update_text_labels(spanX, spanY)
+  {
+    // Called after zoom or drag
+    // Get the position for the numbers
+    // Create the divs
+    // Put them accordingly
+    const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
+    let i = 0;
+    for(i; i < n_instances; i++) // Horizontal
+    {
+      const curr_div = this.textContainer.children[i];
+      let x = -3 * this.squareRatio * screenRatio + i * (6 / n_instances) * this.squareRatio * screenRatio;
+
+      // Transform them to clip coords
+      x = (x * this.zoom  + this.Offset[0] + 1) / 2;
+      if(x < 0 || x > 1)
+      {
+        curr_div.style.color = "rgba(0,0,0,0)";
+      }else
+      {
+        curr_div.style.color = "rgba(255,255,0,1)";
+      }
+
+      // Obtain position for display
+      const position = x * (spanX[1] - spanX[0]) + spanX[0]; 
+
+      // Transform to screen cords
+      x *= this.gl.canvas.width;
+
+      curr_div.style.left = (x + 10) + "px";
+      curr_div.style.top  = 10 + "px";
+      curr_div.textContent = position.toFixed(2);
+    }
+
+
+    for(i; i < 2*n_instances; i++) // Vertical
+    {
+      const curr_div = this.textContainer.children[i];
+      let y = -3  + (i - n_instances) * (6 / n_instances);
+
+      // Transform them to clip coords
+      y = (y * this.zoom  + this.Offset[1] + 1) / 2;
+      if(y < 0 || y > 1)
+      {
+        curr_div.style.color = "rgba(0,0,0,0)";
+      }else
+      {
+        curr_div.style.color = "rgba(255,255,0,1)";
+      }
+
+      // Obtain position for display
+      const position = y * (spanY[1] - spanY[0]) + spanY[0]; 
+
+      // Transform to screen cords
+      y = y * -1 + 1;
+      y *= this.gl.canvas.height;
+
+      curr_div.style.left = 10 + "px";
+      curr_div.style.top  = (y + 10) + "px";
+      curr_div.textContent = position.toFixed(2);
+    }
+  }
+
+
   update_squareSize()
   {
     const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
@@ -156,9 +237,8 @@ export class Grid
     this.squareRatio = mapY / mapX;
 
 
-
     this.zoom = 3.0;
-
+    this.update_squareSize();
 
     this.gl.useProgram(this.Shader);
     this.gl.uniform1f(this.zoomLocation, this.zoom);
@@ -182,6 +262,7 @@ export class Grid
 
   update_span(spanX, spanY)
   {
+    this.update_text_labels(spanX, spanY);
     console.log("Span updated");
     this.gl.useProgram(this.Shader);
     this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
@@ -198,11 +279,11 @@ export class Grid
     
     // X
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, 50);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
     
     // Y
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, 50);
+    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
 
   }
 }
