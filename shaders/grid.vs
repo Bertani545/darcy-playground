@@ -39,10 +39,10 @@ void main() {
 
   float dist = 6.0 / TOTAL_LINES;
 
-  vec2 current_position = a_position;
+  vec2 current_position = a_position * 6.;
 
   // Scale it
-  current_position *= 2.0 * u_zoom;
+  //current_position *= 2.0 * u_zoom;
 
 
   // Position the segments to create the line
@@ -56,14 +56,10 @@ void main() {
   current_position += startingPoint;
 
 
-    // Ofset caused by the mouse
-  current_position += u_offset;
-
-
-
   current_position *= u_zoom;
 
-
+      // Ofset caused by the mouse
+  current_position += u_offset;
 
   
 

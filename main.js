@@ -223,8 +223,8 @@ async function main() {
         grid.update_offset(dx, dy);
 
         // Square size in screen space, move to world space
-        dx = dx * (spanX[1] - spanX[0]) /2 * grid.zoom;
-        dy = dy * (spanY[1] - spanY[0]) /2 * grid.zoom;
+        dx = dx * (spanX[1] - spanX[0]) / 2 * grid.zoom;
+        dy = dy * (spanY[1] - spanY[0]) / 2 * grid.zoom;
 
         // Now for span
         spanX[0] -= dx;

@@ -125,7 +125,7 @@ export class Grid
       let x = -3 * this.squareRatio * screenRatio + i * (6 / n_instances) * this.squareRatio * screenRatio;
 
       // Transform them to clip coords
-      x = (x * this.zoom  + this.Offset[0] * this.zoom + 1) / 2;
+      x = (x * this.zoom  + this.Offset[0] + 1) / 2;
       if(x < 0 || x > 1)
       {
         curr_div.style.color = "rgba(0,0,0,0)";
@@ -152,7 +152,7 @@ export class Grid
       let y = -3  + (i - n_instances) * (6 / n_instances);
 
       // Transform them to clip coords
-      y = (y * this.zoom  + this.Offset[1] * this.zoom + 1) / 2;
+      y = (y * this.zoom  + this.Offset[1] + 1) / 2;
       if(y < 0 || y > 1)
       {
         curr_div.style.color = "rgba(0,0,0,0)";
@@ -184,15 +184,17 @@ export class Grid
     // 6 = [-3,3]
     this.sizeSquare[1] =  6 / 50 * this.zoom
 
-    console.log(this.sizeSquare);
+    console.log(...this.sizeSquare);
   }
 
   update_zoom(deltaZoom) {
 
       if (deltaZoom < 0) {
           this.zoom *= (1 + this.zoomSpeed); // Zoom in
+          this.Offset = this.Offset.map(x => x * (1 + this.zoomSpeed));
       } else {
           this.zoom /= (1 + this.zoomSpeed); // Zoom out
+          this.Offset = this.Offset.map(x => x / (1 + this.zoomSpeed));
       }
 
       // Zoom wrapping logic
@@ -200,23 +202,51 @@ export class Grid
       const MIN_ZOOM = 2;
 
       //if(this.zoom >= MAX_ZOOM || this.zoom <= MIN_ZOOM) this.zoom = 2.0;
-      if(this.zoom > MAX_ZOOM) this.zoom = 2.0 + this.zoom - MAX_ZOOM;
-      if(this.zoom < MIN_ZOOM) this.zoom = 4.0 - this.zoom + MIN_ZOOM;
+      if(this.zoom > MAX_ZOOM) this.zoom = 2.0;
+      if(this.zoom < MIN_ZOOM) this.zoom = 4.0;
 
       console.log("zoom: " + this.zoom);
 
       this.update_squareSize();
 
-      this.gl.useProgram(this.Shader);
+    
+      console.log("Offset: " + (this.Offset))
+      if(Math.abs(this.Offset[0] ) >  this.sizeSquare[0]){ this.Offset[0] %= this.sizeSquare[0]; }
+      if(Math.abs(this.Offset[1]) >  this.sizeSquare[1]){ this.Offset[1] %= this.sizeSquare[1]; }
+
+
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform2f(this.offsetLocation, ...this.Offset);
       this.gl.uniform1f(this.zoomLocation, this.zoom);
   }
 
-  update_color(color)
+  update_offset(dx, dy)
   {
-    this.color = color;
+    this.Offset[0] += dx * this.zoom;
+    this.Offset[1] -= dy * this.zoom;
+
+    // Check if bigger than a square
+    if(Math.abs(this.Offset[0] ) >  this.sizeSquare[0]){ this.Offset[0] %= this.sizeSquare[0]; }
+    if(Math.abs(this.Offset[1]) >  this.sizeSquare[1]){ this.Offset[1] %= this.sizeSquare[1]; }
+
+    //this.Offset[0] = (this.Offset[0] + this.sizeSquare[0]) % this.sizeSquare[0];
+    //this.Offset[1] = (this.Offset[1] + this.sizeSquare[1]) % this.sizeSquare[1];
+
+
     this.gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.colorLocation, ...color);
+    this.gl.uniform2f(this.offsetLocation, ...this.Offset);
+
+    console.log("Offset: " + (this.Offset))
   }
+
+  update_span(spanX, spanY)
+  {
+    this.update_text_labels(spanX, spanY);
+    //console.log("Span updated");
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
+  }
+
 
   // Used when manually inputing the new span
   update_ratio(spanX, spanY)
@@ -247,31 +277,19 @@ export class Grid
 
   }
 
+  update_color(color)
+  {
+    this.color = color;
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform4f(this.colorLocation, ...color);
+  }
+
   get squareSize()
   {
     return this.sizeSquare;
   }
 
-  update_offset(dx, dy)
-  {
-    this.Offset[0] += dx;
-    this.Offset[1] -= dy;
 
-    // Check if bigger than a square
-    if(Math.abs(this.Offset[0]) > this.sizeSquare[0]){ this.Offset[0] %= this.sizeSquare[0]; }
-    if(Math.abs(this.Offset[1]) > this.sizeSquare[1]){ this.Offset[1] %= this.sizeSquare[1]; }
-
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform2f(this.offsetLocation, ...this.Offset);
-  }
-
-  update_span(spanX, spanY)
-  {
-    this.update_text_labels(spanX, spanY);
-    //console.log("Span updated");
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
-  }
 
   draw()
   {
