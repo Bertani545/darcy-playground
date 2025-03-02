@@ -16,7 +16,7 @@ function randomInt(range) {
 var animate_method = 0;
 var animation_duration = 5;
 
-var spanX = [-1,1];
+var spanX = [0,10];
 var sizeX = 2;
 var middleX = 0;
 
@@ -81,7 +81,7 @@ async function main() {
 
   // ------------------------- Construct necesary VAOS ------------------------
 
-  spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
+  //spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
   sizeX = spanX[1] - spanX[0];
   sizeY = spanY[1] - spanY[0];
 
@@ -277,62 +277,31 @@ async function main() {
       const aspect_ratio = gl.canvas.width/ gl.canvas.height;
 
       // Change span
-      if (e.deltaY < 0) {
-        // Zoom in, span shrinks
-          spanX = spanX.map(x => x * (1 - spanSpeed));
-          spanY = spanY.map(y => y * (1 - spanSpeed));
-      } else {
-        // Zoom out, span grows
-          spanX = spanX.map(x => x * (1 + spanSpeed));
-          spanY = spanY.map(y => y * (1 + spanSpeed));
-      }
-
       middleX = (spanX[1] + spanX[0])/2;
       middleY = (spanY[1] + spanY[0])/2;
 
+      if (e.deltaY < 0) {
+        // Zoom in, span shrinks
 
-      // To make it more manageble
-      /*
-      if(spanX[1] - spanX[0] >= 2 * sizeX)
-      {
-        spanX[1] = middleX + sizeX;
-        spanX[0] = middleX - sizeX;
-        sizeX *= 2;
-      }
+        sizeX = (spanX[1] - spanX[0]) / (1 + spanSpeed);
+        spanX = [middleX - sizeX/2, middleX + sizeX/2];
 
-      if(spanX[1] - spanX[0] <= 0.5 * sizeX)
-      {
-        spanX[1] = middleX + sizeX * 0.25;
-        spanX[0] = middleX - sizeX * 0.25;
-        sizeX *= 0.5;
-      }
+        sizeY = (spanY[1] - spanY[0]) / (1 + spanSpeed);
+        spanY = [middleY - sizeY/2, middleY + sizeY/2];
 
-      if(spanY[1] - spanY[0] >= 2 * sizeY)
-      {
-        spanY[1] = middleY + sizeY;
-        spanY[0] = middleY - sizeY;
-        sizeY *= 2;
-      }
+      } else {
+        // Zoom out, span grows
 
-      if(spanY[1] - spanY[0] <= 0.5 * sizeY)
-      {
-        spanY[1] = middleY + sizeY * 0.25;
-        spanY[0] = middleY - sizeY * 0.25;
-        sizeY *= 0.5;
+          sizeX = (spanX[1] - spanX[0]) * (1 + spanSpeed);
+          spanX = [middleX - sizeX/2, middleX + sizeX/2];
+
+          sizeY = (spanY[1] - spanY[0]) * (1 + spanSpeed);
+          spanY = [middleY - sizeY/2, middleY + sizeY/2];
       }
-      */
 
       grid.update_span(spanX, spanY);
       bezierDisplay.update_span(spanX, spanY);
-      //console.log("log span: " + (spanX[1]-spanX[0]))
 
-/*
-      if (e.deltaY < 0) {
-          console.log("Scrolled up");
-      } else {
-          console.log("Scrolled down");
-      }
-*/
   });
 
 

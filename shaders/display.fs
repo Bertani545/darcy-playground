@@ -22,7 +22,7 @@ float min_distance(vec2 p)
   float res = 2.0;
   for(float i = 0.; i <= 6.28; i+= 0.01)
   {
-    vec2 curr_p = vec2(cos(i), sin(i));
+    vec2 curr_p = vec2(5. * cos(i), sin(i));
     float dist = length(curr_p - p);
     res = min(res, dist);
   }
@@ -43,6 +43,7 @@ void main() {
     float aspect = (u_spanXY[3] - u_spanXY[2]) / (u_spanXY[1] - u_spanXY[0]);
 
     if(min_distance(realPos) < 0.08 * aspect)
+    //if(abs(realPos.x - (u_spanXY[1] + u_spanXY[0])/2.) < 0.01)
     {
         outColor = vec4(1.0);
     }

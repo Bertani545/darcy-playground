@@ -192,7 +192,7 @@ export class Grid
       if (deltaZoom < 0) {
           this.zoom *= (1 + this.zoomSpeed); // Zoom in
       } else {
-          this.zoom *= (1 - this.zoomSpeed); // Zoom out
+          this.zoom /= (1 + this.zoomSpeed); // Zoom out
       }
 
       // Zoom wrapping logic
