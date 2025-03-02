@@ -13,11 +13,11 @@ function lessOrEqualPowerOf2(n) {
 
 export class Grid
 {
-  constructor(gl, text_container, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
+  constructor(gl, text_container, zoom_speed, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
   {
     this.color = color;
+    this.zoomSpeed = zoom_speed;
     this.zoom = zoom;
-    this.zoomSpeed = 0.02;
     this.Offset = [0,0];
     this.sizeSquare = [1,1]
     this.squareRatio = 1;
@@ -93,6 +93,7 @@ export class Grid
     gl.useProgram(this.Shader)
     gl.uniform1f(this.zoomLocation, this.zoom);
     gl.uniform4f(this.colorLocation, ...this.color);
+    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height / gl.canvas.width);
 
 
   }
@@ -173,7 +174,7 @@ export class Grid
     }
   }
 
-
+  // Screen space
   update_squareSize()
   {
     const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
@@ -246,15 +247,19 @@ export class Grid
 
   }
 
-  // dx and dy between -1 and 1
+  get squareSize()
+  {
+    return this.sizeSquare;
+  }
+
   update_offset(dx, dy)
   {
-    this.Offset[0] += dx * this.sizeSquare[0] * 2.0;
-    this.Offset[1] -= dy * this.sizeSquare[1] * 2.0;
+    this.Offset[0] += dx;
+    this.Offset[1] -= dy;
 
     // Check if bigger than a square
-    if(Math.abs(this.Offset[0]) > this.sizeSquare[0]){ this.Offset[0] = 0; }
-    if(Math.abs(this.Offset[1]) > this.sizeSquare[1]){ this.Offset[1] = 0; }
+    if(Math.abs(this.Offset[0]) > this.sizeSquare[0]){ this.Offset[0] %= this.sizeSquare[0]; }
+    if(Math.abs(this.Offset[1]) > this.sizeSquare[1]){ this.Offset[1] %= this.sizeSquare[1]; }
 
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);
@@ -263,7 +268,7 @@ export class Grid
   update_span(spanX, spanY)
   {
     this.update_text_labels(spanX, spanY);
-    console.log("Span updated");
+    //console.log("Span updated");
     this.gl.useProgram(this.Shader);
     this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
   }
@@ -274,8 +279,6 @@ export class Grid
 
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
-
-    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height / gl.canvas.width);
     
     // X
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);

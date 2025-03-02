@@ -3,6 +3,7 @@ import * as webgl_utils from './webgl-utils.js'
 import { RenderPoints,  Point} from './point_class.js'
 import {BezierCurve, RenderCurves, Line} from './line_class.js'
 import {Grid} from './grid_class.js'
+import {PathContainer} from './path_class.js';
 
 
 
@@ -71,6 +72,7 @@ async function main() {
   // Clear the canvas
   gl.clearColor(0, 0, 0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST);
 
 
   // Get element where the text is going to be displayed
@@ -79,16 +81,28 @@ async function main() {
 
   // ------------------------- Construct necesary VAOS ------------------------
 
-  spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height ); 
+  spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
+  sizeX = spanX[1] - spanX[0];
+  sizeY = spanY[1] - spanY[0];
+
+  middleX = (spanX[1] + spanX[0])/2;
+  middleY = (spanY[1] + spanY[0])/2;
 
 
-  const grid = new Grid(gl, text_container_input);
+  const grid = new Grid(gl, text_container_input, spanSpeed);
   await grid.build();
 
   grid.update_ratio(spanX, spanY);
   grid.update_squareSize();
   grid.update_span(spanX, spanY);
   
+
+
+  const bezierDisplay = new PathContainer(gl);
+  await bezierDisplay.build();
+  bezierDisplay.update_span(spanX, spanY);
+
+
 
   let theta = 0.0;
 
@@ -142,6 +156,7 @@ async function main() {
 
     
     grid.draw();
+    bezierDisplay.draw();
 
 
     // ---------- Animation stuff --------
@@ -152,17 +167,22 @@ async function main() {
 
 
     // Render to one pixel so we can determine which object is being click
-    gl.bindFramebuffer(gl.FRAMEBUFFER, select_obj.ID); gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.viewport(0, 0, 1, 1);
+    //gl.bindFramebuffer(gl.FRAMEBUFFER, select_obj.ID); gl.clear(gl.COLOR_BUFFER_BIT);
+    //gl.viewport(0, 0, 1, 1);
     // Render things to pick
+
+
+    // UI elements
+    spanText.textContent = "width from " + spanX[0].toFixed(4) + " to " + spanX[1].toFixed(4) + "\n" +
+    "height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
+
+
 
     theta += 1 * deltaTime;
     requestAnimationFrame(drawScene);
 
 
-    // UI elements
-    spanText.textContent = "width from " + spanX[0].toFixed(4) + " to " + spanX[1].toFixed(4) + "\n" +
-                            "height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
+
 
   }
 
@@ -183,28 +203,35 @@ async function main() {
         let dy = currentMouseY - mouseY;
 
         // Normalize them
-        dx /= rect.height; // With aspect transformation
+        dx /= rect.width; // With aspect transformation
         dy /= rect.height;
+
+
+
+        // Update the transformation of the span
+        //dx *= spanX[1] - spanX[0];
+        //dy *= spanY[1] - spanY[0];
+
+        // Scale
+        //dx *= 2.0;
+        //dy *= 2.0;
+
+        dx *= grid.squareSize[0] * 2.0;
+        dy *= grid.squareSize[1] * 2.0;
 
         // Update the translation of the grid
         grid.update_offset(dx, dy);
 
+        // Square size in screen space, move to world space
+        dx = dx * (spanX[1] - spanX[0]) /2;
+        dy = dy * (spanY[1] - spanY[0]) /2;
 
-        // Update the transformation of the span
-        dx *= spanX[1] - spanX[0];
-        dy *= spanY[1] - spanY[0];
-
-        // Scale
-        dx *= 2.0;
-        dy *= 2.0;
-
+        // Now for span
         spanX[0] -= dx;
         spanX[1] -= dx;
-        middleX -= dx;
 
         spanY[0] += dy;
         spanY[1] += dy;
-        middleY += dy;
 
         // Update mouse position
         mouseX = currentMouseX;
@@ -212,7 +239,11 @@ async function main() {
         mouseCoordX = (currentMouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
         mouseCoordY = (currentMouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
         
+
+        middleX = (spanX[1] + spanX[0])/2;
+        middleY = (spanY[1] + spanY[0])/2;
         grid.update_span(spanX, spanY);
+        bezierDisplay.update_span(spanX, spanY);
      }
   });
 
@@ -243,6 +274,7 @@ async function main() {
       e.preventDefault();
 
       grid.update_zoom(e.deltaY);
+      const aspect_ratio = gl.canvas.width/ gl.canvas.height;
 
       // Change span
       if (e.deltaY < 0) {
@@ -255,7 +287,12 @@ async function main() {
           spanY = spanY.map(y => y * (1 + spanSpeed));
       }
 
+      middleX = (spanX[1] + spanX[0])/2;
+      middleY = (spanY[1] + spanY[0])/2;
+
+
       // To make it more manageble
+      /*
       if(spanX[1] - spanX[0] >= 2 * sizeX)
       {
         spanX[1] = middleX + sizeX;
@@ -283,9 +320,10 @@ async function main() {
         spanY[0] = middleY - sizeY * 0.25;
         sizeY *= 0.5;
       }
-
+      */
 
       grid.update_span(spanX, spanY);
+      bezierDisplay.update_span(spanX, spanY);
       //console.log("log span: " + (spanX[1]-spanX[0]))
 
 /*
