@@ -223,8 +223,8 @@ async function main() {
         grid.update_offset(dx, dy);
 
         // Square size in screen space, move to world space
-        dx = dx * (spanX[1] - spanX[0]) /2;
-        dy = dy * (spanY[1] - spanY[0]) /2;
+        dx = dx * (spanX[1] - spanX[0]) /2 * grid.zoom;
+        dy = dy * (spanY[1] - spanY[0]) /2 * grid.zoom;
 
         // Now for span
         spanX[0] -= dx;
@@ -276,9 +276,7 @@ async function main() {
       grid.update_zoom(e.deltaY);
       const aspect_ratio = gl.canvas.width/ gl.canvas.height;
 
-      // Change span
-      middleX = (spanX[1] + spanX[0])/2;
-      middleY = (spanY[1] + spanY[0])/2;
+      
 
       if (e.deltaY < 0) {
         // Zoom in, span shrinks
@@ -289,15 +287,24 @@ async function main() {
         sizeY = (spanY[1] - spanY[0]) / (1 + spanSpeed);
         spanY = [middleY - sizeY/2, middleY + sizeY/2];
 
+        //spanX = spanX.map((x) => x / (1 + spanSpeed));
+        //spanY = spanY.map((x) => x / (1 + spanSpeed));
+
       } else {
         // Zoom out, span grows
-
+        //spanX = spanX.map((x) => x * (1 + spanSpeed));
+        //spanY = spanY.map((x) => x * (1 + spanSpeed));
+          
           sizeX = (spanX[1] - spanX[0]) * (1 + spanSpeed);
           spanX = [middleX - sizeX/2, middleX + sizeX/2];
 
           sizeY = (spanY[1] - spanY[0]) * (1 + spanSpeed);
           spanY = [middleY - sizeY/2, middleY + sizeY/2];
       }
+
+      // Change span
+      middleX = (spanX[1] + spanX[0])/2;
+      middleY = (spanY[1] + spanY[0])/2;
 
       grid.update_span(spanX, spanY);
       bezierDisplay.update_span(spanX, spanY);

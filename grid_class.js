@@ -125,7 +125,7 @@ export class Grid
       let x = -3 * this.squareRatio * screenRatio + i * (6 / n_instances) * this.squareRatio * screenRatio;
 
       // Transform them to clip coords
-      x = (x * this.zoom  + this.Offset[0] + 1) / 2;
+      x = (x * this.zoom  + this.Offset[0] * this.zoom + 1) / 2;
       if(x < 0 || x > 1)
       {
         curr_div.style.color = "rgba(0,0,0,0)";
@@ -152,7 +152,7 @@ export class Grid
       let y = -3  + (i - n_instances) * (6 / n_instances);
 
       // Transform them to clip coords
-      y = (y * this.zoom  + this.Offset[1] + 1) / 2;
+      y = (y * this.zoom  + this.Offset[1] * this.zoom + 1) / 2;
       if(y < 0 || y > 1)
       {
         curr_div.style.color = "rgba(0,0,0,0)";
@@ -200,8 +200,8 @@ export class Grid
       const MIN_ZOOM = 2;
 
       //if(this.zoom >= MAX_ZOOM || this.zoom <= MIN_ZOOM) this.zoom = 2.0;
-      if(this.zoom > MAX_ZOOM) this.zoom = 2.0;
-      if(this.zoom < MIN_ZOOM) this.zoom = 4.0;
+      if(this.zoom > MAX_ZOOM) this.zoom = 2.0 + this.zoom - MAX_ZOOM;
+      if(this.zoom < MIN_ZOOM) this.zoom = 4.0 - this.zoom + MIN_ZOOM;
 
       console.log("zoom: " + this.zoom);
 

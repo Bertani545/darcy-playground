@@ -55,17 +55,15 @@ void main() {
   vec2 startingPoint = -vec2((TOTAL_LINES) * dist) / 2.0 * distortionX;
   current_position += startingPoint;
 
-    // Zoom in the middle
-  current_position -= u_offset;
-  current_position *= u_zoom;
-  current_position += u_offset * u_zoom;
 
-
-
-  //current_position *= u_zoom;
-
-  // Ofset caused by the mouse
+    // Ofset caused by the mouse
   current_position += u_offset;
+
+
+
+  current_position *= u_zoom;
+
+
 
   
 
