@@ -51,15 +51,15 @@ export function read_svg_file(file)
     const xmlDoc = parser.parseFromString(file, "image/svg+xml");
     const paths = xmlDoc.getElementsByTagName("path");
 
-    const path_container = {'line':{},'squareBezier':{}, 'cubicBezier':{}};
+    const path_container = {'line':{},'quadraticBezier':{}, 'cubicBezier':{}};
+    let idCubicBezier = 0;
+    let idquadraticBezier = 0;
+    let idLine = 0;
 
     for (let path of paths) {
         const values = new ArrayTraveler(path.getAttribute("d").split(/[ ,]+/));
         
         let change_command = false;
-        let idCubicBezier = 0;
-        let idSquareBezier = 0;
-        let idLine = 0;
 
         let current_point = [0,0];
         let initial_point = [0,0];
@@ -179,14 +179,14 @@ export function read_svg_file(file)
                             dy += current_point[1];
                         }
 
-                        path_container['squareBezier'][idSquareBezier] = {};
-                        path_container['squareBezier'][idSquareBezier].p1 = [...current_point];
-                        path_container['squareBezier'][idSquareBezier].c = [cx, cy];
-                        path_container['squareBezier'][idSquareBezier].p2 = [dx, dy];
+                        path_container['quadraticBezier'][idquadraticBezier] = {};
+                        path_container['quadraticBezier'][idquadraticBezier].p1 = [...current_point];
+                        path_container['quadraticBezier'][idquadraticBezier].c = [cx, cy];
+                        path_container['quadraticBezier'][idquadraticBezier].p2 = [dx, dy];
                         current_point = [dx, dy];
 
                         change_command = true;
-                        idSquareBezier++;
+                        idquadraticBezier++;
                         break;
                     }
                 case 'T':
@@ -209,19 +209,19 @@ export function read_svg_file(file)
                         else
                         {   
                             // Compute the new control point
-                            const past_control = path_container['squareBezier'][idSquareBezier-1].c;
+                            const past_control = path_container['quadraticBezier'][idquadraticBezier-1].c;
                             cx = -1 * (past_control[0] - current_point[0]) + current_point[0];
                             cy = -1 * (past_control[1] - current_point[1]) + current_point[1];
                         }
 
-                        path_container['squareBezier'][idSquareBezier] = {};
-                        path_container['squareBezier'][idSquareBezier].p1 = [...current_point];
-                        path_container['squareBezier'][idSquareBezier].c = [cx, cy];
-                        path_container['squareBezier'][idSquareBezier].p2 = [dx, dy];
+                        path_container['quadraticBezier'][idquadraticBezier] = {};
+                        path_container['quadraticBezier'][idquadraticBezier].p1 = [...current_point];
+                        path_container['quadraticBezier'][idquadraticBezier].c = [cx, cy];
+                        path_container['quadraticBezier'][idquadraticBezier].p2 = [dx, dy];
                         current_point = [dx, dy];
 
                         change_command = true;
-                        idSquareBezier++;
+                        idquadraticBezier++;
                         break;
                     }
                 case 'C':
@@ -322,6 +322,8 @@ export function read_svg_file(file)
         else
         {
             current_command = last_command;
+            if(current_command === 'M' || current_command === 'm')
+                current_command = 'l';
         }  
         
         }while(current_command != null)
