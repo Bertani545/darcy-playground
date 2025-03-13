@@ -50,6 +50,7 @@ TODO:
 
 async function main() {
   const canvas_input = document.querySelector("#Grid01");
+  const canvas_output = document.querySelector("#Grid02");
   //canvas.width = 400;
   //canvas.height = 300;
 
@@ -89,7 +90,7 @@ async function main() {
   middleY = (spanY[1] + spanY[0])/2;
 
 
-  const grid = new Grid(gl, text_container_input, spanSpeed);
+  const grid = new Grid(gl, canvas_output.getContext("2d"), text_container_input, spanSpeed);
   await grid.build();
 
   grid.update_ratio(spanX, spanY);
@@ -150,7 +151,6 @@ async function main() {
 
 
     //Render to the screen
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.viewport(0, 0, canvas_input.width, canvas_input.height);
 
 

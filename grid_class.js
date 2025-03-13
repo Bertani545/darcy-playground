@@ -1,4 +1,4 @@
-import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor } from './webgl-utils.js'
+import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly } from './webgl-utils.js'
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 
@@ -13,7 +13,7 @@ function lessOrEqualPowerOf2(n) {
 
 export class Grid
 {
-  constructor(gl, text_container, zoom_speed, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
+  constructor(gl, ctx_second_canvas, text_container, zoom_speed, color = [1.0, 1.0, 1.0, 1.0], zoom = 3.0)
   {
     this.color = color;
     this.zoomSpeed = zoom_speed;
@@ -26,6 +26,9 @@ export class Grid
     this.VAO = null;
     this.Shader = null;
     this.colorLocation = null;
+
+    this.ctx = ctx_second_canvas;
+    this.pixelContainer;
 
     this.textContainer = text_container;
     this.create_text_instances();
@@ -96,7 +99,14 @@ export class Grid
     gl.uniform1f(this.aspectScreenLocation, gl.canvas.height / gl.canvas.width);
 
 
+
+    // Create second buffer for the second canvas
+    // contains id and texture
+    this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 2, gl.canvas.width, gl.canvas.height);
+    this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
+
   }
+
 
   create_text_instances()
   {
@@ -295,6 +305,8 @@ export class Grid
   {
     const gl = this.gl;
 
+    // Draw to the first canvas
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
     
@@ -306,5 +318,20 @@ export class Grid
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
 
+
+
+    // Draw to the texture
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.secondBuffer.ID);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
+    gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
+    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
+
+    // Pass the texture to the second canvas
+    gl.readPixels(0,0,gl.canvas.width, gl.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,this.pixelContainer); // From current framebuffer
+    const imageData = new ImageData(this.pixelContainer, gl.canvas.width, gl.canvas.height);
+    this.ctx.putImageData(imageData, 0, 0);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }
