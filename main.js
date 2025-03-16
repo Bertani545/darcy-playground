@@ -16,11 +16,11 @@ function randomInt(range) {
 var animate_method = 0;
 var animation_duration = 5;
 
-var spanX = [0,10];
+var spanX = [0,200];
 var sizeX = 2;
 var middleX = 0;
 
-var spanY = [-1,1];
+var spanY = [0,200];
 var sizeY = 2;
 var middleY = 0;
 
@@ -99,9 +99,9 @@ async function main() {
   
 
 
-  const bezierDisplay = new PathContainer(gl);
-  await bezierDisplay.build();
-  bezierDisplay.update_span(spanX, spanY);
+  const pathDisplayer = new PathContainer(gl);
+  await pathDisplayer.build();
+  pathDisplayer.update_span(spanX, spanY);
 
 
 
@@ -156,7 +156,7 @@ async function main() {
 
     
     grid.draw();
-    bezierDisplay.draw();
+    pathDisplayer.draw();
 
 
     // ---------- Animation stuff --------
@@ -243,7 +243,7 @@ async function main() {
         middleX = (spanX[1] + spanX[0])/2;
         middleY = (spanY[1] + spanY[0])/2;
         grid.update_span(spanX, spanY);
-        bezierDisplay.update_span(spanX, spanY);
+        pathDisplayer.update_span(spanX, spanY);
      }
   });
 
@@ -307,7 +307,7 @@ async function main() {
       middleY = (spanY[1] + spanY[0])/2;
 
       grid.update_span(spanX, spanY);
-      bezierDisplay.update_span(spanX, spanY);
+      pathDisplayer.update_span(spanX, spanY);
 
   });
 
@@ -338,33 +338,13 @@ async function main() {
         const reader = new FileReader();
         reader.onload = (e) => {
             const svgText = e.target.result;
-            parseSVG(svgText);
+            pathDisplayer.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
         };
         // We read the whole file to parse afterwards
         reader.readAsText(file);
     }
   });
 
-  function parseSVG(svgText) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(svgText, "image/svg+xml");
-
-    // Get the root <svg> element
-    //const svgElement = xmlDoc.documentElement;
-    //console.log("Root element:", svgElement.nodeName);
-
-    // We only care about the paths for now
-    const paths = xmlDoc.getElementsByTagName("path");
-    for (let i = 0; i < paths.length; i++) {
-        console.log("Path:", paths[i].getAttribute("style")); // Get path data
-    }
-
-    // Example: Get all <rect> elements
-    //const rects = xmlDoc.getElementsByTagName("rect");
-    //for (let i = 0; i < rects.length; i++) {
-    //    console.log("Rect:", rects[i].getAttribute("x"), rects[i].getAttribute("y"));
-    //}
-  }
 
 
   document.getElementById('time_button').addEventListener('click', () => {

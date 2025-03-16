@@ -1,7 +1,11 @@
 import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor } from './webgl-utils.js'
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
+import { read_svg_file } from './svg_reader.js';
 
+
+const MAX_POINTS = 1000;
+const MAX_PATHS = 200;
 
 export class PathContainer
 {
@@ -13,7 +17,7 @@ export class PathContainer
   async build()
   {
     const gl = this.gl;
-    //gl.lineWidth(2.0);
+    gl.lineWidth(2.0);
 
     // ---------------- VAO construction. -----------
     const vao = gl.createVertexArray();
@@ -25,9 +29,11 @@ export class PathContainer
 
 
     // Create a square to display the functions with fragment shader
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1.5,-1.5,  1.5,-1.5,  -1.5,1.5,  1.5,1.5]), gl.STATIC_DRAW);
+    //gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,  1,-1,  -1,1,  1,1]), gl.STATIC_DRAW);
+    //gl.bufferData(gl.ARRAY_BUFFER, MAX_PATHS * MAX_POINTS * 2, gl.STATIC_DRAW);
+    
     // ------ Atribute stuff -------
-    gl.enableVertexAttribArray(0);
+    //gl.enableVertexAttribArray(0);
 
     /*
     var attribute
@@ -37,7 +43,7 @@ export class PathContainer
     var stride = 4*2;      // Size of the vertex
     var offset = 0;        // start at the beginning of the buffer
     */
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 4*2, 0);
+    //gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 4*2, 0);
 
 
     // ------------------ Shader construction -------------
@@ -53,26 +59,100 @@ export class PathContainer
 
     //Save shader properties
     this.spanLocation = gl.getUniformLocation(program, "u_spanXY");
-    this.bezierLocation = gl.getUniformLocation(program, "u_bezierPoints");
+    this.pointDataLocation = gl.getUniformLocation(program, "u_pointData");
     this.screenSizeLocation = gl.getUniformLocation(program, "u_screenSize");
+    this.pointsTotalLocation = gl.getUniformLocation(program, "u_nPoints");
 
 
     this.gl.useProgram(this.Shader);
     gl.uniform2f(this.screenSizeLocation, gl.canvas.width, gl.canvas.height);
+    gl.uniform1i(this.pointDataLocation, 1);
 
+
+    this.nPaths = 0;
+    this.nPoints = 0;
   }
 
+  
   update_span(spanX, spanY)
   {
-    //console.log("Span updated bezier");
     this.gl.useProgram(this.Shader);
     this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
+    console.log(spanX, spanY);
   }
 
 
-  add_Path()
+  // Returns a texture and how many paths
+  create_discrete_paths(svgFile, n_points)
   {
 
+    if(n_points > MAX_POINTS)
+    {
+      throw new Error("Too many points. Better safe than sorry");
+    }
+    this.nPoints = n_points;
+    this.gl.uniform1i(this.pointsTotalLocation, n_points);
+
+    const paths = read_svg_file(svgFile);
+    console.log(paths);
+    // const path_container = {'line':{},'quadraticBezier':{}, 'cubicBezier':{}};
+
+    const n_paths = Object.keys(paths['lines']).length + Object.keys(paths['quadraticBeziers']).length + Object.keys(paths['cubicBeziers']).length;
+
+    if(n_paths > MAX_PATHS)
+    {
+      throw new Error("Too many paths. Better safe than sorry");
+    }
+    this.nPaths = n_paths;
+
+    // Create texture for data
+    // Height = n_paths
+    // Width = n_points 
+
+    
+    const data = new Float32Array(n_points * n_paths * 4);
+    //new Uint32Array(this._data.buffer,0,this._width * this._height * 4)
+
+    let currPathID = 0;
+
+    for(const line of paths['lines'])
+    {
+      for(let i = 0; i < n_points; i++)
+      {
+        const distX = (line.p2[0] - line.p1[0]) / (n_points - 1);
+        const distY = (line.p2[1] - line.p1[1]) / (n_points - 1);
+        // Interpolate
+        data[4 * n_points * currPathID + i * 4 + 0] = line.p1[0] + i * distX;
+        data[4 * n_points * currPathID + i * 4 + 1] = line.p1[1] + i * distY;
+      }
+      currPathID++;
+    }
+
+    for(const qB of paths['quadraticBeziers'])
+    {
+      data[4 * n_points * currPathID + i * 4 + 0] = 1.0;
+      data[4 * n_points * currPathID + i * 4 + 1] = 1.0;
+      currPathID++;
+    }
+
+    for(const cB of paths['cubicBeziers'])
+    {
+      data[4 * n_points * currPathID + i * 4 + 0] = 1.0;
+      data[4 * n_points * currPathID + i * 4 + 1] = 1.0;
+      currPathID++;
+    }
+      
+    // Set data
+    const dataTexture = this.gl.createTexture();
+    this.gl.activeTexture(this.gl.TEXTURE0 + 1),
+    this.gl.bindTexture(this.gl.TEXTURE_2D, dataTexture),
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE),
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE),
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST),
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, n_points, n_paths, 0, this.gl.RGBA, this.gl.FLOAT, data);
+
+    console.log(data)
   }
 
 
@@ -82,12 +162,7 @@ export class PathContainer
 
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
-
-    // X
-    gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-    
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, this.nPoints, this.nPaths);
   }
 
 }

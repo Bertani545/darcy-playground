@@ -102,7 +102,7 @@ export class Grid
 
     // Create second buffer for the second canvas
     // contains id and texture
-    this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 2, gl.canvas.width, gl.canvas.height);
+    this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 0, gl.canvas.width, gl.canvas.height);
     this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
 
   }
@@ -220,7 +220,7 @@ export class Grid
       this.update_squareSize();
 
     
-      console.log("Offset: " + (this.Offset))
+      //console.log("Offset: " + (this.Offset))
       if(Math.abs(this.Offset[0] ) >  this.sizeSquare[0]){ this.Offset[0] %= this.sizeSquare[0]; }
       if(Math.abs(this.Offset[1]) >  this.sizeSquare[1]){ this.Offset[1] %= this.sizeSquare[1]; }
 
@@ -246,7 +246,7 @@ export class Grid
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);
 
-    console.log("Offset: " + (this.Offset))
+    //console.log("Offset: " + (this.Offset))
   }
 
   update_span(spanX, spanY)
