@@ -59,7 +59,6 @@ export function read_svg_file(file)
     if(height){ height = parseFloat(height);}
     else {height = 0;}
 
-    console.log(height)
     //const width = SVGElement.getAttribute("width");
 
     const path_container = {'lines':[],'quadraticBeziers':[], 'cubicBeziers':[]};
@@ -68,7 +67,7 @@ export function read_svg_file(file)
     let idLine = 0;
 
     for (let path of paths) {
-        const values = new ArrayTraveler(path.getAttribute("d").split(/[ ,]+/));
+        const values = new ArrayTraveler(path.getAttribute("d").split(/[ ,\n]+/));
         
         let change_command = false;
 
@@ -79,7 +78,7 @@ export function read_svg_file(file)
 
         current_command = values.get_next();
         do
-        {   
+        {
             switch(current_command)
             {
                 case 'M':
@@ -192,8 +191,8 @@ export function read_svg_file(file)
 
                         path_container['quadraticBeziers'][idquadraticBezier] = {};
                         path_container['quadraticBeziers'][idquadraticBezier].p1 = [current_point[0], current_point[1] * -1 + height];
-                        path_container['quadraticBeziers'][idquadraticBezier].c = [cx, cy * -1 + height];
-                        path_container['quadraticBeziers'][idquadraticBezier].p2 = [dx, dy * -1 + height];
+                        path_container['quadraticBeziers'][idquadraticBezier].p2 = [cx, cy * -1 + height];
+                        path_container['quadraticBeziers'][idquadraticBezier].p3 = [dx, dy * -1 + height];
                         current_point = [dx, dy];
 
                         change_command = true;
@@ -219,16 +218,18 @@ export function read_svg_file(file)
                         }
                         else
                         {   
+    
                             // Compute the new control point
-                            const past_control = path_container['quadraticBeziers'][idquadraticBezier-1].c;
+                            const past_control = [...path_container['quadraticBeziers'][idquadraticBezier-1].p2];
+                            past_control[1] = -1 * (past_control[1] - height); // Uninvert
                             cx = -1 * (past_control[0] - current_point[0]) + current_point[0];
                             cy = -1 * (past_control[1] - current_point[1]) + current_point[1];
                         }
-
+                        
                         path_container['quadraticBeziers'][idquadraticBezier] = {};
                         path_container['quadraticBeziers'][idquadraticBezier].p1 = [current_point[0], current_point[1] * -1 + height];
-                        path_container['quadraticBeziers'][idquadraticBezier].c = [cx, cy * -1 + height];
-                        path_container['quadraticBeziers'][idquadraticBezier].p2 = [dx, dy * -1 + height];
+                        path_container['quadraticBeziers'][idquadraticBezier].p2 = [cx, cy * -1 + height];
+                        path_container['quadraticBeziers'][idquadraticBezier].p3 = [dx, dy * -1 + height];
                         current_point = [dx, dy];
 
                         change_command = true;
@@ -256,9 +257,9 @@ export function read_svg_file(file)
 
                         path_container['cubicBeziers'][idCubicBezier] = {};
                         path_container['cubicBeziers'][idCubicBezier].p1 = [current_point[0], current_point[1] * -1 + height];
-                        path_container['cubicBeziers'][idCubicBezier].c1 = [c1x, c1y * -1 + height];
-                        path_container['cubicBeziers'][idCubicBezier].c2 = [c2x, c2y * -1 + height];
-                        path_container['cubicBeziers'][idCubicBezier].p2 = [dx, dy * -1 + height];
+                        path_container['cubicBeziers'][idCubicBezier].p2 = [c1x, c1y * -1 + height];
+                        path_container['cubicBeziers'][idCubicBezier].p3 = [c2x, c2y * -1 + height];
+                        path_container['cubicBeziers'][idCubicBezier].p4 = [dx, dy * -1 + height];
                         current_point = [dx, dy];
 
                         change_command = true;
@@ -289,16 +290,17 @@ export function read_svg_file(file)
                         else
                         {
                             // Compute the new control point
-                            const past_control = path_container['cubicBeziers'][idCubicBezier-1].c2;
+                            const past_control = [...path_container['cubicBeziers'][idCubicBezier-1].p3];
+                            past_control[1] = -1 * (past_control[1] - height) // Uninvert 
                             c1x = -1 * (past_control[0] - current_point[0]) + current_point[0];
                             c1y = -1 * (past_control[1] - current_point[1]) + current_point[1];
                         }
 
                         path_container['cubicBeziers'][idCubicBezier] = {};
                         path_container['cubicBeziers'][idCubicBezier].p1 = [current_point[0], current_point[1] * -1 + height];
-                        path_container['cubicBeziers'][idCubicBezier].c1 = [c1x, c1y * -1 + height];
-                        path_container['cubicBeziers'][idCubicBezier].c2 = [c2x, c2y * -1 + height];
-                        path_container['cubicBeziers'][idCubicBezier].p2 = [dx, dy * -1 + height];
+                        path_container['cubicBeziers'][idCubicBezier].p2 = [c1x, c1y * -1 + height];
+                        path_container['cubicBeziers'][idCubicBezier].p3 = [c2x, c2y * -1 + height];
+                        path_container['cubicBeziers'][idCubicBezier].p4 = [dx, dy * -1 + height];
                         current_point = [dx, dy];
 
                         change_command = true;
