@@ -4,11 +4,12 @@ function dotProd_listOfNumbers_listOfVec2(L1, L2)
   if(L1.length != L2.length){throw new Error("Attemped a dot product with list of different sizes");}
   const ln = L1.length;
 
-  let result = new Vector2D(0,0)
+  let result = [0,0]
 
   for(let i = 0; i < ln; i++)
   {
-    result = result.add(L2[i].multiply(L1[i]));
+    result[0] += L1[i] * L2[i][0];
+    result[1] += L1[i] * L2[i][1];
   }
   return result;
 }
@@ -18,10 +19,10 @@ function dotProd_listOfNumbers_listOfVec2(L1, L2)
 export function multiply_LML_4x4(v1, M, v2)
 {
   //First multiplication
-  const r1 = [M[0], M[4], M[ 8], M[12]];
-  const r2 = [M[1], M[5], M[ 9], M[13]];
-  const r3 = [M[2], M[6], M[10], M[14]];
-  const r4 = [M[3], M[7], M[11], M[15]];
+  const r1 = [M[ 0], M[ 1], M[ 2], M[ 3]];
+  const r2 = [M[ 4], M[ 5], M[ 6], M[ 7]];
+  const r3 = [M[ 8], M[ 9], M[10], M[11]];
+  const r4 = [M[12], M[13], M[14], M[15]];
   
 
 
@@ -29,6 +30,19 @@ export function multiply_LML_4x4(v1, M, v2)
                 dotProd_listOfNumbers_listOfVec2(r2, v2),
                 dotProd_listOfNumbers_listOfVec2(r3, v2),
                 dotProd_listOfNumbers_listOfVec2(r4, v2)]
+   return dotProd_listOfNumbers_listOfVec2(v1, middle_res);
+}
+
+export function multiply_LML_3x3(v1, M, v2)
+{
+  //First multiplication
+  const r1 = [M[0], M[1], M[2]];
+  const r2 = [M[3], M[4], M[5]];
+  const r3 = [M[6], M[7], M[8]];
+  
+  const middle_res = [dotProd_listOfNumbers_listOfVec2(r1, v2),
+                dotProd_listOfNumbers_listOfVec2(r2, v2),
+                dotProd_listOfNumbers_listOfVec2(r3, v2)]
    return dotProd_listOfNumbers_listOfVec2(v1, middle_res);
 }
 

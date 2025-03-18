@@ -2,6 +2,7 @@ import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor } fr
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { read_svg_file } from './svg_reader.js';
+import { point_in_bezier_time } from './bezier_functions.js';
 
 
 const MAX_POINTS = 1000;
@@ -117,10 +118,11 @@ export class PathContainer
 
     for(const line of paths['lines'])
     {
+      const distX = (line.p2[0] - line.p1[0]) / (n_points - 1);
+      const distY = (line.p2[1] - line.p1[1]) / (n_points - 1);
+      
       for(let i = 0; i < n_points; i++)
       {
-        const distX = (line.p2[0] - line.p1[0]) / (n_points - 1);
-        const distY = (line.p2[1] - line.p1[1]) / (n_points - 1);
         // Interpolate
         data[4 * n_points * currPathID + i * 4 + 0] = line.p1[0] + i * distX;
         data[4 * n_points * currPathID + i * 4 + 1] = line.p1[1] + i * distY;
@@ -130,16 +132,24 @@ export class PathContainer
 
     for(const qB of paths['quadraticBeziers'])
     {
-      data[4 * n_points * currPathID + i * 4 + 0] = 1.0;
-      data[4 * n_points * currPathID + i * 4 + 1] = 1.0;
+      for(let i = 0; i < n_points; i++)
+      {
+        const pointOnCurve = point_in_bezier_time(2, i * 1/(n_points-1), qB);
+        data[4 * n_points * currPathID + i * 4 + 0] = pointOnCurve[0];
+        data[4 * n_points * currPathID + i * 4 + 1] = pointOnCurve[1];
+      }
       currPathID++;
     }
-
+    
     for(const cB of paths['cubicBeziers'])
     {
-      data[4 * n_points * currPathID + i * 4 + 0] = 1.0;
-      data[4 * n_points * currPathID + i * 4 + 1] = 1.0;
-      currPathID++;
+      for(let i = 0; i < n_points; i++)
+        {
+          const pointOnCurve = point_in_bezier_time(3, i * 1/(n_points-1), cB);
+          data[4 * n_points * currPathID + i * 4 + 0] = pointOnCurve[0];
+          data[4 * n_points * currPathID + i * 4 + 1] = pointOnCurve[1];
+        }
+        currPathID++;
     }
       
     // Set data
