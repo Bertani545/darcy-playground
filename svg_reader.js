@@ -326,12 +326,12 @@ export function read_svg_file(file)
                             dy += current_point[1];
                         }
 
-                        let c1x, c1y;
+                        let c1x = 0, c1y = 0;
                         if((last_command !== 'C' && last_command !== 'c') &&
                             (last_command !== 'S' && last_command !== 's'))
                         {
                             c1x = current_point[0];
-                            c2x = current_point[1];
+                            c1y = current_point[1];
                         }
                         else
                         {
@@ -357,7 +357,17 @@ export function read_svg_file(file)
                 case 'A':
                     {
                         // Not bothering with this one bruh
-                        for(let i = 0; i < 7; i++) values.get_next();
+                        for(let i = 0; i < 5; i++) values.get_next();
+                        const dx = values.get_next();
+                        const dy = values.get_next();
+
+                        if (current_command === 'a') { // Relative
+                            dx += current_point[0];
+                            dy += current_point[1];
+                        }
+
+                        current_point = [dx, dy];
+
                         break;
                     }
                 case '':
