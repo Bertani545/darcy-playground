@@ -1,3 +1,7 @@
+// To do:
+// Account for ugly input :c
+
+
 
 /*
 Reads ans SVG file and creates a dictionary
@@ -19,32 +23,71 @@ const EPS = 0.00001; // Change to allow different resolutions
 // <------------------------------- Acount for the view box
 
 
-class ArrayTraveler
+class TextTraveler
 {
-    constructor(arr)
+    constructor(text)
     {
-        this.arr = arr;
-        this.id = 0;
+        this.text = text;
+        this.currentPosition = -1;
+        this.lastPosition = -1;
+        do
+        {
+            // Starts with an instruction
+            this.currentPosition++;
+        }
+        while((this.text.charCodeAt(this.currentPosition) < 97  || this.text.charCodeAt(this.currentPosition) > 122)
+            &&(this.text.charCodeAt(this.currentPosition) < 65  || this.text.charCodeAt(this.currentPosition) > 90));
+        
+        this.start = this.currentPosition;
     }
     get_next()
     {
-        const value = this.arr[this.id];
-        this.id++;
-        if(this.id > this.arr.length) return null;
-        return value;
+        // Delete spaces or line jump
+        while(this.text[this.currentPosition] === ' ' || this.text[this.currentPosition] === '\n'
+                || this.text[this.currentPosition] === ',')
+        {
+            this.currentPosition++;
+        }
+
+        // Either a letter or a number
+        if((this.text.charCodeAt(this.currentPosition) >= 97  && this.text.charCodeAt(this.currentPosition) <= 122)
+            ||(this.text.charCodeAt(this.currentPosition) >= 65 && this.text.charCodeAt(this.currentPosition) <= 90))
+        {    
+            // A letter. Only one char and jump to the next position
+            this.lastPosition = this.currentPosition;
+            this.currentPosition++;
+
+            console.log("Letter = " + this.text[this.currentPosition-1])
+            return this.text[this.currentPosition-1];
+        }
+
+        // It must be a number then
+        // Read until NaN or two points
+        let number = this.text[this.currentPosition];
+        this.currentPosition++;
+        let points = 0;
+        while((this.text.charCodeAt(this.currentPosition) >= 48 && this.text.charCodeAt(this.currentPosition) <= 57)
+                || (this.text[this.currentPosition] === '.' && points == 0))
+        {
+            number += this.text[this.currentPosition];
+            if(this.text[this.currentPosition] === '.') points++;
+            this.currentPosition++;
+        }
+        this.lastPosition = this.currentPosition;
+        console.log("NUmber = " + number)
+        return number;
     }
     return_to_prev()
     {
-        this.id--;
-        if(this.id < 0) throw new Error("Invalid negative index");
+        if(this.lastPosition < 0) throw new Error("No valid previous state");
+
+        this.currentPosition = this.lastPosition;
+        this.lastPosition = -1;
     }
-    go_to_id(id)
-    {
-        this.id = id;
-    }
+
     go_to_start()
     {
-        this.id = 0;
+        this.currentPosition = this.start;
     }
 }
 
@@ -67,7 +110,7 @@ export function read_svg_file(file)
     let idLine = 0;
 
     for (let path of paths) {
-        const values = new ArrayTraveler(path.getAttribute("d").split(/[ ,\n]+/));
+        const values = new TextTraveler(path.getAttribute("d"));
         
         let change_command = false;
 
@@ -313,7 +356,12 @@ export function read_svg_file(file)
                         // Not bothering with this one bruh
                         for(let i = 0; i < 7; i++) values.get_next();
                         break;
-                    }   
+                    }
+                case '':
+                    {
+                        change_command = true;
+                        break;
+                    }
                 default:
                     {
                         /*
