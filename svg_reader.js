@@ -39,14 +39,17 @@ class TextTraveler
             &&(this.text.charCodeAt(this.currentPosition) < 65  || this.text.charCodeAt(this.currentPosition) > 90));
         
         this.start = this.currentPosition;
+
     }
     get_next()
     {
+        if(this.currentPosition >= this.text.length){return null;}
         // Delete spaces or line jump
         while(this.text[this.currentPosition] === ' ' || this.text[this.currentPosition] === '\n'
                 || this.text[this.currentPosition] === ',')
         {
             this.currentPosition++;
+            if(this.currentPosition >= this.text.length){return null;}
         }
 
         // Either a letter or a number
@@ -57,24 +60,24 @@ class TextTraveler
             this.lastPosition = this.currentPosition;
             this.currentPosition++;
 
-            console.log("Letter = " + this.text[this.currentPosition-1])
+            //console.log("Letter = " + this.text[this.currentPosition-1])
             return this.text[this.currentPosition-1];
         }
 
         // It must be a number then
         // Read until NaN or two points
-        let number = this.text[this.currentPosition];
-        this.currentPosition++;
+        this.lastPosition = this.currentPosition;
+        let number = ''
         let points = 0;
-        while((this.text.charCodeAt(this.currentPosition) >= 48 && this.text.charCodeAt(this.currentPosition) <= 57)
-                || (this.text[this.currentPosition] === '.' && points == 0))
+        do
         {
             number += this.text[this.currentPosition];
             if(this.text[this.currentPosition] === '.') points++;
             this.currentPosition++;
         }
-        this.lastPosition = this.currentPosition;
-        console.log("NUmber = " + number)
+        while((this.text.charCodeAt(this.currentPosition) >= 48 && this.text.charCodeAt(this.currentPosition) <= 57)
+                || (this.text[this.currentPosition] === '.' && points == 0))
+        //console.log("Number = " + number)
         return number;
     }
     return_to_prev()
