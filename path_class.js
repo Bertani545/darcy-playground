@@ -86,13 +86,15 @@ export class PathContainer
   // Returns a texture and how many paths
   create_discrete_paths(svgFile, n_points)
   {
-
+    console.log(this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE))
+    this.nPoints = n_points;
     if(n_points > MAX_POINTS)
     {
-      throw new Error("Too many points. Better safe than sorry");
+      //throw new Error("Too many points. Better safe than sorry");
+      alert("Too many points. Capping to " + MAX_POINTS);
+      this.nPoints = MAX_POINTS;
     }
-    this.nPoints = n_points;
-    this.gl.uniform1i(this.pointsTotalLocation, n_points);
+    this.gl.uniform1i(this.pointsTotalLocation, this.nPoints);
 
     const paths = read_svg_file(svgFile);
     //console.log(paths);
@@ -100,32 +102,35 @@ export class PathContainer
 
     const n_paths = Object.keys(paths['lines']).length + Object.keys(paths['quadraticBeziers']).length + Object.keys(paths['cubicBeziers']).length;
 
+    this.nPaths = n_paths;
+    console.log(n_paths);
     if(n_paths > MAX_PATHS)
     {
-      throw new Error("Too many paths. Better safe than sorry");
+      alert("Too many paths. Capping to " + MAX_PATHS);
+      this.nPaths = MAX_PATHS;
     }
-    this.nPaths = n_paths;
+    
 
     // Create texture for data
     // Height = n_paths
     // Width = n_points 
-
     
-    const data = new Float32Array(n_points * n_paths * 4);
+    
+    const data = new Float32Array(this.nPoints * this.nPaths * 4);
     //new Uint32Array(this._data.buffer,0,this._width * this._height * 4)
 
     let currPathID = 0;
 
     for(const line of paths['lines'])
     {
-      const distX = (line.p2[0] - line.p1[0]) / (n_points - 1);
-      const distY = (line.p2[1] - line.p1[1]) / (n_points - 1);
+      const distX = (line.p2[0] - line.p1[0]) / (this.nPoints - 1);
+      const distY = (line.p2[1] - line.p1[1]) / (this.nPoints - 1);
       
-      for(let i = 0; i < n_points; i++)
+      for(let i = 0; i < this.nPoints; i++)
       {
         // Interpolate
-        data[4 * n_points * currPathID + i * 4 + 0] = line.p1[0] + i * distX;
-        data[4 * n_points * currPathID + i * 4 + 1] = line.p1[1] + i * distY;
+        data[4 * this.nPoints * currPathID + i * 4 + 0] = line.p1[0] + i * distX;
+        data[4 * this.nPoints * currPathID + i * 4 + 1] = line.p1[1] + i * distY;
       }
       currPathID++;
     }
@@ -135,25 +140,25 @@ export class PathContainer
 
     for(const qB of paths['quadraticBeziers'])
     {
-      bezierContainer.build_curve(qB, 2, n_points);
+      bezierContainer.build_curve(qB, 2, this.nPoints);
       // Create the points by length parametrization
-      for(let i = 0; i < n_points; i++)
+      for(let i = 0; i < this.nPoints; i++)
       {
-        const pointOnCurve = bezierContainer.eval_by_length(i * 1/(n_points-1));
-        data[4 * n_points * currPathID + i * 4 + 0] = pointOnCurve[0];
-        data[4 * n_points * currPathID + i * 4 + 1] = pointOnCurve[1];
+        const pointOnCurve = bezierContainer.eval_by_length(i * 1/(this.nPoints-1));
+        data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
+        data[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
       }
       currPathID++;
     }
     
     for(const cB of paths['cubicBeziers'])
     {
-      bezierContainer.build_curve(cB, 3, n_points);
-      for(let i = 0; i < n_points; i++)
+      bezierContainer.build_curve(cB, 3, this.nPoints);
+      for(let i = 0; i < this.nPoints; i++)
         {
-          const pointOnCurve = bezierContainer.eval_by_length(i * 1/(n_points-1));
-          data[4 * n_points * currPathID + i * 4 + 0] = pointOnCurve[0];
-          data[4 * n_points * currPathID + i * 4 + 1] = pointOnCurve[1];
+          const pointOnCurve = bezierContainer.eval_by_length(i * 1/(this.nPoints-1));
+          data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
+          data[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
         }
         currPathID++;
     }
@@ -166,7 +171,7 @@ export class PathContainer
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE),
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST),
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
-    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, n_points, n_paths, 0, this.gl.RGBA, this.gl.FLOAT, data);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, data);
 
     //console.log(data)
   }
