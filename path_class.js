@@ -2,11 +2,11 @@ import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor } fr
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { read_svg_file } from './svg_reader.js';
-import { point_in_bezier_time } from './bezier_functions.js';
+import {BezierCurve, point_in_bezier_time } from './bezier_functions.js';
 
 
 const MAX_POINTS = 1000;
-const MAX_PATHS = 200;
+const MAX_PATHS = 2000;
 
 export class PathContainer
 {
@@ -95,7 +95,7 @@ export class PathContainer
     this.gl.uniform1i(this.pointsTotalLocation, n_points);
 
     const paths = read_svg_file(svgFile);
-    console.log(paths);
+    //console.log(paths);
     // const path_container = {'line':{},'quadraticBezier':{}, 'cubicBezier':{}};
 
     const n_paths = Object.keys(paths['lines']).length + Object.keys(paths['quadraticBeziers']).length + Object.keys(paths['cubicBeziers']).length;
@@ -130,11 +130,16 @@ export class PathContainer
       currPathID++;
     }
 
+
+    const bezierContainer = new BezierCurve();
+
     for(const qB of paths['quadraticBeziers'])
     {
+      bezierContainer.build_curve(qB, 2, n_points);
+      // Create the points by length parametrization
       for(let i = 0; i < n_points; i++)
       {
-        const pointOnCurve = point_in_bezier_time(2, i * 1/(n_points-1), qB);
+        const pointOnCurve = bezierContainer.eval_by_length(i * 1/(n_points-1));
         data[4 * n_points * currPathID + i * 4 + 0] = pointOnCurve[0];
         data[4 * n_points * currPathID + i * 4 + 1] = pointOnCurve[1];
       }
@@ -143,9 +148,10 @@ export class PathContainer
     
     for(const cB of paths['cubicBeziers'])
     {
+      bezierContainer.build_curve(cB, 3, n_points);
       for(let i = 0; i < n_points; i++)
         {
-          const pointOnCurve = point_in_bezier_time(3, i * 1/(n_points-1), cB);
+          const pointOnCurve = bezierContainer.eval_by_length(i * 1/(n_points-1));
           data[4 * n_points * currPathID + i * 4 + 0] = pointOnCurve[0];
           data[4 * n_points * currPathID + i * 4 + 1] = pointOnCurve[1];
         }
@@ -162,7 +168,7 @@ export class PathContainer
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, n_points, n_paths, 0, this.gl.RGBA, this.gl.FLOAT, data);
 
-    console.log(data)
+    //console.log(data)
   }
 
 
