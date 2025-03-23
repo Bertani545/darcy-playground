@@ -1,6 +1,7 @@
 import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly } from './webgl-utils.js'
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
+import { PathContainer } from './path_class.js';
 
 const n_p = 100;
 const n_instances = 50;
@@ -32,9 +33,16 @@ export class Grid
 
     this.textContainer = text_container;
     this.create_text_instances();
+
+    this.curves = new PathContainer(this.gl);
+
+    this.spanX = [0,0]
+    this.spanY = [0,0]
+    this.middleX = [0,0]
+    this.middleY = [0,0]
   }
 
-  async build()
+  async build(spanX, spanY)
   {
     const gl = this.gl;
     gl.lineWidth(2.0);
@@ -104,7 +112,14 @@ export class Grid
     // contains id and texture
     this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 0, gl.canvas.width, gl.canvas.height);
     this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
+    
+    await this.curves.build();
 
+
+
+    // Final setup
+    this.update_span(spanX, spanY);
+    this.update_ratio();
   }
 
 
@@ -121,7 +136,7 @@ export class Grid
   }
 
   // Assumes that we are starting at -3 and end at 3
-  update_text_labels(spanX, spanY)
+  update_text_labels()
   {
     // Called after zoom or drag
     // Get the position for the numbers
@@ -145,7 +160,7 @@ export class Grid
       }
 
       // Obtain position for display
-      const position = x * (spanX[1] - spanX[0]) + spanX[0]; 
+      const position = x * (this.spanX[1] - this.spanX[0]) + this.spanX[0]; 
 
       // Transform to screen cords
       x *= this.gl.canvas.width;
@@ -172,7 +187,7 @@ export class Grid
       }
 
       // Obtain position for display
-      const position = y * (spanY[1] - spanY[0]) + spanY[0]; 
+      const position = y * (this.spanY[1] - this.spanY[0]) + this.spanY[0]; 
 
       // Transform to screen cords
       y = y * -1 + 1;
@@ -202,10 +217,25 @@ export class Grid
       if (deltaZoom < 0) {
           this.zoom *= (1 + this.zoomSpeed); // Zoom in
           this.Offset = this.Offset.map(x => x * (1 + this.zoomSpeed));
+
+          this.sizeX = (this.spanX[1] - this.spanX[0]) / (1 + this.zoomSpeed);
+          this.spanX = [this.middleX - this.sizeX/2, this.middleX + this.sizeX/2];
+
+          this.sizeY = (this.spanY[1] - this.spanY[0]) / (1 + this.zoomSpeed);
+          this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
+
       } else {
           this.zoom /= (1 + this.zoomSpeed); // Zoom out
           this.Offset = this.Offset.map(x => x / (1 + this.zoomSpeed));
+
+          
+          this.sizeX = (this.spanX[1] - this.spanX[0]) * (1 + this.zoomSpeed);
+          this.spanX = [this.middleX - this.sizeX/2, this.middleX + this.sizeX/2];
+
+          this.sizeY = (this.spanY[1] - this.spanY[0]) * (1 + this.zoomSpeed);
+          this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
       }
+      this.update_span(this.spanX, this.spanY);
 
       // Zoom wrapping logic
       const MAX_ZOOM = 4;
@@ -232,6 +262,10 @@ export class Grid
 
   update_offset(dx, dy)
   {
+
+    dx *= this.squareSize[0] * 2.0; 
+    dy *= this.squareSize[1] * 2.0;
+
     this.Offset[0] += dx * this.zoom;
     this.Offset[1] -= dy * this.zoom;
 
@@ -246,23 +280,60 @@ export class Grid
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);
 
-    //console.log("Offset: " + (this.Offset))
+    //update sapan
+    // Square size in screen space, move to world space
+    dx = dx * (this.spanX[1] - this.spanX[0]) / 2 * this.zoom;
+    dy = dy * (this.spanY[1] - this.spanY[0]) / 2 * this.zoom;
+
+    // Now for span
+    this.spanX[0] -= dx;
+    this.spanX[1] -= dx;
+
+    this.spanY[0] += dy;
+    this.spanY[1] += dy;
+
+    this.update_span(this.spanX, this.spanY);
   }
 
   update_span(spanX, spanY)
   {
-    this.update_text_labels(spanX, spanY);
+    this.spanX = [...spanX];
+    this.spanY = [...spanY];
+    this.middleX = (spanX[1] + spanX[0])/2;
+    this.middleY = (spanY[1] + spanY[0])/2;
+    this.curves.update_span(this.spanX, this.spanY);
+    this.update_text_labels();
     //console.log("Span updated");
     this.gl.useProgram(this.Shader);
     this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
   }
 
+  
+  update_span_hard(spanX, spanY)
+  {
+    // Resets the offset and changes squeare size
+    this.Offset = [0,0]
+    this.spanX = [...spanX];
+    this.spanY = [...spanY];
+    this.middleX = (spanX[1] + spanX[0])/2;
+    this.middleY = (spanY[1] + spanY[0])/2;
+    this.update_ratio();
+    this.update_squareSize();
+    
+    this.curves.update_span(this.spanX, this.spanY);
+    this.update_text_labels();
+    //console.log("Span updated");
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
+    
+  }
+
 
   // Used when manually inputing the new span
-  update_ratio(spanX, spanY)
+  update_ratio()
   {
-    let lenX = spanX[1] - spanX[0];
-    let lenY = spanY[1] - spanY[0];
+    let lenX = this.spanX[1] - this.spanX[0];
+    let lenY = this.spanY[1] - this.spanY[0];
 
     // Get the surrounding powers of 2
     let bottomX = lessOrEqualPowerOf2(lenX);
@@ -276,7 +347,6 @@ export class Grid
 
     // Compute ratio
     this.squareRatio = mapY / mapX;
-
 
     this.zoom = 3.0;
     this.update_squareSize();
@@ -299,7 +369,36 @@ export class Grid
     return this.sizeSquare;
   }
 
+  create_discrete_paths(svgFile, n_points)
+  {
+    const limits = this.curves.create_discrete_paths(svgFile, n_points);
 
+    // Update viewport
+    let szX = limits.Right - limits.Left;
+    let szY = limits.Top - limits.Bottom;
+    const aspectSVG = szX / szY;
+    const aspectCanvas = this.gl.canvas.width / this.gl.canvas.height;
+
+    if(aspectSVG > aspectCanvas)
+    {
+      // Fit to width
+      const newHeight = szX / aspectCanvas;
+      const centerY = (limits.Top + limits.Bottom) / 2.0;
+      limits.Top = centerY + newHeight / 2.0;
+      limits.Bottom = centerY - newHeight / 2.0;
+    }
+    else
+    {
+      // Fit to heigth
+      const newWidth = szY * aspectCanvas;
+      const centerX = (limits.Right + limits.Left) / 2.0;
+      limits.Right = centerX + newWidth / 2.0;
+      limits.Left = centerX - newWidth / 2.0;
+    }
+
+
+    this.update_span_hard([limits.Left-10, limits.Right+10], [limits.Bottom-10, limits.Top+10]);
+  }
 
   draw()
   {
@@ -319,8 +418,12 @@ export class Grid
     gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
 
 
+    this.curves.draw();
+
 
     // Draw to the texture
+    gl.bindVertexArray(this.VAO);
+    gl.useProgram(this.Shader);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.secondBuffer.ID);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);

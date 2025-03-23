@@ -16,13 +16,7 @@ function randomInt(range) {
 var animate_method = 0;
 var animation_duration = 5;
 
-var spanX = [0,200];
-var sizeX = 2;
-var middleX = 0;
 
-var spanY = [0,200];
-var sizeY = 2;
-var middleY = 0;
 
 
 var spanSpeed = 0.05;
@@ -37,7 +31,6 @@ TODO:
 - The span must also be distorted by the ratio of the screen. That way a circle will look like a circle
 
 - Add user being able to input span
-- Add the option to draw your vector graphics <- Let's do a svg path renderer :b
 - Add UI element for the span of the axis
 - Formula parser for expressions of the form
   x = f(x,y)
@@ -82,7 +75,16 @@ async function main() {
 
   // ------------------------- Construct necesary VAOS ------------------------
 
-  //spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
+  // Send this to the build
+  var spanX = [-1,1];
+  var spanY = [-1,1];
+
+  var sizeX = 2;
+  var middleX = 0;
+  var sizeY = 2;
+  var middleY = 0;
+
+  spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
   sizeX = spanX[1] - spanX[0];
   sizeY = spanY[1] - spanY[0];
 
@@ -91,18 +93,10 @@ async function main() {
 
 
   const grid = new Grid(gl, canvas_output.getContext("2d"), text_container_input, spanSpeed);
-  await grid.build();
+  await grid.build(spanX, spanY); // Add here the span it will have in the begginnig
 
-  grid.update_ratio(spanX, spanY);
-  grid.update_squareSize();
-  grid.update_span(spanX, spanY);
+
   
-
-
-  const pathDisplayer = new PathContainer(gl);
-  await pathDisplayer.build();
-  pathDisplayer.update_span(spanX, spanY);
-
 
 
   let theta = 0.0;
@@ -130,9 +124,7 @@ async function main() {
   
   // New buffer to select objects
   var curr_ID = -1;
-  var select_obj =   webgl_utils.buildFrameBuffer_ColorOnly(gl, 0, 1,1);
-
-
+  //var select_obj =   webgl_utils.buildFrameBuffer_ColorOnly(gl, 0, 1,1);
 
 
 
@@ -152,17 +144,12 @@ async function main() {
 
     //Render to the screen
     gl.viewport(0, 0, canvas_input.width, canvas_input.height);
-
-
-    
     grid.draw();
-    pathDisplayer.draw();
 
 
     // ---------- Animation stuff --------
     //Time in the curve
     const t = (timeNow % animation_duration) / animation_duration
-
 
 
 
@@ -177,13 +164,8 @@ async function main() {
     "height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
 
 
-
     theta += 1 * deltaTime;
     requestAnimationFrame(drawScene);
-
-
-
-
   }
 
 
@@ -207,43 +189,14 @@ async function main() {
         dy /= rect.height;
 
 
-
-        // Update the transformation of the span
-        //dx *= spanX[1] - spanX[0];
-        //dy *= spanY[1] - spanY[0];
-
-        // Scale
-        //dx *= 2.0;
-        //dy *= 2.0;
-
-        dx *= grid.squareSize[0] * 2.0;
-        dy *= grid.squareSize[1] * 2.0;
-
-        // Update the translation of the grid
         grid.update_offset(dx, dy);
-
-        // Square size in screen space, move to world space
-        dx = dx * (spanX[1] - spanX[0]) / 2 * grid.zoom;
-        dy = dy * (spanY[1] - spanY[0]) / 2 * grid.zoom;
-
-        // Now for span
-        spanX[0] -= dx;
-        spanX[1] -= dx;
-
-        spanY[0] += dy;
-        spanY[1] += dy;
 
         // Update mouse position
         mouseX = currentMouseX;
         mouseY = currentMouseY;
-        mouseCoordX = (currentMouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
-        mouseCoordY = (currentMouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
+        //mouseCoordX = (currentMouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
+        //mouseCoordY = (currentMouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
         
-
-        middleX = (spanX[1] + spanX[0])/2;
-        middleY = (spanY[1] + spanY[0])/2;
-        grid.update_span(spanX, spanY);
-        pathDisplayer.update_span(spanX, spanY);
      }
   });
 
@@ -253,8 +206,8 @@ async function main() {
     mouseX = e.clientX;
     mouseY = e.clientY;
 
-    mouseCoordX = (mouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
-    mouseCoordY = (mouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
+    //mouseCoordX = (mouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
+    //mouseCoordY = (mouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
 
     // For later
     // Read the pixel color at the mouse position
@@ -266,49 +219,13 @@ async function main() {
 
     isDragging = true;
 
-    console.log(mouseCoordX, mouseCoordY)
+    //console.log(mouseCoordX, mouseCoordY)
 
   });
 
   canvas_input.addEventListener("wheel", (e) => {
       e.preventDefault();
-
       grid.update_zoom(e.deltaY);
-      const aspect_ratio = gl.canvas.width/ gl.canvas.height;
-
-      
-
-      if (e.deltaY < 0) {
-        // Zoom in, span shrinks
-
-        sizeX = (spanX[1] - spanX[0]) / (1 + spanSpeed);
-        spanX = [middleX - sizeX/2, middleX + sizeX/2];
-
-        sizeY = (spanY[1] - spanY[0]) / (1 + spanSpeed);
-        spanY = [middleY - sizeY/2, middleY + sizeY/2];
-
-        //spanX = spanX.map((x) => x / (1 + spanSpeed));
-        //spanY = spanY.map((x) => x / (1 + spanSpeed));
-
-      } else {
-        // Zoom out, span grows
-        //spanX = spanX.map((x) => x * (1 + spanSpeed));
-        //spanY = spanY.map((x) => x * (1 + spanSpeed));
-          
-          sizeX = (spanX[1] - spanX[0]) * (1 + spanSpeed);
-          spanX = [middleX - sizeX/2, middleX + sizeX/2];
-
-          sizeY = (spanY[1] - spanY[0]) * (1 + spanSpeed);
-          spanY = [middleY - sizeY/2, middleY + sizeY/2];
-      }
-
-      // Change span
-      middleX = (spanX[1] + spanX[0])/2;
-      middleY = (spanY[1] + spanY[0])/2;
-
-      grid.update_span(spanX, spanY);
-      pathDisplayer.update_span(spanX, spanY);
-
   });
 
 
@@ -338,7 +255,7 @@ async function main() {
         const reader = new FileReader();
         reader.onload = (e) => {
             const svgText = e.target.result;
-            pathDisplayer.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
+            grid.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
         };
         // We read the whole file to parse afterwards
         reader.readAsText(file);
