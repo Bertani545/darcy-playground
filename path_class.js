@@ -121,6 +121,20 @@ export class PathContainer
 
     let currPathID = 0;
 
+    // Obtain bouding box
+    let left = Infinity
+    let right = -Infinity
+    let top = -Infinity
+    let bottom = Infinity;
+
+    function update_bouding_box(point)
+    {
+      if(point[0] < left) left = point[0];
+      if(point[0] > right) right = point[0];
+      if(point[1] < bottom) bottom = point[1];
+      if(point[1] > top) top = point[1];
+    }
+
     for(const line of paths['lines'])
     {
       const distX = (line.p2[0] - line.p1[0]) / (this.nPoints - 1);
@@ -129,8 +143,14 @@ export class PathContainer
       for(let i = 0; i < this.nPoints; i++)
       {
         // Interpolate
-        data[4 * this.nPoints * currPathID + i * 4 + 0] = line.p1[0] + i * distX;
-        data[4 * this.nPoints * currPathID + i * 4 + 1] = line.p1[1] + i * distY;
+        const newX = line.p1[0] + i * distX;
+        const newY = line.p1[1] + i * distY;
+
+        update_bouding_box([newX, newY]);
+        
+        data[4 * this.nPoints * currPathID + i * 4 + 0] = newX;
+        data[4 * this.nPoints * currPathID + i * 4 + 1] = newY;
+
       }
       currPathID++;
     }
@@ -145,6 +165,8 @@ export class PathContainer
       for(let i = 0; i < this.nPoints; i++)
       {
         const pointOnCurve = bezierContainer.eval_by_length(i * 1/(this.nPoints-1));
+        update_bouding_box(pointOnCurve);
+
         data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
         data[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
       }
@@ -157,6 +179,8 @@ export class PathContainer
       for(let i = 0; i < this.nPoints; i++)
         {
           const pointOnCurve = bezierContainer.eval_by_length(i * 1/(this.nPoints-1));
+          update_bouding_box(pointOnCurve);
+          
           data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
           data[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
         }
@@ -174,6 +198,7 @@ export class PathContainer
     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, data);
 
     //console.log(data)
+    return {Top:top, Bottom:bottom, Left:left, Right:right}
   }
 
 
