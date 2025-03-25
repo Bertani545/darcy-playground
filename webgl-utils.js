@@ -24,6 +24,22 @@ export async function createShader(gl, type, source) {
   return undefined;
 }
 
+
+export async function createShader_fromSourceCode(gl, type, source_code) {
+
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source_code);
+  gl.compileShader(shader);
+  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return await shader;
+  }
+     
+  throw ("could not compile shader:" + gl.getShaderInfoLog(shader));
+  gl.deleteShader(shader);
+  return undefined;
+}
+
 export async function createProgram(gl, vertexShader, fragmentShader) {
   var program = gl.createProgram();
   gl.attachShader(program, vertexShader);

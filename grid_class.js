@@ -1,4 +1,4 @@
-import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly, buildFrameBuffer_computeShader } from './webgl-utils.js'
+import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly, buildFrameBuffer_computeShader, loadShaderFile, createShader_fromSourceCode } from './webgl-utils.js'
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { PathContainer } from './path_class.js';
@@ -115,7 +115,7 @@ export class Grid
     this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
     
     
-    // Two otther frame buffers for "compute" shaders
+    // Two other frame buffers for "compute" shaders
     this.VAOComputeShader = gl.createVertexArray();
     this.gl.bindVertexArray(this.VAOComputeShader);
     const vertexBufferCS = gl.createBuffer();
@@ -134,6 +134,26 @@ export class Grid
     this.floatGrid02 = buildFrameBuffer_computeShader(this.gl, 3, 1024, 1024);
     this.floatGrid02.texID = 3;
     this.gl.bindVertexArray(null);
+    /*
+      All the code to support a varying shader
+    */
+    // Initial version.
+    this.transformFunction = `vec2 f(vec2 p){return p;}`
+
+    // We save the original version
+    this.computeFunctionFS_source = await loadShaderFile("./shaders/fill_grid.fs");
+    // Other 2 here. Can use a await array
+    //
+
+    // We send to compile the modified ones
+    this.computeFunctionFS = await createShader_fromSourceCode(gl, gl.FRAGMENT_SHADER, this.computeFunctionFS_source.replace("REPLACE", this.transformFunction));
+
+    // And finaly create the shaders
+    this.programFunction = await createProgram(gl, vertexShaderCS, this.computeFunctionFS);
+    gl.useProgram(this.programFunction)
+    gl.uniform1f(gl.getUniformLocation(this.programFunction, "u_sizeSquare"), 1024);
+    this.programGridTrans = null;
+    this.programBezierTrans = null;
 
     // Final setup
     this.update_span(spanX, spanY);
@@ -323,8 +343,7 @@ export class Grid
     this.curves.update_span(this.spanX, this.spanY);
     this.update_text_labels();
     //console.log("Span updated");
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
+    
   }
 
   
@@ -342,61 +361,29 @@ export class Grid
     this.curves.update_span(this.spanX, this.spanY);
     this.update_text_labels();
     //console.log("Span updated");
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
     
   }
-
-
-  #generateGridData(width, height) {
-    const data = new Float32Array(width * height * 4); // RGBA32F (4 floats per pixel)
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const index = (y * width + x) * 4;
-        
-            const point = [2/width*x -1, 2/height*y -1];
-            data[index]     = point[0] * point[0];  
-            data[index + 1] = data[index];
-            data[index + 2] = point[1]; 
-            data[index + 3] = data[index + 2]; 
-          }
-      }
-      return data;
-  }
-
 
 
   update_secondView_span()
   {
     const gl = this.gl;
-    // Future first function to obtain the values of the grid
-    // Test
-    const data = this.#generateGridData(1024, 1024);
-    console.log(data);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.floatGrid02.ID);
-    const texture = gl.createTexture();
-    // make unit i the active texture unit
-    gl.activeTexture(gl.TEXTURE0 + 3);
-    // Bind texture to 'texture unit i' 2D bind point
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    // Set the parameters so we don't need mips and so we're not filtering
-    // and we don't repeat
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 1024, 1024, 0, gl.RGBA, gl.FLOAT, data);
-
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
     gl.bindVertexArray(this.VAOComputeShader);
+    gl.viewport(0, 0, 1024, 1024);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.floatGrid02.ID); // The first used as tex is grid02
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(this.programFunction);
+
+    gl.uniform2f(gl.getUniformLocation(this.programFunction, "u_spanX"), ...this.spanX);
+    gl.uniform2f(gl.getUniformLocation(this.programFunction, "u_spanY"), ...this.spanY);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+
     gl.useProgram(this.computeShader);
     // Run the algorithm to obtain the bounding box limits
-
-    console.log(this.floatGrid01.texID)
     const frameBuffers =  [this.floatGrid01, this.floatGrid02];
+    // Original size is 1024 x 1024
     for (let i = 9; i >= 0; i--) {
         const newSize = (1 << i);
     
@@ -405,7 +392,7 @@ export class Grid
     
         // Bind output framebuffer (ping-pong buffer)
         gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[(i+1)%2].ID); 
-        //gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT);
     
         // Set uniforms
         gl.uniform1i(gl.getUniformLocation(this.computeShader, "u_currentPower"), i);
@@ -422,6 +409,10 @@ export class Grid
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   }
 
+  update_transform_function()
+  {
+    // Re do the shaders for obtainning the grid and the render shaders in the second canvas
+  }
 
   // Used when manually inputing the new span
   update_ratio()
@@ -504,7 +495,7 @@ export class Grid
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
-    
+    this.gl.uniform4f(this.spanLocation,...this.spanX, ...this.spanY);
     // X
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
@@ -520,6 +511,7 @@ export class Grid
     // Draw to the texture
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
+    this.gl.uniform4f(this.spanLocation,...this.spanTransformed);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.secondBuffer.ID);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
