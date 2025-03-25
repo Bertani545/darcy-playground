@@ -1,6 +1,5 @@
 #version 300 es
  
-//layout(location = 0) in vec2 a_position;
 
 uniform int u_nPoints;
 uniform vec4 u_spanXY; // (minX, maxX, minY, maxY)

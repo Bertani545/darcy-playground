@@ -98,6 +98,28 @@ export function buildFrameBuffer_ColorOnly(gl, i, width, height)
 }
 
 
+export function buildFrameBuffer_computeShader(gl, i, width, height)
+{
+  var fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  // Tell WebGL how to convert from clip space to pixels
+  //gl.viewport(0, 0, width, height);
+
+  var texture = createAndSetupTexture(gl, i);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, width, height, 0, gl.RGBA, gl.FLOAT, null);
+
+  // Bind the texture as where color is going to be written
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+  //console.log(gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE)
+  //Unbind
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  return {ID: fbo,
+          ColorTexture: texture}
+}
+
+
 export function getIdColor(id) {
   const R = (id & 0xFF0000) >> 16 / 255; // Red
   const G = (id & 0x00FF00) >> 8 / 255;  // Green

@@ -1,4 +1,4 @@
-import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly } from './webgl-utils.js'
+import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly, buildFrameBuffer_computeShader } from './webgl-utils.js'
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { PathContainer } from './path_class.js';
@@ -40,6 +40,7 @@ export class Grid
     this.spanY = [0,0]
     this.middleX = [0,0]
     this.middleY = [0,0]
+    this.spanTransformed = new Float32Array(4);
   }
 
   async build(spanX, spanY)
@@ -106,20 +107,38 @@ export class Grid
     gl.uniform4f(this.colorLocation, ...this.color);
     gl.uniform1f(this.aspectScreenLocation, gl.canvas.height / gl.canvas.width);
 
-
+    await this.curves.build();
 
     // Create second buffer for the second canvas
     // contains id and texture
     this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 0, gl.canvas.width, gl.canvas.height);
     this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
     
-    await this.curves.build();
+    
+    // Two otther frame buffers for "compute" shaders
+    this.VAOComputeShader = gl.createVertexArray();
+    this.gl.bindVertexArray(this.VAOComputeShader);
+    const vertexBufferCS = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferCS);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,  1,-1,  -1,1,  1,1]), gl.STATIC_DRAW); // Square
 
-
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 4*2, 0);
+    
+    const vertexShaderCS = await createShader(gl, gl.VERTEX_SHADER, "./shaders/simple.vs");
+    const fragmentShaderCS = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/reduction.fs");
+    this.computeShader = await createProgram(gl, vertexShaderCS, fragmentShaderCS);
+    
+    this.floatGrid01 = buildFrameBuffer_computeShader(this.gl, 2, 1024, 1024);
+    this.floatGrid01.texID = 2;
+    this.floatGrid02 = buildFrameBuffer_computeShader(this.gl, 3, 1024, 1024);
+    this.floatGrid02.texID = 3;
+    this.gl.bindVertexArray(null);
 
     // Final setup
     this.update_span(spanX, spanY);
     this.update_ratio();
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
   }
 
 
@@ -329,6 +348,81 @@ export class Grid
   }
 
 
+  #generateGridData(width, height) {
+    const data = new Float32Array(width * height * 4); // RGBA32F (4 floats per pixel)
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const index = (y * width + x) * 4;
+        
+            const point = [2/width*x -1, 2/height*y -1];
+            data[index]     = point[0] * point[0];  
+            data[index + 1] = data[index];
+            data[index + 2] = point[1]; 
+            data[index + 3] = data[index + 2]; 
+          }
+      }
+      return data;
+  }
+
+
+
+  update_secondView_span()
+  {
+    const gl = this.gl;
+    // Future first function to obtain the values of the grid
+    // Test
+    const data = this.#generateGridData(1024, 1024);
+    console.log(data);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.floatGrid02.ID);
+    const texture = gl.createTexture();
+    // make unit i the active texture unit
+    gl.activeTexture(gl.TEXTURE0 + 3);
+    // Bind texture to 'texture unit i' 2D bind point
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // Set the parameters so we don't need mips and so we're not filtering
+    // and we don't repeat
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 1024, 1024, 0, gl.RGBA, gl.FLOAT, data);
+
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    gl.bindVertexArray(this.VAOComputeShader);
+    gl.useProgram(this.computeShader);
+    // Run the algorithm to obtain the bounding box limits
+
+    console.log(this.floatGrid01.texID)
+    const frameBuffers =  [this.floatGrid01, this.floatGrid02];
+    for (let i = 9; i >= 0; i--) {
+        const newSize = (1 << i);
+    
+        // Set viewport for the current reduction step
+        gl.viewport(0, 0, newSize, newSize);
+    
+        // Bind output framebuffer (ping-pong buffer)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[(i+1)%2].ID); 
+        //gl.clear(gl.COLOR_BUFFER_BIT);
+    
+        // Set uniforms
+        gl.uniform1i(gl.getUniformLocation(this.computeShader, "u_currentPower"), i);
+        gl.uniform1i(gl.getUniformLocation(this.computeShader, "u_pointData"), frameBuffers[i%2].texID);
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+    
+    //gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[1].ID);
+    gl.readPixels(0,0,1,1, gl.RGBA,gl.FLOAT, this.spanTransformed); // From current framebuffer
+
+    console.log(this.spanTransformed);
+
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  }
+
+
   // Used when manually inputing the new span
   update_ratio()
   {
@@ -399,6 +493,8 @@ export class Grid
 
     this.update_span_hard([limits.Left-10, limits.Right+10], [limits.Bottom-10, limits.Top+10]);
   }
+
+
 
   draw()
   {

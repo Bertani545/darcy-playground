@@ -60,6 +60,14 @@ async function main() {
   if (!gl) {
     throw new Error("Error. No se pudo cargar WebGL2");
   }
+
+    // For rendering to float
+  const ext = gl.getExtension("EXT_color_buffer_float");
+  if (!ext) {
+    alert("need EXT_color_buffer_float");
+    return;
+  }
+
   // Canvas stuff
   webgl_utils.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height); // [-1, 1] maps to [0, canvas.width/height]
@@ -131,6 +139,7 @@ async function main() {
 
   // --------- Render cycle ------
   var timeThen  = 0;
+  grid.update_secondView_span();
 
   requestAnimationFrame(drawScene);
   function drawScene(timeNow)
@@ -143,7 +152,6 @@ async function main() {
 
 
     //Render to the screen
-    gl.viewport(0, 0, canvas_input.width, canvas_input.height);
     grid.draw();
 
 

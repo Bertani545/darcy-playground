@@ -48,8 +48,8 @@ export class PathContainer
 
 
     // ------------------ Shader construction -------------
-    const vertexShader = await createShader(gl, gl.VERTEX_SHADER, "./shaders/display.vs");
-    const fragmentShader = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/display.fs");
+    const vertexShader = await createShader(gl, gl.VERTEX_SHADER, "./shaders/path_display.vs");
+    const fragmentShader = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/path_display.fs");
     const program = await createProgram(gl, vertexShader, fragmentShader);
 
 
