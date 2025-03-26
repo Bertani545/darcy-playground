@@ -169,6 +169,7 @@ export class PathContainer
       for(let i = 0; i < this.nPoints; i++)
       {
         const pointOnCurve = bezierContainer.eval_by_length(i * 1/(this.nPoints-1));
+        
         update_bouding_box(pointOnCurve);
 
         data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
@@ -191,6 +192,23 @@ export class PathContainer
         currPathID++;
     }
       
+
+    // Normalize it
+    const h = top-bottom;
+    const w = right-left;
+
+    const normalize = h > w ? h : w;
+
+    for(let i = 0; i < this.nPoints*this.nPaths*4; i+=4)
+    {
+      data[i] /= normalize;
+      data[i + 1] /= normalize;
+    }
+    top /= normalize;
+    bottom /= normalize;
+    right /= normalize;
+    left /= normalize;
+
     // Set data
     const dataTexture = this.gl.createTexture();
     this.gl.activeTexture(this.gl.TEXTURE0 + 1),

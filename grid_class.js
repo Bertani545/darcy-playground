@@ -130,7 +130,7 @@ export class Grid
   async #build_new_shaders()
   {
     this.transformFunction = "vec2 f(vec2 p) {return vec2(2. * p.x, p.y);}"
-
+    
     this.transformFunction = `
     vec2 f(vec2 uv) {
         float r = length(uv);  // Compute radius
@@ -144,6 +144,7 @@ export class Grid
     }
     `;
 
+    //this.transformFunction = "vec2 f(vec2 p) {return vec2(p.x*p.x,p.y);}"
     
 
     await this.curves.update_transformed_shader(this.transformFunction);
@@ -521,7 +522,7 @@ export class Grid
     }
 
 
-    this.update_span_hard([limits.Left-10, limits.Right+10], [limits.Bottom-10, limits.Top+10]);
+    this.update_span([limits.Left, limits.Right], [limits.Bottom, limits.Top]);
   }
 
 
