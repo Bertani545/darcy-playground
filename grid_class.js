@@ -159,7 +159,18 @@ export class Grid
 
   async #build_new_shaders()
   {
-    this.transformFunction = 'vec2 f(vec2 p) {return vec2(p.x*p.x, p.y);}'
+    this.transformFunction = `
+    vec2 f(vec2 uv) {
+        float r = length(uv);  // Compute radius
+        float theta = atan(uv.y, uv.x);  // Compute angle
+        
+        // Apply nonlinear distortion to radius
+        float rNew = pow(r, 2.0);
+        
+        // Convert back to Cartesian coordinates
+        return vec2(rNew * cos(theta), rNew * sin(theta));
+    }
+    `;
 
     await this.curves.update_transformed_shader(this.transformFunction);
 
@@ -556,10 +567,11 @@ export class Grid
     this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
 
 
-    // Pass the texture to the second canvas
+    //Pass the texture to the second canvas
     gl.readPixels(0,0,gl.canvas.width, gl.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,this.pixelContainer); // From current framebuffer
     const imageData = new ImageData(this.pixelContainer, gl.canvas.width, gl.canvas.height);
     this.ctx.putImageData(imageData, 0, 0);
+
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }

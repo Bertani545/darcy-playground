@@ -16,6 +16,7 @@ uniform vec4 u_transformedSpanXY;
 
 
 out vec4 line_color;
+out float invisible; // when you can't even hear... MY NAME
 
 #define PI 3.1415926535898
 #define TAU 6.283185307179586
@@ -66,7 +67,10 @@ void main() {
       // Ofset caused by the mouse
   current_position += u_offset;
 
-  
+  invisible = 0.0;
+  if(abs(current_position.x) >  1. || abs(current_position.y) > 1.0) invisible = 1.0;
+
+
   line_color = domain_color(current_position);
 
   // Map the coordinates to span and color them acordingly
@@ -78,6 +82,7 @@ void main() {
 
   real_position = f(real_position);
   // Re map real_position to screen space [TransSpan[0], TransSpan[1]] -> [-1, 1]
+  
   float l = u_transformedSpanXY[0];
   float r = u_transformedSpanXY[1];
   float b = u_transformedSpanXY[2];
@@ -85,6 +90,17 @@ void main() {
   
   current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
   current_position.y = ((real_position.y - b)/(t - b)) * 2. - 1.;
+  
+/*
+  float l = u_spanXY[0];
+  float r = u_spanXY[1];
+  float b = u_spanXY[2];
+  float t = u_spanXY[3];
+  
+  current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
+  current_position.y = ((real_position.y - b)/(t - b)) * 2. - 1.;
+*/
 
+  current_position.y =  -current_position.y;
   gl_Position = vec4(current_position, 0.0, 1.0) ;
 }

@@ -24,4 +24,10 @@ void main() {
   // Transform them into [-1, 1]
   gl_Position.x = 2.0 * (coords.x - u_transformedSpanXY[0]) / (u_transformedSpanXY[1]-u_transformedSpanXY[0]) - 1.0;
   gl_Position.y = 2.0 * (coords.y - u_transformedSpanXY[2]) / (u_transformedSpanXY[3]-u_transformedSpanXY[2]) - 1.0;
+
+    //gl_Position.x = 2.0 * (coords.x - u_spanXY[0]) / (u_spanXY[1]-u_spanXY[0]) - 1.0;
+    //gl_Position.y = 2.0 * (coords.y - u_spanXY[2]) / (u_spanXY[3]-u_spanXY[2]) - 1.0;
+
+    gl_Position.y = - gl_Position.y;
+
 }

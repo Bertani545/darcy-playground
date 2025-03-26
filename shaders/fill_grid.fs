@@ -15,7 +15,7 @@ void main()
 {
     vec2 fragCoord = floor(gl_FragCoord.xy);
     // Obtain grid
-    vec2 step = fragCoord / u_sizeSquare;
+    vec2 step = fragCoord / (u_sizeSquare-1.);
     vec2 position;
 
     position.x = (u_spanX[1] - u_spanX[0]) * step.x + u_spanX[0];

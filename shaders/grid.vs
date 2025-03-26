@@ -14,6 +14,7 @@ uniform vec4 u_spanXY;
 
 
 out vec4 line_color;
+out float invisible;
 
 #define PI 3.1415926535898
 #define TAU 6.283185307179586
@@ -36,6 +37,7 @@ vec4 domain_color(vec2 coord) {
 
 
 void main() {
+  invisible = 0.0;
   vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
 
   float dist = 6.0 / TOTAL_LINES;
