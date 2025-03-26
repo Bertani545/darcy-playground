@@ -1,9 +1,6 @@
 
 import * as webgl_utils from './webgl-utils.js'
-import { RenderPoints,  Point} from './point_class.js'
-import {BezierCurve, RenderCurves, Line} from './line_class.js'
 import {Grid} from './grid_class.js'
-import {PathContainer} from './path_class.js';
 
 
 
