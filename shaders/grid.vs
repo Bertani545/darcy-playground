@@ -9,7 +9,6 @@ uniform float u_zoom;
 uniform vec2 u_lineSpawnDirection;
 uniform float u_gridRatio;
 uniform vec2 u_offset;
-uniform vec4 u_spanXY;
 
 
 
@@ -42,7 +41,8 @@ void main() {
 
   float dist = 6.0 / TOTAL_LINES;
 
-  vec2 current_position = a_position * 6.;
+  vec2 elongate_dir = vec2(u_lineSpawnDirection.y, u_lineSpawnDirection.x);
+  vec2 current_position = vec2(gl_VertexID) * dist * elongate_dir;
 
   // Scale it
   //current_position *= 2.0 * u_zoom;
@@ -66,6 +66,8 @@ void main() {
 
   
   line_color = domain_color(current_position);
+
+  if(current_position.x < -1.0) line_color = vec4(1.0);
 
   gl_Position = vec4(current_position, 0.0, 1.0) ;
 }

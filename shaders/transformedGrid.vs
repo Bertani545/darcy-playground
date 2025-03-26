@@ -41,11 +41,12 @@ vec4 domain_color(vec2 coord) {
 
 
 void main() {
-  vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
+vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
 
   float dist = 6.0 / TOTAL_LINES;
 
-  vec2 current_position = a_position * 6.;
+  vec2 elongate_dir = vec2(u_lineSpawnDirection.y, u_lineSpawnDirection.x);
+  vec2 current_position = vec2(gl_VertexID) * dist * elongate_dir;
 
   // Scale it
   //current_position *= 2.0 * u_zoom;
@@ -67,11 +68,12 @@ void main() {
       // Ofset caused by the mouse
   current_position += u_offset;
 
-  invisible = 0.0;
-  if(abs(current_position.x) >  1. || abs(current_position.y) > 1.0) invisible = 1.0;
-
 
   line_color = domain_color(current_position);
+
+
+    invisible = 0.0;
+  if(abs(current_position.x) >  1.0 || abs(current_position.y) > 1.0) invisible = 1.0;
 
   // Map the coordinates to span and color them acordingly
   // [-1,1] -> [span[0], span[1]]
@@ -91,6 +93,12 @@ void main() {
   current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
   current_position.y = ((real_position.y - b)/(t - b)) * 2. - 1.;
   
+
+  current_position.y =  -current_position.y;
+  
+  gl_Position = vec4(current_position, 0.0, 1.0) ;
+}
+
 /*
   float l = u_spanXY[0];
   float r = u_spanXY[1];
@@ -100,7 +108,3 @@ void main() {
   current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
   current_position.y = ((real_position.y - b)/(t - b)) * 2. - 1.;
 */
-
-  current_position.y =  -current_position.y;
-  gl_Position = vec4(current_position, 0.0, 1.0) ;
-}

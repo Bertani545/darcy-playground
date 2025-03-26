@@ -52,36 +52,6 @@ export class Grid
     const vao = gl.createVertexArray();
     gl.bindVertexArray(vao); // Make it current
 
-    //Vertex buffer for the VAO
-    const vertexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-
-
-    // Create points to allow the grid to be modified
-
-    const pointsX = []
-    const pointsY = []
-    for(let i = 0; i <= n_p; i++)
-    {
-      pointsX.push(1.0/n_p * i);pointsX.push(0);
-      pointsY.push(0);pointsY.push(1.0/n_p * i);
-    }
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pointsX.concat(pointsY)), gl.STATIC_DRAW);
-    // ------ Atribute stuff -------
-    gl.enableVertexAttribArray(0);
-
-    /*
-    var attribute
-    var size = 2;          // 2 components per iteration
-    var type = gl.FLOAT;   // the data is 32bit floats
-    var normalize = false; // don't normalize the data
-    var stride = 4*2;      // Size of the vertex
-    var offset = 0;        // start at the beginning of the buffer
-    */
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 4*2, 0);
-
-
     // Initial version of the function
     this.transformFunction = `vec2 f(vec2 p){return p;}`
 
@@ -159,6 +129,8 @@ export class Grid
 
   async #build_new_shaders()
   {
+    this.transformFunction = "vec2 f(vec2 p) {return vec2(2. * p.x, p.y);}"
+
     this.transformFunction = `
     vec2 f(vec2 uv) {
         float r = length(uv);  // Compute radius
@@ -171,6 +143,8 @@ export class Grid
         return vec2(rNew * cos(theta), rNew * sin(theta));
     }
     `;
+
+    
 
     await this.curves.update_transformed_shader(this.transformFunction);
 
@@ -442,6 +416,29 @@ export class Grid
     //gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[1].ID);
     gl.readPixels(0,0,1,1, gl.RGBA,gl.FLOAT, this.spanTransformed); // From current framebuffer
 
+    // Change the aspect ratio
+    const aspect = (this.spanX[1]-this.spanX[0])/(this.spanY[1]-this.spanY[0]);
+    const trans_aspect = (this.spanTransformed[1]-this.spanTransformed[0])/(this.spanTransformed[3]-this.spanTransformed[2])
+
+    if(trans_aspect > aspect)
+    {
+      // Too wide
+      const newHeight = (this.spanTransformed[1]-this.spanTransformed[0]) / aspect;
+      const centerY = (this.spanTransformed[2]+this.spanTransformed[3]) / 2.0;
+      this.spanTransformed[3] = centerY + newHeight / 2.0;
+      this.spanTransformed[2] = centerY - newHeight / 2.0;
+
+    }
+    else
+    {
+      // Too tall
+      const newWidth = (this.spanTransformed[3]-this.spanTransformed[2]) * aspect;
+      const centerX = (this.spanTransformed[0]+this.spanTransformed[1]) / 2.0;
+      this.spanTransformed[1] = centerX + newWidth / 2.0;
+      this.spanTransformed[0] = centerX - newWidth / 2.0;
+    }
+
+
     console.log(this.spanTransformed);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -538,13 +535,14 @@ export class Grid
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
     gl.uniform4f(this.spanLocation,...this.spanX, ...this.spanY);
+    
     // X
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
     
     // Y
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
 
     this.curves.draw(this.spanX, this.spanY);
 
@@ -562,7 +560,7 @@ export class Grid
     gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
     gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
 
     this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
 
