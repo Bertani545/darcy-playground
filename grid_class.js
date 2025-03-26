@@ -7,7 +7,9 @@ const n_p = 100;
 const n_instances = 50;
 
 function lessOrEqualPowerOf2(n) {
-  return 1 << 31 - Math.clz32(n);
+  let pow = Math.log(n);
+  //pow = pow < 0 ? Math.ceil(pow) : Math.floor(pow);
+  return Math.floor(pow);
 }
 
 
@@ -130,7 +132,7 @@ export class Grid
   async #build_new_shaders()
   {
     this.transformFunction = "vec2 f(vec2 p) {return vec2(2. * p.x, p.y);}"
-    
+/*    
     this.transformFunction = `
     vec2 f(vec2 uv) {
         float r = length(uv);  // Compute radius
@@ -143,8 +145,8 @@ export class Grid
         return vec2(rNew * cos(theta), rNew * sin(theta));
     }
     `;
-
-    //this.transformFunction = "vec2 f(vec2 p) {return vec2(p.x*p.x,p.y);}"
+*/
+    this.transformFunction = "vec2 f(vec2 p) {return vec2(p.x*p.x,p.y);}"
     
 
     await this.curves.update_transformed_shader(this.transformFunction);
@@ -456,11 +458,28 @@ export class Grid
     let lenX = this.spanX[1] - this.spanX[0];
     let lenY = this.spanY[1] - this.spanY[0];
 
+    console.log("Real ratio: " + lenY / lenX);
+
+    let powX = lessOrEqualPowerOf2(lenX);
+    let powY = lessOrEqualPowerOf2(lenY);
+
     // Get the surrounding powers of 2
+    let bottomX =  Math.pow(2, powX);
+    let topX = Math.pow(2, powX + 1);
+    
+    let bottomY = Math.pow(2, powY);
+    let topY = Math.pow(2, powY + 1);
+
+/*
     let bottomX = lessOrEqualPowerOf2(lenX);
-    let topX = bottomX << 1;
+    let topX = bottomX == 0 ? 1 : bottomX << 1;
+    
     let bottomY = lessOrEqualPowerOf2(lenY);
-    let topY = bottomY << 1;
+    let topY = bottomY == 0 ? 1 : bottomY << 1;
+
+*/
+
+    console.log("Powers", bottomX, topX, bottomY, topY)
 
     // Map it [4,2]
     const mapX = (lenX - bottomX) / (topX - bottomX) * 2 + 2;
@@ -468,6 +487,8 @@ export class Grid
 
     // Compute ratio
     this.squareRatio = mapY / mapX;
+
+    console.log("Ratio: " + this.squareRatio)
 
     this.zoom = 3.0;
     this.update_squareSize();
@@ -522,7 +543,7 @@ export class Grid
     }
 
 
-    this.update_span([limits.Left, limits.Right], [limits.Bottom, limits.Top]);
+    this.update_span_hard([limits.Left, limits.Right], [limits.Bottom, limits.Top]);
   }
 
 

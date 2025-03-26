@@ -220,6 +220,7 @@ export class PathContainer
     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, data);
 
     //console.log(data)
+    console.log(top-bottom, right-left)
     return {Top:top, Bottom:bottom, Left:left, Right:right}
   }
 
