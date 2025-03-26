@@ -1,4 +1,4 @@
-import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor } from './webgl-utils.js'
+import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, loadShaderFile, createShader_fromSourceCode } from './webgl-utils.js'
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { read_svg_file } from './svg_reader.js';
@@ -49,14 +49,16 @@ export class PathContainer
 
     // ------------------ Shader construction -------------
     const vertexShader = await createShader(gl, gl.VERTEX_SHADER, "./shaders/path_display.vs");
-    const fragmentShader = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/path_display.fs");
-    const program = await createProgram(gl, vertexShader, fragmentShader);
+    this.fragmentShader = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/path_display.fs");
+    const program = await createProgram(gl, vertexShader, this.fragmentShader);
 
 
 
     // Assign the created VAO and Shader to the instance
     this.VAO = vao;
     this.Shader = program;
+    this.vertexShaderTransformed_source = await loadShaderFile("./shaders/path_display_transformed.vs")
+    this.transformedShader = null;
 
     //Save shader properties
     this.spanLocation = gl.getUniformLocation(program, "u_spanXY");
@@ -66,7 +68,6 @@ export class PathContainer
 
 
     this.gl.useProgram(this.Shader);
-    gl.uniform2f(this.screenSizeLocation, gl.canvas.width, gl.canvas.height);
     gl.uniform1i(this.pointDataLocation, 1);
 
 
@@ -75,12 +76,16 @@ export class PathContainer
   }
 
   
-  update_span(spanX, spanY)
+  async update_transformed_shader(new_function)
   {
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.spanLocation,...spanX, ...spanY);
-    console.log(spanX, spanY);
+    const gl = this.gl;
+    const vertexShader = await createShader_fromSourceCode(gl, gl.VERTEX_SHADER, this.vertexShaderTransformed_source .replace("REPLACE", new_function) );
+    this.transformedShader = await createProgram(gl, vertexShader, this.fragmentShader);
+
+    gl.useProgram(this.transformedShader);
+    gl.uniform1i(gl.getUniformLocation(this.transformedShader, "u_pointData"), 1);
   }
+
 
 
   // Returns a texture and how many paths
@@ -94,7 +99,6 @@ export class PathContainer
       alert("Too many points. Capping to " + MAX_POINTS);
       this.nPoints = MAX_POINTS;
     }
-    this.gl.uniform1i(this.pointsTotalLocation, this.nPoints);
 
     const paths = read_svg_file(svgFile);
     //console.log(paths);
@@ -202,12 +206,24 @@ export class PathContainer
   }
 
 
-  draw()
+  draw(spanX, spanY)
   {
     const gl = this.gl;
 
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
+    gl.uniform4f(this.spanLocation, ...spanX, ...spanY);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, this.nPoints, this.nPaths);
+  }
+
+  draw_transformed(spanX, spanY, spanXY)
+  {
+    const gl = this.gl;
+    
+    gl.bindVertexArray(this.VAO);
+    gl.useProgram(this.transformedShader);
+    gl.uniform4f(gl.getUniformLocation(this.transformedShader, "u_spanXY"),...spanX, ...spanY);
+    gl.uniform4f(gl.getUniformLocation(this.transformedShader, "u_transformedSpanXY"),...spanXY);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, this.nPoints, this.nPaths);
   }
 

@@ -28,7 +28,7 @@ spanText.style.fontSize = "x-large";
 
 TODO: 
 
-- The span must also be distorted by the ratio of the screen. That way a circle will look like a circle
+  -> MAKE THE SHADERS FOR THE SECOND CANVAS
 
 - Add user being able to input span
 - Add UI element for the span of the axis
@@ -139,7 +139,6 @@ async function main() {
 
   // --------- Render cycle ------
   var timeThen  = 0;
-  grid.update_secondView_span();
 
   requestAnimationFrame(drawScene);
   function drawScene(timeNow)

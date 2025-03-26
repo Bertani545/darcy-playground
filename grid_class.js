@@ -82,12 +82,13 @@ export class Grid
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 4*2, 0);
 
 
+    // Initial version of the function
+    this.transformFunction = `vec2 f(vec2 p){return p;}`
+
     // ------------------ Shader construction -------------
     const vertexShader = await createShader(gl, gl.VERTEX_SHADER, "./shaders/grid.vs");
-    const fragmentShader = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/grid.fs");
-    const program = await createProgram(gl, vertexShader, fragmentShader);
-
-
+    this.fragmentShader = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/grid.fs");
+    const program = await createProgram(gl, vertexShader, this.fragmentShader);
 
     // Assign the created VAO and Shader to the instance
     this.VAO = vao;
@@ -125,9 +126,9 @@ export class Grid
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 4*2, 0);
     
-    const vertexShaderCS = await createShader(gl, gl.VERTEX_SHADER, "./shaders/simple.vs");
+    this.simpleVS = await createShader(gl, gl.VERTEX_SHADER, "./shaders/simple.vs");
     const fragmentShaderCS = await createShader(gl, gl.FRAGMENT_SHADER, "./shaders/reduction.fs");
-    this.computeShader = await createProgram(gl, vertexShaderCS, fragmentShaderCS);
+    this.computeShader = await createProgram(gl, this.simpleVS, fragmentShaderCS);
     
     this.floatGrid01 = buildFrameBuffer_computeShader(this.gl, 2, 1024, 1024);
     this.floatGrid01.texID = 2;
@@ -137,30 +138,48 @@ export class Grid
     /*
       All the code to support a varying shader
     */
-    // Initial version.
-    this.transformFunction = `vec2 f(vec2 p){return p;}`
+    
 
     // We save the original version
     this.computeFunctionFS_source = await loadShaderFile("./shaders/fill_grid.fs");
-    // Other 2 here. Can use a await array
-    //
-
-    // We send to compile the modified ones
-    this.computeFunctionFS = await createShader_fromSourceCode(gl, gl.FRAGMENT_SHADER, this.computeFunctionFS_source.replace("REPLACE", this.transformFunction));
-
-    // And finaly create the shaders
-    this.programFunction = await createProgram(gl, vertexShaderCS, this.computeFunctionFS);
-    gl.useProgram(this.programFunction)
-    gl.uniform1f(gl.getUniformLocation(this.programFunction, "u_sizeSquare"), 1024);
-    this.programGridTrans = null;
-    this.programBezierTrans = null;
+    this.gridTransVertexShader_source = await loadShaderFile("./shaders/transformedGrid.vs");
+    this.computeFunctionFS = null; this.functionProgram = null;
+    this.gridTransformedVS = null; this.programGridTransformed = null;
+    await this.#build_new_shaders();
 
     // Final setup
     this.update_span(spanX, spanY);
     this.update_ratio();
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+
+
+
   }
 
+
+  async #build_new_shaders()
+  {
+    this.transformFunction = 'vec2 f(vec2 p) {return vec2(p.x*p.x, p.y);}'
+
+    await this.curves.update_transformed_shader(this.transformFunction);
+
+    const gl = this.gl;
+
+    // We send to compile the modified ones
+    this.computeFunctionFS = await createShader_fromSourceCode(gl, gl.FRAGMENT_SHADER, this.computeFunctionFS_source.replace("REPLACE", this.transformFunction));
+    // And finaly create the shaders
+    this.functionProgram = await createProgram(gl, this.simpleVS, this.computeFunctionFS);
+    gl.useProgram(this.functionProgram)
+    gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_sizeSquare"), 1024);
+    
+    
+    this.gridTransformedVS = await createShader_fromSourceCode(gl, gl.VERTEX_SHADER, this.gridTransVertexShader_source.replace("REPLACE", this.transformFunction));
+    this.programGridTransformed = await createProgram(gl, this.gridTransformedVS, this.fragmentShader);
+    gl.useProgram(this.programGridTransformed);
+    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
+    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_aspectScreen"), gl.canvas.height / gl.canvas.width);
+    
+  }
 
   create_text_instances()
   {
@@ -296,7 +315,12 @@ export class Grid
 
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);
-      this.gl.uniform1f(this.zoomLocation, this.zoom);
+    this.gl.uniform1f(this.zoomLocation, this.zoom);
+
+    this.gl.useProgram(this.programGridTransformed);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.programGridTransformed, "u_offset"), ...this.Offset);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
+    
   }
 
   update_offset(dx, dy)
@@ -319,6 +343,9 @@ export class Grid
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);
 
+    this.gl.useProgram(this.programGridTransformed);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.programGridTransformed, "u_offset"), ...this.Offset);
+
     //update sapan
     // Square size in screen space, move to world space
     dx = dx * (this.spanX[1] - this.spanX[0]) / 2 * this.zoom;
@@ -340,9 +367,10 @@ export class Grid
     this.spanY = [...spanY];
     this.middleX = (spanX[1] + spanX[0])/2;
     this.middleY = (spanY[1] + spanY[0])/2;
-    this.curves.update_span(this.spanX, this.spanY);
     this.update_text_labels();
     //console.log("Span updated");
+
+    this.update_secondView_span();
     
   }
 
@@ -358,10 +386,9 @@ export class Grid
     this.update_ratio();
     this.update_squareSize();
     
-    this.curves.update_span(this.spanX, this.spanY);
     this.update_text_labels();
     //console.log("Span updated");
-    
+    this.update_secondView_span();
   }
 
 
@@ -372,10 +399,10 @@ export class Grid
     gl.viewport(0, 0, 1024, 1024);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.floatGrid02.ID); // The first used as tex is grid02
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(this.programFunction);
+    gl.useProgram(this.functionProgram);
 
-    gl.uniform2f(gl.getUniformLocation(this.programFunction, "u_spanX"), ...this.spanX);
-    gl.uniform2f(gl.getUniformLocation(this.programFunction, "u_spanY"), ...this.spanY);
+    gl.uniform2f(gl.getUniformLocation(this.functionProgram, "u_spanX"), ...this.spanX);
+    gl.uniform2f(gl.getUniformLocation(this.functionProgram, "u_spanY"), ...this.spanY);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -440,6 +467,10 @@ export class Grid
     this.gl.uniform1f(this.zoomLocation, this.zoom);
     this.gl.uniform1f(this.gridRatioLocation, this.squareRatio);
 
+    this.gl.useProgram(this.programGridTransformed);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.programGridTransformed, "u_gridRatio"), this.squareRatio);
+
   }
 
   update_color(color)
@@ -495,7 +526,7 @@ export class Grid
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.spanLocation,...this.spanX, ...this.spanY);
+    gl.uniform4f(this.spanLocation,...this.spanX, ...this.spanY);
     // X
     gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
@@ -504,19 +535,26 @@ export class Grid
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
 
+    this.curves.draw(this.spanX, this.spanY);
 
-    this.curves.draw();
 
 
+    
     // Draw to the texture
     gl.bindVertexArray(this.VAO);
-    gl.useProgram(this.Shader);
-    this.gl.uniform4f(this.spanLocation,...this.spanTransformed);
+    gl.useProgram(this.programGridTransformed);
+    gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_spanXY"),...this.spanX, ...this.spanY);
+    gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_transformedSpanXY"),...this.spanTransformed);
+    
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.secondBuffer.ID);gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform2f(this.lineSpawnDirectionLocation, 0, 1);
+    gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
-    gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
+    gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, n_p, n_p + 2, n_instances);
+
+    this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
+
 
     // Pass the texture to the second canvas
     gl.readPixels(0,0,gl.canvas.width, gl.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,this.pixelContainer); // From current framebuffer

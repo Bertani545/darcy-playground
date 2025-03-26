@@ -9,7 +9,9 @@ uniform float u_zoom;
 uniform vec2 u_lineSpawnDirection;
 uniform float u_gridRatio;
 uniform vec2 u_offset;
+
 uniform vec4 u_spanXY;
+uniform vec4 u_transformedSpanXY;
 
 
 
@@ -20,6 +22,8 @@ out vec4 line_color;
 
 #define TOTAL_LINES 50.0
 
+
+REPLACE
 
 vec4 domain_color(vec2 coord) {
     //hsv-rgb code taken from https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
@@ -65,5 +69,36 @@ void main() {
   
   line_color = domain_color(current_position);
 
+  // Map the coordinates to span and color them acordingly
+  // [-1,1] -> [span[0], span[1]]
+  vec2 real_position;
+  real_position.x = ((current_position.x + 1.0) / 2.0) * (u_spanXY[1]-u_spanXY[0]) + u_spanXY[0];
+  real_position.y = ((current_position.y + 1.0) / 2.0) * (u_spanXY[3]-u_spanXY[2]) + u_spanXY[2];
+  
+
+  real_position = f(real_position);
+  // Re map real_position to screen space [TransSpan[0], TransSpan[1]] -> [-1, 1]
+  float l = u_transformedSpanXY[0];
+  float r = u_transformedSpanXY[1];
+  float b = u_transformedSpanXY[2];
+  float t = u_transformedSpanXY[3];
+  
+  current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
+  current_position.y = ((real_position.y - t)/(t - b)) * 2. - 1.;
+/*
+  real_position.x *= real_position.x;
+  real_position.y *= 1.0;
+  //current_position.x = current_position.x + 0.5 * current_position.y;
+  //current_position.y = 1.4 * current_position.y;
+
+  // Re map real_position to screen space [span[0], span[1]] -> [-1, 1]
+  float l = u_spanXY[0] < 0.0 &&  u_spanXY[1] > 0.0 ? 0.0 : min(u_spanXY[0] * u_spanXY[0], u_spanXY[1] * u_spanXY[1]); // <--- si funciona T__T
+  float r = max(u_spanXY[0] * u_spanXY[0], u_spanXY[1] * u_spanXY[1]);
+  float t = u_spanXY[2];
+  float b = u_spanXY[3];
+
+  current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
+  current_position.y = ((real_position.y - t)/(b - t)) * 2. - 1.;
+*/
   gl_Position = vec4(current_position, 0.0, 1.0) ;
 }
