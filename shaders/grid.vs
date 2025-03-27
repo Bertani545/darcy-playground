@@ -18,7 +18,8 @@ out float invisible;
 #define PI 3.1415926535898
 #define TAU 6.283185307179586
 
-#define TOTAL_LINES 50.0
+#define TOTAL_LINES 20.0
+#define TOTAL_POINTS 500.0;
 
 
 vec4 domain_color(vec2 coord) {
@@ -39,23 +40,23 @@ void main() {
   invisible = 0.0;
   vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
 
-  float dist = 6.0 / TOTAL_LINES;
-
+  float dist_between_lines = 2.5 / TOTAL_LINES;
+  float dist_between_points = 2.5 / TOTAL_POINTS;
   vec2 elongate_dir = vec2(u_lineSpawnDirection.y, u_lineSpawnDirection.x);
-  vec2 current_position = vec2(gl_VertexID) * dist * elongate_dir;
+  vec2 current_position = vec2(gl_VertexID) * dist_between_points * elongate_dir;
 
   // Scale it
   //current_position *= 2.0 * u_zoom;
 
 
   // Position the segments to create the line
-  vec2 distanceFromOrigin = u_lineSpawnDirection * vec2(float(gl_InstanceID) * dist) * distortionX;
+  vec2 distanceFromOrigin = u_lineSpawnDirection * vec2(float(gl_InstanceID) * dist_between_lines) * distortionX;
   current_position += distanceFromOrigin;
 
 
 
   // Position the line in the correct position
-  vec2 startingPoint = -vec2((TOTAL_LINES) * dist) / 2.0 * distortionX;
+  vec2 startingPoint = -vec2((TOTAL_LINES) * dist_between_lines) / 2.0 * distortionX;
   current_position += startingPoint;
 
 

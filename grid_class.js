@@ -3,8 +3,8 @@ import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { PathContainer } from './path_class.js';
 
-const n_p = 100;
-const n_instances = 50;
+const n_p = 500;
+const n_instances = 20;
 
 function lessOrEqualPowerOf2(n) {
   let pow = Math.log(n);
@@ -132,7 +132,7 @@ export class Grid
   async #build_new_shaders()
   {
     this.transformFunction = "vec2 f(vec2 p) {return vec2(2. * p.x, p.y);}"
-/*    
+/*   
     this.transformFunction = `
     vec2 f(vec2 uv) {
         float r = length(uv);  // Compute radius
@@ -146,7 +146,7 @@ export class Grid
     }
     `;
 */
-    this.transformFunction = "vec2 f(vec2 p) {return vec2(p.x*p.x,p.y);}"
+    //this.transformFunction = "vec2 f(vec2 p) {return vec2(p.x*p.x,p.y);}"
     
 
     await this.curves.update_transformed_shader(this.transformFunction);
@@ -193,7 +193,7 @@ export class Grid
     for(i; i < n_instances; i++) // Horizontal
     {
       const curr_div = this.textContainer.children[i];
-      let x = -3 * this.squareRatio * screenRatio + i * (6 / n_instances) * this.squareRatio * screenRatio;
+      let x = -1.25 * this.squareRatio * screenRatio + i * (2.5 / n_instances) * this.squareRatio * screenRatio;
 
       // Transform them to clip coords
       x = (x * this.zoom  + this.Offset[0] + 1) / 2;
@@ -220,7 +220,7 @@ export class Grid
     for(i; i < 2*n_instances; i++) // Vertical
     {
       const curr_div = this.textContainer.children[i];
-      let y = -3  + (i - n_instances) * (6 / n_instances);
+      let y = -1.25  + (i - n_instances) * (2.5 / n_instances);
 
       // Transform them to clip coords
       y = (y * this.zoom  + this.Offset[1] + 1) / 2;
@@ -249,11 +249,11 @@ export class Grid
   update_squareSize()
   {
     const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
-    this.sizeSquare[0] =  6 / 50 * this.zoom * screenRatio * this.squareRatio;
+    this.sizeSquare[0] =  2.5 / n_instances * this.zoom * screenRatio * this.squareRatio;
     // Distance * zoom * screenRatio * squareRatio
     // Distance = 6 / number of lines
     // 6 = [-3,3]
-    this.sizeSquare[1] =  6 / 50 * this.zoom
+    this.sizeSquare[1] =  2.5 / n_instances * this.zoom
 
     console.log(...this.sizeSquare);
   }

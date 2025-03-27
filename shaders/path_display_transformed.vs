@@ -6,16 +6,21 @@ uniform vec4 u_transformedSpanXY;
 
 uniform sampler2D u_pointData;
 
+out float invisible;
+
 REPLACE
 
 void main() {
 
   vec4 data = texelFetch(u_pointData, ivec2(gl_VertexID, gl_InstanceID), 0);
 
-    if(data.x < u_spanXY[0]) data.x = u_spanXY[0];
-    if(data.x > u_spanXY[1]) data.x = u_spanXY[1];
-    if(data.y < u_spanXY[2]) data.y = u_spanXY[2];
-    if(data.y > u_spanXY[3]) data.y = u_spanXY[3];
+    bool change = false;
+    if(data.x < u_spanXY[0]) change = true;//data.x = u_spanXY[0];
+    if(data.x > u_spanXY[1]) change = true;//data.x = u_spanXY[1];
+    if(data.y < u_spanXY[2]) change = true;//data.y = u_spanXY[2];
+    if(data.y > u_spanXY[3]) change = true;//data.y = u_spanXY[3];
+
+    if(change) invisible = 1.0;
 
   vec2 coords = f(data.xy);
 

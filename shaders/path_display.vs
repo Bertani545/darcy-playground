@@ -5,8 +5,10 @@ uniform vec4 u_spanXY; // (minX, maxX, minY, maxY)
 
 uniform sampler2D u_pointData;
 
-void main() {
+out float invisible;
 
+void main() {
+  invisible = 0.0;
   vec4 data = texelFetch(u_pointData, ivec2(gl_VertexID, gl_InstanceID), 0);
 
   vec2 coords = data.xy;
