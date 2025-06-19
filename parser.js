@@ -1,18 +1,24 @@
 
 
 
-class node
+class Node
 {
-	constructor(expression, isWrapper)
+	constructor()
 	{
 		this.next = null;
 		this.conector = null; //+*/^
 		this.parent = null;
 
-		this.value = expression; // e, pi, cos, sin, 1.5, -2.5, sqrt, pow, (), ||, []
+		this.value = null; // e, pi, cos, sin, 1.5, -2.5, sqrt, pow, (), ||, []
 
-		this.isWrapper = isWrapper; // if value is 
+		this.isWrapper = null; // if value is 
 		this.parenthesisContents = null; // some other expression
+	}
+
+	set_value(expression, isWrapper)
+	{
+		this.value = expression;
+		this.isWrapper = isWrapper;
 	}
 
 }
@@ -21,75 +27,51 @@ class Graph
 {
 	constructor()
 	{
-		this.head = null;
+		this.head = new Node();;
 		this.current = this.head;
 	}
 
-	add_node_normal(node)
-	{
-		this.current.next = node;
-		node.parent = this.current.parent;
-		this.current = node;
-
-	}
-
-	add_node_inside_wrap(node)
-	{
-		this.current.parenthesisContents = node;
-		node.parent = this.current;
-		this.current = node;
-	}
-	wrap_finished()
-	{
-		this.current = this.current.parent;
-	}
 	add_connector(conector)
 	{
 		this.current.conector = conector
+		this.current.next = new Node();
+		this.current = this.current.next;
+	}
+
+	add_wrapper(wrapper)
+	{
+		this.current.value = wrapper;
+		this.current.isWrapper = true;
+		this.current.parenthesisContents = new Node();
+		this.current.parenthesisContents.parent = this.current;
+		this.current = this.current.parenthesisContents;
+
+	}
+
+	get current_value()
+	{
+		return this.current.value;
+	}
+
+
+	implicitMultiplication(value)
+	{
+		this.current.next = new Node();
+		this.current.conector = "*";
+		this.current = this.current.next;
+		this.current.value = value;
 	}
 }
 
 
-const number = "^([0-9]*[.])?[0-9]+$";
-const variableName = "^(e|pi|t)$";
-const functionName = "ln|log|lg|exp|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?|sqrt";
-const identifier = functionName + "|" + variableName;
-const symbol = "[\\[\\]()+*/^-\\|]";
-const whitespace = "\\s+";
 
-
-
-class expressionTraveler
-{
-	constructor(exp)
-    {
-
-    }
-}
-
-
-// Returns what it reads
-function number_reader()
-{
-
-}
-
-function function_reader()
-{
-
-}
-
-function constant_reader()
-{
-
-}
 
 function is_correctly_closed(exp)
 {
 	//Checks is (), [] and || are correctly closed
 	const stack = [];
 
-	const values = ['(', ')', '[', ']', '|'];
+	const values = ['(', ')', '[', ']'];
 	for(let char of exp)
 	{
 		if(!values.includes(char)) continue;
@@ -98,7 +80,6 @@ function is_correctly_closed(exp)
 
 			case '(':
 			case '[':
-			case '|':
 				stack.push(char);
 				break;
 			// Both of these will never appear in the stack
@@ -106,27 +87,11 @@ function is_correctly_closed(exp)
 				{
 					if(stack[stack.length-1] == '(') return false;
 					if(stack[stack.length-1] == '['){stack.pop(); break;}
-					// Special case: a lot of |
-					let poped = 0;
-					let i = stack.length-1;
-					while(stack[i] == '|' &&  i > -1){i--; stack.pop(); poped++; }
-					if(i < 0 || stack[i] != '[' || (poped)%2 == 1) return false;
-					stack.pop(); // pop the [
-
-					break;
 				}
 			case ')':
 				{
 					if(stack[stack.length-1] == '[') return false;
 					if(stack[stack.length-1] == '('){stack.pop(); break;}
-					// Special case: a lot of |
-					let poped = 0;
-					let i = stack.length-1;
-					while(stack[i] == '|' &&  i > -1){i--; stack.pop(); poped++;}
-					if(i < 0 || stack[i] != '(' || (poped)%2 == 1) return false;
-					stack.pop(); // pop the (
-
-					break;
 				}
 
 			default:
@@ -135,39 +100,216 @@ function is_correctly_closed(exp)
 		}
 	}
 
-	console.log(stack)
-	if(stack.length > 0)
-	{
-		let total = 0
-		for(let char of stack)
-		{
-			if(char == '|')
-			{
-				total++;
-			}
-			else return false;
-		}
-	if(total%2 == 1) return false;
-	} 
+	if(stack.length > 0) return false;
 
 	return true;
 }
 
 
-function read_expression(exp)
-{	
-	const trimmed = exp.replace(/\s+/g, "");
-	if(!is_correctly_closed(trimmed)) return null;
-	const graph = new Graph();
 
-	// Check if first letter is not valid = * / ] ) ^
+// Remeber to impement that if () or [] or || exists, it must pop the parent from the list
 
-	return trimmed
+//const exp = parse_input(" 1.5 + 2.5 * exp(10.y + 10) - 5 / cos(10x)");
+//console.log(exp)
+
+var numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
+var variableName = "(e|pi|tau|t|x|y)";
+var functionName = "ln|log|lg|exp|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?|sqrt";
+var identifier = functionName + "|" + variableName;
+var symbol = "[\\[\\]\\(\\)+*/^-]";
+var whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
+var wrapper = functionName + "|\\[|\\(";
+
+function tokenize(expression) {
+	var token = RegExp("(" + numericConstant + "|" + identifier + "|" + symbol + "|" + whitespace + ")", "g");
+	
+	var tokenStream = expression.match(token);
+	if (!tokenStream) return false;
+	if (tokenStream.join("") != expression) return false;
+	
+	tokenStream = tokenStream.filter(function(token) {
+		return ! token.match("^(" + whitespace + ")$");
+	});
+	
+	//tokenStream.push("\n");
+	
+	return tokenStream;
 
 }
 
-//const exp = read_expression(" 1.5 + 2.5 * exp(10.y + 10) - 5 / cos(10x)");
-//console.log(exp)
+function isVariableName(token) {
+		if (token.match("^(" + variableName + ")$")) {
+			//++i;
+			//if (token == 't') {
+				//timeDependent = true;
+			//} 
+			//return token;
+			return true;
+		} else return false;
+	}
+	
+	function isFunctionName(token) {
+		if (token.match("^(" + functionName + ")$")) {
+			//++i;
+			//return token;
+			return true;
+		} else return false;
+	}
+	
+	function isWrapper(token){
+		if(token.match("^(" + wrapper + ")$")) return true;
+		return false;
+	}
 
-const exp = "[(|)(|)]"
-console.log(is_correctly_closed(exp));
+	function isNumericConstant(token) {
+		if (token.match("^(" + numericConstant + ")$")) {
+			//++i;
+			//return token;
+			return true;
+		} else return false;
+	}
+	function isConector(token){
+		if(token.match("^([+-/*^])$")) return true;
+		return false;
+	}
+
+
+function read_expression(exp, graph)
+{
+	if(!exp) return null;
+	let i = 0;
+	
+	
+	while(i < exp.length)
+	{
+		console.log(i, exp[i]);
+		let currentToken = exp[i];
+		if(isVariableName(currentToken) || isNumericConstant(currentToken))
+		{
+			if(graph.current.value != null)
+			{
+				graph.implicitMultiplication(currentToken);
+			}
+			else
+			{
+				graph.current.value = currentToken;
+			}
+			i++;
+			continue;
+		}
+		if(isConector(currentToken))
+		{
+			if(currentToken == '+' || currentToken == '-')
+			{
+				graph.add_connector(currentToken);
+				i++;
+				continue;
+			}
+			if(['*', '/', '^'].includes(currentToken))
+			{
+				if(!graph.current_value){ console.log("*, / and ^ must have something before"); return null;}
+				graph.add_connector(currentToken);
+				i++;
+				continue;
+			}
+		}
+
+		if(isWrapper(currentToken))
+		{
+			let closer = "";
+			let opener = "";
+			if(isFunctionName(currentToken))
+			{
+				i++;
+				if(exp[i] != '('){console.log('Please wrap contents of functions between ()'); return null;}
+				closer = ")";
+				opener = "(";
+			}
+			else
+			{
+				opener = currentToken;
+				switch (opener) {
+					case '(':
+						closer = ')';
+						break;
+					case '[':
+						closer = ']';
+						break;
+					default:
+						console.log("Shouldn't get here");
+						break;
+				}
+			}
+			
+			// Find close of (
+			let j = i+1;
+			let seen = 0;
+			while(!(exp[j] == closer && seen == 0)) // No anidated | 1 + | 1 | + 1|
+ 			{
+				if(exp[j] == opener) seen++;
+				if(exp[j] == closer) seen--;
+				j++;
+			}
+			// j hold where the end is
+			// (i,j) is our new expression
+			if(i+1 == j){console.log("Empty statement"); return null;}
+			const parent = graph.current;
+			graph.add_wrapper(currentToken);
+			read_expression(exp.slice(i+1, j), graph);
+			graph.current = parent;
+			i = j + 1;
+		}
+
+	}
+}
+
+
+function parse_input(exp)
+{	
+	let trimmed = exp.replace(/\s+/g, "");
+	if(!is_correctly_closed(trimmed)){console.log("Please close correctly all your parethesis"); return null;}
+	const graph = new Graph();
+	console.log(graph)
+	let tokenized = tokenize(trimmed);
+	if(!tokenized) return null;
+	read_expression(tokenized, graph);
+	console.log(graph)
+	return graph;
+}
+
+
+function get_code(current)
+{
+	let ans = "";
+	while(current)
+	{
+		if(current.isWrapper)
+		{
+			if(isFunctionName(current.value)) ans += current.value;
+			ans += "(";
+			ans += get_code(current.parenthesisContents);
+			ans += ")";
+		}
+		else
+		{
+			if(current.value) ans += current.value;
+			// Must have conector 
+			if(current.conector) ans += current.conector;
+		}
+		current = current.next;
+	}
+	return ans;
+}
+
+
+function toGLSL(graph)
+{
+	if(!graph) return "float f1(vec2 p){return 0.0;}";
+
+	return "float f1(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(graph.head) + ";\n}";
+}
+
+const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10) - 5 / cos(10x^2 / (3+|y|))')
+console.log(toGLSL(full_graph))
+//  
+// Tokenize first, do my shit later
