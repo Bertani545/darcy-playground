@@ -176,7 +176,7 @@ function isVariableName(token) {
 
 function read_expression(exp, graph)
 {
-	if(!exp) return null;
+	if(!exp) return 0;
 	let i = 0;
 	
 	
@@ -207,7 +207,7 @@ function read_expression(exp, graph)
 			}
 			if(['*', '/', '^'].includes(currentToken))
 			{
-				if(!graph.current_value){ console.log("*, / and ^ must have something before"); return null;}
+				if(!graph.current_value){ console.log("*, / and ^ must have something before"); return 0;}
 				graph.add_connector(currentToken);
 				i++;
 				continue;
@@ -221,7 +221,7 @@ function read_expression(exp, graph)
 			if(isFunctionName(currentToken))
 			{
 				i++;
-				if(exp[i] != '('){console.log('Please wrap contents of functions between ()'); return null;}
+				if(exp[i] != '('){console.log('Please wrap contents of functions between ()'); return 0;}
 				closer = ")";
 				opener = "(";
 			}
@@ -252,15 +252,18 @@ function read_expression(exp, graph)
 			}
 			// j hold where the end is
 			// (i,j) is our new expression
-			if(i+1 == j){console.log("Empty statement"); return null;}
+			if(i+1 == j){console.log("Empty statement"); return 0;}
 			const parent = graph.current;
 			graph.add_wrapper(currentToken);
-			read_expression(exp.slice(i+1, j), graph);
+			const success = read_expression(exp.slice(i+1, j), graph);
+			if(!success) return 0;
 			graph.current = parent;
 			i = j + 1;
 		}
 
 	}
+
+	return 1;
 }
 
 
@@ -272,7 +275,8 @@ function parse_input(exp)
 	console.log(graph)
 	let tokenized = tokenize(trimmed);
 	if(!tokenized) return null;
-	read_expression(tokenized, graph);
+	let status_reader = read_expression(tokenized, graph);
+	if(status_reader == 0) return null;
 	console.log(graph)
 	return graph;
 }
@@ -309,7 +313,7 @@ function toGLSL(graph)
 	return "float f1(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(graph.head) + ";\n}";
 }
 
-const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10) - 5 / cos(10x^2 / (3+|y|))')
+const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10.0.0pi) - 5 / cos(10x^2 / (3++++--++-y))')
 console.log(toGLSL(full_graph))
 //  
 // Tokenize first, do my shit later
