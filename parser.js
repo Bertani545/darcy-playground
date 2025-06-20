@@ -1,124 +1,9 @@
-
-
-
-class Node
-{
-	constructor()
-	{
-		this.next = null;
-		this.conector = null; //+*/^
-		this.parent = null;
-
-		this.value = null; // e, pi, cos, sin, 1.5, -2.5, sqrt, pow, (), ||, []
-
-		this.isWrapper = null; // if value is 
-		this.parenthesisContents = null; // some other expression
-	}
-
-	set_value(expression, isWrapper)
-	{
-		this.value = expression;
-		this.isWrapper = isWrapper;
-	}
-
-}
-
-class Graph
-{
-	constructor()
-	{
-		this.head = new Node();;
-		this.current = this.head;
-	}
-
-	add_connector(conector)
-	{
-		this.current.conector = conector
-		this.current.next = new Node();
-		this.current = this.current.next;
-	}
-
-	add_wrapper(wrapper)
-	{
-		this.current.value = wrapper;
-		this.current.isWrapper = true;
-		this.current.parenthesisContents = new Node();
-		this.current.parenthesisContents.parent = this.current;
-		this.current = this.current.parenthesisContents;
-
-	}
-
-	get current_value()
-	{
-		return this.current.value;
-	}
-
-
-	implicitMultiplication(value)
-	{
-		this.current.next = new Node();
-		this.current.conector = "*";
-		this.current = this.current.next;
-		this.current.value = value;
-	}
-}
-
-
-
-
-function is_correctly_closed(exp)
-{
-	//Checks is (), [] and || are correctly closed
-	const stack = [];
-
-	const values = ['(', ')', '[', ']'];
-	for(let char of exp)
-	{
-		if(!values.includes(char)) continue;
-
-		switch (char) {
-
-			case '(':
-			case '[':
-				stack.push(char);
-				break;
-			// Both of these will never appear in the stack
-			case ']':
-				{
-					if(stack[stack.length-1] == '(') return false;
-					if(stack[stack.length-1] == '['){stack.pop(); break;}
-				}
-			case ')':
-				{
-					if(stack[stack.length-1] == '[') return false;
-					if(stack[stack.length-1] == '('){stack.pop(); break;}
-				}
-
-			default:
-				console.log("Something went wrong");
-				break;
-		}
-	}
-
-	if(stack.length > 0) return false;
-
-	return true;
-}
-
-
-
-// Remeber to impement that if () or [] or || exists, it must pop the parent from the list
-
-//const exp = parse_input(" 1.5 + 2.5 * exp(10.y + 10) - 5 / cos(10x)");
-//console.log(exp)
-
 var numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
-var variableName = "(e|pi|tau|t|x|y)";
-var functionName = "ln|log|lg|exp|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?|sqrt";
+var variableName = "(e|pi|t|x|y)";
+var functionName = "ln|log|exp|gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
 var identifier = functionName + "|" + variableName;
-var symbol = "[\\[\\]\\(\\)+*/^-]";
+var symbol = "[\\[\\]()+*/^!-]";
 var whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
-var wrapper = functionName + "|\\[|\\(";
 
 function tokenize(expression) {
 	var token = RegExp("(" + numericConstant + "|" + identifier + "|" + symbol + "|" + whitespace + ")", "g");
@@ -131,189 +16,215 @@ function tokenize(expression) {
 		return ! token.match("^(" + whitespace + ")$");
 	});
 	
-	//tokenStream.push("\n");
+	tokenStream.push("\n");
 	
 	return tokenStream;
 
 }
 
-function isVariableName(token) {
-		if (token.match("^(" + variableName + ")$")) {
-			//++i;
-			//if (token == 't') {
-				//timeDependent = true;
-			//} 
-			//return token;
-			return true;
-		} else return false;
-	}
-	
-	function isFunctionName(token) {
-		if (token.match("^(" + functionName + ")$")) {
-			//++i;
-			//return token;
-			return true;
-		} else return false;
-	}
-	
-	function isWrapper(token){
-		if(token.match("^(" + wrapper + ")$")) return true;
-		return false;
-	}
+let timeDependent = false;
 
-	function isNumericConstant(token) {
-		if (token.match("^(" + numericConstant + ")$")) {
-			//++i;
-			//return token;
-			return true;
-		} else return false;
-	}
-	function isConector(token){
-		if(token.match("^([+-/*^])$")) return true;
-		return false;
-	}
-
-
-function read_expression(exp, graph)
-{
-	if(!exp) return 0;
+function parse(inputStream) {
+	if (!inputStream) return false;
+	let oldTimeDependent = timeDependent;
 	let i = 0;
 	
+	function parseVariableName() {
+		const token = inputStream[i];
+		if (token.match("^(" + variableName + ")$")) {
+			++i;
+			if (token == 't') {
+				timeDependent = true;
+			}
+			return token;
+		} else return false;
+	}
 	
-	while(i < exp.length)
-	{
-		console.log(i, exp[i]);
-		let currentToken = exp[i];
-		if(isVariableName(currentToken) || isNumericConstant(currentToken))
-		{
-			if(graph.current.value != null)
-			{
-				graph.implicitMultiplication(currentToken);
-			}
-			else
-			{
-				graph.current.value = currentToken;
-			}
-			i++;
-			continue;
-		}
-		if(isConector(currentToken))
-		{
-			if(currentToken == '+' || currentToken == '-')
-			{
-				graph.add_connector(currentToken);
-				i++;
-				continue;
-			}
-			if(['*', '/', '^'].includes(currentToken))
-			{
-				if(!graph.current_value){ console.log("*, / and ^ must have something before"); return 0;}
-				graph.add_connector(currentToken);
-				i++;
-				continue;
-			}
-		}
-
-		if(isWrapper(currentToken))
-		{
-			let closer = "";
-			let opener = "";
-			if(isFunctionName(currentToken))
-			{
-				i++;
-				if(exp[i] != '('){console.log('Please wrap contents of functions between ()'); return 0;}
-				closer = ")";
-				opener = "(";
-			}
-			else
-			{
-				opener = currentToken;
-				switch (opener) {
-					case '(':
-						closer = ')';
-						break;
-					case '[':
-						closer = ']';
-						break;
-					default:
-						console.log("Shouldn't get here");
-						break;
-				}
-			}
-			
-			// Find close of (
-			let j = i+1;
-			let seen = 0;
-			while(!(exp[j] == closer && seen == 0)) // No anidated | 1 + | 1 | + 1|
- 			{
-				if(exp[j] == opener) seen++;
-				if(exp[j] == closer) seen--;
-				j++;
-			}
-			// j hold where the end is
-			// (i,j) is our new expression
-			if(i+1 == j){console.log("Empty statement"); return 0;}
-			const parent = graph.current;
-			graph.add_wrapper(currentToken);
-			const success = read_expression(exp.slice(i+1, j), graph);
-			if(!success) return 0;
-			graph.current = parent;
-			i = j + 1;
-		}
-
+	function parseFunctionName() {
+		const token = inputStream[i];
+		if (token.match("^(" + functionName + ")$")) {
+			++i;
+			return token;
+		} else return false;
+	}
+	
+	function parseNumericConstant() {
+		const token = inputStream[i];
+		if (token.match("^(" + numericConstant + ")$")) {
+			++i;
+			return token;
+		} else return false;
 	}
 
-	return 1;
+	function parseAtomicExpression() {
+		const i0 = i;
+		const fn = parseFunctionName();
+		let closer;
+		if (inputStream[i] == '(') closer = ')';
+		else if (inputStream[i] == '[') closer = ']';
+		else {
+			// There must always be () or [] after functions
+			i = i0;
+			return parseVariableName() || parseNumericConstant();
+		}
+		++i;
+		const inner = parseExpression();
+		if (!inner) {
+			i = i0;
+			return false;
+		}
+		if (inputStream[i++] != closer) {
+			 i = i0;
+			 return false;
+		}
+		return fn ? [fn, inner] : inner;
+	}
+	//takes care of implied multiplication and unitary negation as well
+	function parseExponentialExpression() {
+		const i0 = i;
+		let sign;
+		if (inputStream[i] == '-' || inputStream[i] == '+') {
+			sign = inputStream[i++];
+		}
+		const multiplicands = [parseAtomicExpression()];
+		if (!multiplicands[0]) return false;
+		let ae;
+		while (ae = parseAtomicExpression()) {
+			multiplicands.push(ae)
+		}
+		let power;
+		if (inputStream[i] == '^') {
+			++i;
+			power = parseExponentialExpression();
+			if (!power) {
+				i = i0;
+				return false;
+			}
+			const base = multiplicands.pop();
+			multiplicands.push(["^", base, power]);
+		}
+		let expression = multiplicands[0]
+		multiplicands.slice(1).forEach(function(multiplicand) {
+			expression = ["*", expression, multiplicand];
+		});
+		if (sign == '-') {
+			expression = ["-", expression];
+		}
+		return expression;
+	}
+
+	function parseMultiplicativeExpression() {
+		const i0 = i;
+		let left = parseExponentialExpression();
+		if (!left) return false;
+		while (inputStream[i] == '*' || inputStream[i] == '/') {
+			const operator = inputStream[i++];
+			const right = parseExponentialExpression();
+			if (! right) {
+				i = i0;
+				return false;
+			}
+			left = [operator, left, right];
+		}
+		return left;
+	}
+	
+	function parseAdditiveExpression() {
+		const i0 = i;
+		let left = parseMultiplicativeExpression();
+		if (!left) return false;
+		while (inputStream[i] == '+' || inputStream[i] == '-') {
+			const operator = inputStream[i++];
+			const right = parseMultiplicativeExpression();
+			if (! right) {
+				i = i0;
+				return false;
+			}
+			left = [operator, left, right];
+		}
+		return left;
+	}
+	
+	
+	function parseExpression() {
+		return parseAdditiveExpression();
+	}
+	
+	
+	var expression = parseExpression();
+	if (inputStream[i] != '\n') { // Didn't reach the end of the stream
+		timeDependent = oldTimeDependent;
+		return false;
+	}
+	return expression;
 }
 
 
 function parse_input(exp)
 {	
 	let trimmed = exp.replace(/\s+/g, "");
-	if(!is_correctly_closed(trimmed)){console.log("Please close correctly all your parethesis"); return null;}
-	const graph = new Graph();
-	console.log(graph)
+	//if(!is_correctly_closed(trimmed)){console.log("Please close correctly all your parethesis"); return null;}
+
 	let tokenized = tokenize(trimmed);
 	if(!tokenized) return null;
-	let status_reader = read_expression(tokenized, graph);
-	if(status_reader == 0) return null;
-	console.log(graph)
-	return graph;
+
+	let expression = parse(tokenized);
+	if(!expression) return null;
+	return expression
 }
 
 
-function get_code(current)
+function get_code(expression)
 {
 	let ans = "";
-	while(current)
-	{
-		if(current.isWrapper)
-		{
-			if(isFunctionName(current.value)) ans += current.value;
-			ans += "(";
-			ans += get_code(current.parenthesisContents);
-			ans += ")";
+	if (typeof(expression) == "string") {
+		if (expression.match("^(" + numericConstant + ")$")) {
+			return expression;
+		} else if (expression.match("^(" + variableName + ")$")) {
+			switch(expression) {
+				case "e":
+					return "E";
+				case "pi":
+					return "PI";
+				case "t":
+					return "u_t";
+				case "x":
+					return "x";
+				case "y":
+					return "y";
+			}
 		}
-		else
-		{
-			if(current.value) ans += current.value;
-			// Must have conector 
-			if(current.conector) ans += current.conector;
-		}
-		current = current.next;
+		return "{It shouldn't have reached this place: " + expression + "}";
 	}
-	return ans;
+	if (expression[0].match("^(" + functionName + ")$")) {
+		return  expression[0] + "(" + get_code(expression[1]) + ")";
+	}
+	switch(expression[0]) {
+		case "+":
+			return "(" + get_code(expression[1]) + " + " + get_code(expression[2]) + ")";
+		case "-":
+			if (expression.length == 2)
+				return "( -" + get_code(expression[1]) + ")";
+			return "(" + get_code(expression[1]) + " - " + get_code(expression[2]) + ")"
+		case "*":
+			return "(" + get_code(expression[1]) + " * " + get_code(expression[2]) + ")";
+		case "/":
+			return "(" + get_code(expression[1]) + " / " + get_code(expression[2]) + ")";
+		case "^":
+			return "pow(" + get_code(expression[1]) + "," + get_code(expression[2]) + ")";
+	}
 }
 
 
-function toGLSL(graph)
+function toGLSL(expression)
 {
-	if(!graph) return "float f1(vec2 p){return 0.0;}";
+	const parsed = parse_input(expression);
+	if(!parsed) return "float f1(vec2 p){return 0.0;}";
 
-	return "float f1(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(graph.head) + ";\n}";
+	return "float f1(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}";
 }
 
-const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10.0.0pi) - 5 / cos(10x^2 / (3++++--++-y))')
-console.log(toGLSL(full_graph))
+const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / cos(10x^2 / (3+y))')
+console.log(toGLSL('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / (10 + x^2)'))
 //  
 // Tokenize first, do my shit later
