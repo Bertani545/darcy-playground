@@ -4,18 +4,18 @@ precision highp float;
 
 uniform vec2 u_spanX;
 uniform vec2 u_spanY;
-uniform float u_sizeSquare;
+uniform float u_numberDivisions;
 
 out vec4 outValue;
 
-REPLACE
 
+REPLACE
 
 void main()
 {
     vec2 fragCoord = floor(gl_FragCoord.xy);
     // Obtain grid
-    vec2 step = fragCoord / (u_sizeSquare-1.);
+    vec2 step = fragCoord / (u_numberDivisions-1.);
     vec2 position;
 
     position.x = (u_spanX[1] - u_spanX[0]) * step.x + u_spanX[0];

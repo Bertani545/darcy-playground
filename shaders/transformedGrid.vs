@@ -18,8 +18,7 @@ uniform vec4 u_transformedSpanXY;
 out vec4 line_color;
 out float invisible; // when you can't even hear... MY NAME
 
-#define PI 3.1415926535898
-#define TAU 6.283185307179586
+
 
 #define TOTAL_LINES 20.0
 #define TOTAL_POINTS 500.0;

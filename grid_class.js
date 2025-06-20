@@ -3,6 +3,8 @@ import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { PathContainer } from './path_class.js';
 
+import * as Parser from "./parser.js";
+
 const n_p = 500;
 const n_instances = 20;
 
@@ -117,6 +119,9 @@ export class Grid
     this.gridTransVertexShader_source = await loadShaderFile("./shaders/transformedGrid.vs");
     this.computeFunctionFS = null; this.functionProgram = null;
     this.gridTransformedVS = null; this.programGridTransformed = null;
+    
+    this.f1 = "\nfloat f1(vec2 p){return p.x;}\n"
+    this.f2 = "\nfloat f2(vec2 p){return p.y;}\n"
     await this.#build_new_shaders();
 
     // Final setup
@@ -125,14 +130,28 @@ export class Grid
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
 
+    
+  }
+
+  async update_f1(input)
+  {
+    this.f1 = Parser.toGLSL_f1(input);
+    await this.#build_new_shaders();
+    this.update_span_hard(this.spanX, this.spanY)
+  }
+  async update_f2(input)
+  {
+    this.f2 = Parser.toGLSL_f2(input);
+    await this.#build_new_shaders();
+    this.update_span_hard(this.spanX, this.spanY)
 
   }
 
-
   async #build_new_shaders()
   {
+    /*
     this.transformFunction = "vec2 f(vec2 p) {return vec2(2. * p.x, p.y);}"
-/*   
+  
     this.transformFunction = `
     vec2 f(vec2 uv) {
         float r = length(uv);  // Compute radius
@@ -146,8 +165,30 @@ export class Grid
     }
     `;
 */
-    //this.transformFunction = "vec2 f(vec2 p) {return vec2(p.x*p.x,p.y);}"
-    
+    this.transformFunction = `uniform float u_t;
+                              #define PI 3.14159265359
+                              #define TAU 6.283185307179586
+                              #define E 2.718281828459
+
+                              float gamma(float x) {
+                                // Stirling approximation
+                                x--;
+                                return sqrt(2.0 * PI * x) * pow(x, x) * 1.0 / pow(E, x);
+                              }
+
+                              float cot(float x) {return 1.0 / tan(x);}
+                              float sec(float x) {return 1.0 / cos(x);}
+                              float csc(float x) {return 1.0 / sin(x);}
+
+                              float coth(float x) {return cosh(x) / sinh(x);}
+                              float sech(float x) {return 1.0 / cosh(x);}
+                              float csch(float x) {return 1.0 / sinh(x);}
+
+                              float log10(float x) {return log(x) *0.434294481903;}
+
+                              ` ;
+    this.transformFunction += this.f1 + this.f2 + "vec2 f(vec2 p){ return vec2(f1(p), f2(p));}"
+    console.log(this.transformFunction)
 
     await this.curves.update_transformed_shader(this.transformFunction);
 
@@ -155,10 +196,11 @@ export class Grid
 
     // We send to compile the modified ones
     this.computeFunctionFS = await createShader_fromSourceCode(gl, gl.FRAGMENT_SHADER, this.computeFunctionFS_source.replace("REPLACE", this.transformFunction));
+    console.log(this.computeFunctionFS_source.replace("REPLACE", this.transformFunction))
     // And finaly create the shaders
     this.functionProgram = await createProgram(gl, this.simpleVS, this.computeFunctionFS);
     gl.useProgram(this.functionProgram)
-    gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_sizeSquare"), 1024);
+    gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_numberDivisions"), 1024);
     
     
     this.gridTransformedVS = await createShader_fromSourceCode(gl, gl.VERTEX_SHADER, this.gridTransVertexShader_source.replace("REPLACE", this.transformFunction));
@@ -334,7 +376,7 @@ export class Grid
     this.gl.useProgram(this.programGridTransformed);
     this.gl.uniform2f(this.gl.getUniformLocation(this.programGridTransformed, "u_offset"), ...this.Offset);
 
-    //update sapan
+    //update span
     // Square size in screen space, move to world space
     dx = dx * (this.spanX[1] - this.spanX[0]) / 2 * this.zoom;
     dy = dy * (this.spanY[1] - this.spanY[0]) / 2 * this.zoom;

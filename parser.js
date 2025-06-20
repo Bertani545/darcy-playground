@@ -1,9 +1,9 @@
-var numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
-var variableName = "(e|pi|t|x|y)";
-var functionName = "ln|log|exp|gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
-var identifier = functionName + "|" + variableName;
-var symbol = "[\\[\\]()+*/^!-]";
-var whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
+const numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
+const variableName = "(e|pi|t|x|y)";
+const functionName = "ln|log|exp|gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
+const identifier = functionName + "|" + variableName;
+const symbol = "[\\[\\]\\(\\)+*/^-]";
+const whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
 
 function tokenize(expression) {
 	var token = RegExp("(" + numericConstant + "|" + identifier + "|" + symbol + "|" + whitespace + ")", "g");
@@ -179,7 +179,7 @@ function get_code(expression)
 	let ans = "";
 	if (typeof(expression) == "string") {
 		if (expression.match("^(" + numericConstant + ")$")) {
-			return expression;
+			return "float("+expression+")";
 		} else if (expression.match("^(" + variableName + ")$")) {
 			switch(expression) {
 				case "e":
@@ -197,6 +197,8 @@ function get_code(expression)
 		return "{It shouldn't have reached this place: " + expression + "}";
 	}
 	if (expression[0].match("^(" + functionName + ")$")) {
+		if(expression[0] == "log") return "log10(" + get_code(expression[1]) + ")";
+		if(expression[0] == "ln") return "log(" + get_code(expression[1]) + ")";
 		return  expression[0] + "(" + get_code(expression[1]) + ")";
 	}
 	switch(expression[0]) {
@@ -216,15 +218,26 @@ function get_code(expression)
 }
 
 
-function toGLSL(expression)
+export function toGLSL_f1(expression)
 {
 	const parsed = parse_input(expression);
-	if(!parsed) return "float f1(vec2 p){return 0.0;}";
+	if(!parsed) return "float f1(vec2 p){return p.x;}";
 
-	return "float f1(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}";
+	return "float f1(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}\n";
 }
 
-const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / cos(10x^2 / (3+y))')
-console.log(toGLSL('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / (10 + x^2)'))
+
+export function toGLSL_f2(expression)
+{
+	const parsed = parse_input(expression);
+	if(!parsed) return "float f2(vec2 p){return p.y;}";
+
+	return "float f2(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}\n";
+}
+
+
+
+//const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / cos(10x^2 / (3+y))')
+//console.log(toGLSL('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / (10 + x^2)'))
 //  
 // Tokenize first, do my shit later

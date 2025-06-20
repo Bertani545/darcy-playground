@@ -4,6 +4,7 @@
   <head>
     <meta charset="utf-8">
 	<title>Displacement</title>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 	<style>
@@ -47,14 +48,16 @@
 		}
 
 		#controls {
-			grid-row: 9;
-			display: absolute;
-			gap: 10px; /* Space between buttons */
-		}
+        grid-row: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+      }
 
 	    button, input {
 			position: relative;
-	      	margin: 20px auto;
+	      	margin: 10px auto;
 	      	padding: 10px 20px;
 	      	font-size: 1.6rem;
 	    }
@@ -64,23 +67,29 @@
 		}
 	  </style>
 	<h1>2D Displacements</h1>
+
 	<div id="input_display">
 		<canvas width="1500" height="700" id="Grid01"></canvas>
 		<div id="text_overlay_input">
 		</div>
 	</div>
+
+	<div id="controls">
+      <p id="span_text">Controls:</p>
+
+      <!-- Input added here -->
+      <input type="text" id="f1" placeholder="Enter f_1(x,y)" />
+      <input type="text" id="f2" placeholder="Enter f_2(x,y)">
+    </div>
+
 	<div id="output_display">
 		<canvas width="1500" height="700" id="Grid02"></canvas>
 	</div>
 
 
-	<div id="controls">
-		<p id = "span_text"><p>
-		<!---button id="time_button">Time</button>
-		<button id="length_button">Length</button>
-		<input type="number" id="numberInput" placeholder="Enter animation duration" />
-		<button id="enter_button">Enter</button--->
-	</div>
+	
+
 	<script type="module" src="main.js"></script>
+
 </body>
 </html>

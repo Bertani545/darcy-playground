@@ -3,7 +3,6 @@ import * as webgl_utils from './webgl-utils.js'
 import {Grid} from './grid_class.js'
 
 
-
 // Returns a random integer from 0 to range - 1.
 function randomInt(range) {
   return Math.floor(Math.random() * range);
@@ -267,14 +266,22 @@ async function main() {
   });
 
 
+  const input_f1 = document.getElementById("f1");
+  const input_f2 = document.getElementById("f2");
 
-  document.getElementById('time_button').addEventListener('click', () => {
-      animate_method = 0;
-    });
+  input_f1.addEventListener("input", (event) => {grid.update_f1(event.target.value)})
+  input_f2.addEventListener("input", (event) => {grid.update_f2(event.target.value)})
 
-  document.getElementById('length_button').addEventListener('click', () => {
-    animate_method = 1;
-  });
+
+
+/*
+  //document.getElementById('time_button').addEventListener('click', () => {
+  //    animate_method = 0;
+  //  });
+
+  //document.getElementById('length_button').addEventListener('click', () => {
+  //  animate_method = 1;
+  //});
 
   const numberInput = document.getElementById('numberInput');
 
@@ -282,7 +289,7 @@ async function main() {
     if(numberInput.value < 0.1) alert('The animation time is too low!');
     else animation_duration = numberInput.value;
   });
-
+*/
 }
 
 
