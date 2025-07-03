@@ -137,14 +137,42 @@ export class Grid
   {
     this.f1 = Parser.toGLSL_f1(input);
     await this.#build_new_shaders();
-    this.update_span_hard(this.spanX, this.spanY)
+    this.update_viewport(this.spanX, this.spanY)
   }
   async update_f2(input)
   {
     this.f2 = Parser.toGLSL_f2(input);
     await this.#build_new_shaders();
-    this.update_span_hard(this.spanX, this.spanY)
+    this.update_viewport(this.spanX, this.spanY)
 
+  }
+
+
+  update_viewport(spanX, spanY)
+  {
+    // Update viewport
+    let szX = spanX[1] - spanX[0];
+    let szY = spanY[1] - spanY[0];
+    const aspectSVG = szX / szY;
+    const aspectCanvas = this.gl.canvas.width / this.gl.canvas.height;
+
+    if(aspectSVG > aspectCanvas)
+    {
+      // Fit to width
+      const newHeight = szX / aspectCanvas;
+      const centerY = (spanY[0] + spanY[1]) / 2.0;
+      spanY[1] = centerY + newHeight / 2.0;
+      spanY[0] = centerY - newHeight / 2.0;
+    }
+    else
+    {
+      // Fit to heigth
+      const newWidth = szY * aspectCanvas;
+      const centerX = (spanX[0] + spanX[1]) / 2.0;
+      spanX[1] = centerX + newWidth / 2.0;
+      spanX[0] = centerX - newWidth / 2.0;
+    }
+    this.update_span_hard(spanX, spanY);
   }
 
   async #build_new_shaders()
@@ -297,6 +325,8 @@ export class Grid
     // 6 = [-3,3]
     this.sizeSquare[1] =  2.5 / n_instances * this.zoom
 
+    this.update_text_labels();
+
     console.log(...this.sizeSquare);
   }
 
@@ -409,6 +439,13 @@ export class Grid
   {
     // Resets the offset and changes squeare size
     this.Offset = [0,0]
+
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform2f(this.offsetLocation, ...this.Offset);
+
+    this.gl.useProgram(this.programGridTransformed);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.programGridTransformed, "u_offset"), ...this.Offset);
+
     this.spanX = [...spanX];
     this.spanY = [...spanY];
     this.middleX = (spanX[1] + spanX[0])/2;
@@ -460,6 +497,7 @@ export class Grid
     
     //gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[1].ID);
     gl.readPixels(0,0,1,1, gl.RGBA,gl.FLOAT, this.spanTransformed); // From current framebuffer
+    console.log("Span transformed ", this.spanTransformed )
 
     // Change the aspect ratio
     const aspect = (this.spanX[1]-this.spanX[0])/(this.spanY[1]-this.spanY[0]);
@@ -484,7 +522,7 @@ export class Grid
     }
 
 
-    console.log(this.spanTransformed);
+    //console.log(this.spanTransformed);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   }
@@ -561,31 +599,9 @@ export class Grid
   {
     const limits = this.curves.create_discrete_paths(svgFile, n_points);
 
-    // Update viewport
-    let szX = limits.Right - limits.Left;
-    let szY = limits.Top - limits.Bottom;
-    const aspectSVG = szX / szY;
-    const aspectCanvas = this.gl.canvas.width / this.gl.canvas.height;
-
-    if(aspectSVG > aspectCanvas)
-    {
-      // Fit to width
-      const newHeight = szX / aspectCanvas;
-      const centerY = (limits.Top + limits.Bottom) / 2.0;
-      limits.Top = centerY + newHeight / 2.0;
-      limits.Bottom = centerY - newHeight / 2.0;
-    }
-    else
-    {
-      // Fit to heigth
-      const newWidth = szY * aspectCanvas;
-      const centerX = (limits.Right + limits.Left) / 2.0;
-      limits.Right = centerX + newWidth / 2.0;
-      limits.Left = centerX - newWidth / 2.0;
-    }
+    this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
 
 
-    this.update_span_hard([limits.Left, limits.Right], [limits.Bottom, limits.Top]);
   }
 
 

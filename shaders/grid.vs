@@ -68,6 +68,10 @@ void main() {
   
   line_color = domain_color(current_position);
 
+  invisible = 0.0;
+  if(abs(current_position.x) >  1. || abs(current_position.y) > 1.) invisible = 1.0;
+
+
   if(current_position.x < -1.0) line_color = vec4(1.0);
 
   gl_Position = vec4(current_position, 0.0, 1.0) ;

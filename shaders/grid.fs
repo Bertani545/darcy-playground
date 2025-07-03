@@ -14,6 +14,7 @@ out vec4 outColor;
  
 void main() {
   // Just set the output to a constant reddish-purple
-  vec3 real_color = line_color.xyz * (1.0 - invisible);
+  if(invisible> 0.0) discard;
+  vec3 real_color = line_color.xyz;
   outColor = vec4(real_color, 1.0);
 }

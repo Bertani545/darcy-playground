@@ -72,7 +72,7 @@ vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
   line_color = domain_color(current_position);
 
 
-    invisible = 0.0;
+  invisible = 0.0;
   if(abs(current_position.x) >  1. || abs(current_position.y) > 1.) invisible = 1.0;
 
   // Map the coordinates to span and color them acordingly
