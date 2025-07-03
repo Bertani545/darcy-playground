@@ -126,7 +126,7 @@ async function main() {
   
 
   
-  // New buffer to select objects
+  // New buffer to select objects. Could be useful for future features
   var curr_ID = -1;
   //var select_obj =   webgl_utils.buildFrameBuffer_ColorOnly(gl, 0, 1,1);
 
@@ -163,8 +163,8 @@ async function main() {
 
 
     // UI elements
-    spanText.textContent = "width from " + spanX[0].toFixed(4) + " to " + spanX[1].toFixed(4) + "\n" +
-    "height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
+    //spanText.textContent = "width from " + spanX[0].toFixed(4) + " to " + spanX[1].toFixed(4) + "\n" +
+    //"height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
 
 
     theta += 1 * deltaTime;
