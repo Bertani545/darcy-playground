@@ -43,10 +43,10 @@ vec4 domain_color(vec2 coord) {
 void main() {
 vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
 
-  float dist_between_lines = 2.5 / TOTAL_LINES;
-  float dist_between_points = 2.5 / TOTAL_POINTS;
+  float dist_between_lines = 3. / TOTAL_LINES;
+  float dist_between_points = 3. / TOTAL_POINTS;
   vec2 elongate_dir = vec2(u_lineSpawnDirection.y, u_lineSpawnDirection.x);
-  vec2 current_position = vec2(gl_VertexID) * dist_between_points * elongate_dir;
+  vec2 current_position = vec2(gl_VertexID) * dist_between_points * elongate_dir * distortionX;
 
   // Scale it
   //current_position *= 2.0 * u_zoom;
@@ -77,6 +77,7 @@ vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
 
   // Map the coordinates to span and color them acordingly
   // [-1,1] -> [span[0], span[1]]
+  
   vec2 real_position;
   real_position.x = ((current_position.x + 1.0) / 2.0) * (u_spanXY[1]-u_spanXY[0]) + u_spanXY[0];
   real_position.y = ((current_position.y + 1.0) / 2.0) * (u_spanXY[3]-u_spanXY[2]) + u_spanXY[2];

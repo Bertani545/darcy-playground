@@ -47,7 +47,7 @@ export class Grid
     this.spanTransformed = new Float32Array(4);
   }
 
-  async build(spanX, spanY)
+  async build(spanX = [-1,1], spanY = [-1,1])
   {
     const gl = this.gl;
     gl.lineWidth(2.0);
@@ -80,20 +80,20 @@ export class Grid
     gl.useProgram(this.Shader)
     gl.uniform1f(this.zoomLocation, this.zoom);
     gl.uniform4f(this.colorLocation, ...this.color);
-    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height / gl.canvas.width);
+    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height  / gl.canvas.width);
 
     await this.curves.build();
 
     // Create second buffer for the second canvas
     // contains id and texture
-    this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 0, gl.canvas.width, gl.canvas.height);
+    this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
     
     
     // Two other frame buffers for "compute" shaders
     this.VAOComputeShader = gl.createVertexArray();
     this.gl.bindVertexArray(this.VAOComputeShader);
-    const vertexBufferCS = gl.createBuffer();
+    const vertexBufferCS = this.gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferCS);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,  1,-1,  -1,1,  1,1]), gl.STATIC_DRAW); // Square
 
@@ -125,12 +125,67 @@ export class Grid
     await this.#build_new_shaders();
 
     // Final setup
+    // Set span, centered at zero
+    this.ratio = gl.canvas.width / gl.canvas.height;
+
+    spanX = spanX.map(x => x * this.ratio );
+    
+
+/*
+    spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
+    sizeX = spanX[1] - spanX[0];
+    sizeY = spanY[1] - spanY[0];
+
+    middleX = (spanX[1] + spanX[0])/2;
+    middleY = (spanY[1] + spanY[0])/2;
+*/
+
+
     this.update_span(spanX, spanY);
     this.update_ratio();
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
 
 
     
+  }
+
+  rebuildPixelContainer()
+  {
+    const gl = this.gl;
+    this.secondBuffer = buildFrameBuffer_ColorOnly(gl, 0, gl.canvas.width, gl.canvas.height);
+    this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
+    gl.useProgram(this.programGridTransformed);
+    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
+    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_aspectScreen"), gl.canvas.height / gl.canvas.width);
+
+    gl.useProgram(this.Shader)
+    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height  / gl.canvas.width);
+
+    // Constant y and change of. Make it depend if its on x or y
+    const aspect = gl.canvas.width / gl.canvas.height ;
+    const halfY = (this.spanY[1] - this.spanY[0]) / 2;
+    this.middleY = (this.spanY[0] + this.spanY[1]) / 2;
+    const halfX = halfY * aspect;
+    this.middleX = (this.spanX[0] + this.spanX[1])/2; // or (spanX[0] + spanX[1]) / 2 if you had a moving center
+
+    this.spanX = [this.middleX - halfX, this.middleX + halfX];
+
+    //Update offset
+    const percentage = this.Offset[0] / this.sizeSquare[0];
+    
+    
+    //this.Offset = [0,0];
+
+    this.update_span(this.spanX, this.spanY);
+    this.update_ratio();
+    this.update_squareSize();
+    this.Offset[0] = percentage * this.sizeSquare[0];
+    
+    //this.update_text_labels();
+
+    ////console.log("Span updated");
+    //this.update_secondView_span();
+
   }
 
   async update_f1(input)
@@ -216,7 +271,7 @@ export class Grid
 
                               ` ;
     this.transformFunction += this.f1 + this.f2 + "vec2 f(vec2 p){ return vec2(f1(p), f2(p));}"
-    console.log(this.transformFunction)
+    //console.log(this.transformFunction)
 
     await this.curves.update_transformed_shader(this.transformFunction);
 
@@ -224,7 +279,7 @@ export class Grid
 
     // We send to compile the modified ones
     this.computeFunctionFS = await createShader_fromSourceCode(gl, gl.FRAGMENT_SHADER, this.computeFunctionFS_source.replace("REPLACE", this.transformFunction));
-    console.log(this.computeFunctionFS_source.replace("REPLACE", this.transformFunction))
+    //console.log(this.computeFunctionFS_source.replace("REPLACE", this.transformFunction))
     // And finaly create the shaders
     this.functionProgram = await createProgram(gl, this.simpleVS, this.computeFunctionFS);
     gl.useProgram(this.functionProgram)
@@ -251,19 +306,19 @@ export class Grid
     }
   }
 
-  // Assumes that we are starting at -3 and end at 3
+  // Assumes that we are starting at -1.5 and end at 1.5
   update_text_labels()
   {
     // Called after zoom or drag
     // Get the position for the numbers
     // Create the divs
     // Put them accordingly
-    const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
+    const screenRatio =  this.gl.canvas.height / this.gl.canvas.width;
     let i = 0;
     for(i; i < n_instances; i++) // Horizontal
     {
       const curr_div = this.textContainer.children[i];
-      let x = -1.25 * this.squareRatio * screenRatio + i * (2.5 / n_instances) * this.squareRatio * screenRatio;
+      let x = -1.5 * this.squareRatio * screenRatio + i * (3 / n_instances) * this.squareRatio * screenRatio;
 
       // Transform them to clip coords
       x = (x * this.zoom  + this.Offset[0] + 1) / 2;
@@ -281,8 +336,8 @@ export class Grid
       // Transform to screen cords
       x *= this.gl.canvas.width;
 
-      curr_div.style.left = (x + 10) + "px";
-      curr_div.style.top  = 10 + "px";
+      curr_div.style.left = (x + 15) + "px";
+      curr_div.style.top  = 20 + "px";
       curr_div.textContent = position.toFixed(2);
     }
 
@@ -290,7 +345,7 @@ export class Grid
     for(i; i < 2*n_instances; i++) // Vertical
     {
       const curr_div = this.textContainer.children[i];
-      let y = -1.25  + (i - n_instances) * (2.5 / n_instances);
+      let y = -1.5  + (i - n_instances) * (3 / n_instances);
 
       // Transform them to clip coords
       y = (y * this.zoom  + this.Offset[1] + 1) / 2;
@@ -309,8 +364,8 @@ export class Grid
       y = y * -1 + 1;
       y *= this.gl.canvas.height;
 
-      curr_div.style.left = 10 + "px";
-      curr_div.style.top  = (y + 10) + "px";
+      curr_div.style.left = 20 + "px";
+      curr_div.style.top  = (y + 15) + "px";
       curr_div.textContent = position.toFixed(2);
     }
   }
@@ -319,15 +374,15 @@ export class Grid
   update_squareSize()
   {
     const screenRatio = this.gl.canvas.height / this.gl.canvas.width;
-    this.sizeSquare[0] =  2.5 / n_instances * this.zoom * screenRatio * this.squareRatio;
+    this.sizeSquare[0] =  3  / n_instances * this.zoom * screenRatio * this.squareRatio;
     // Distance * zoom * screenRatio * squareRatio
     // Distance = 6 / number of lines
     // 6 = [-3,3]
-    this.sizeSquare[1] =  2.5 / n_instances * this.zoom
+    this.sizeSquare[1] =  3 / n_instances * this.zoom
 
     this.update_text_labels();
 
-    console.log(...this.sizeSquare);
+    //console.log("Square size", ...this.sizeSquare);
   }
 
   update_zoom(deltaZoom) {
@@ -360,15 +415,15 @@ export class Grid
       const MIN_ZOOM = 2;
 
       //if(this.zoom >= MAX_ZOOM || this.zoom <= MIN_ZOOM) this.zoom = 2.0;
-      if(this.zoom > MAX_ZOOM) this.zoom = 2.0;
-      if(this.zoom < MIN_ZOOM) this.zoom = 4.0;
+      if(this.zoom > MAX_ZOOM) this.zoom = MIN_ZOOM;
+      if(this.zoom < MIN_ZOOM) this.zoom = MAX_ZOOM;
 
-      console.log("zoom: " + this.zoom);
+      //console.log("zoom: " + this.zoom);
 
       this.update_squareSize();
 
     
-      //console.log("Offset: " + (this.Offset))
+      ////console.log("Offset: " + (this.Offset))
       if(Math.abs(this.Offset[0] ) >  this.sizeSquare[0]){ this.Offset[0] %= this.sizeSquare[0]; }
       if(Math.abs(this.Offset[1]) >  this.sizeSquare[1]){ this.Offset[1] %= this.sizeSquare[1]; }
 
@@ -428,7 +483,7 @@ export class Grid
     this.middleX = (spanX[1] + spanX[0])/2;
     this.middleY = (spanY[1] + spanY[0])/2;
     this.update_text_labels();
-    //console.log("Span updated");
+    ////console.log("Span updated");
 
     this.update_secondView_span();
     
@@ -438,7 +493,7 @@ export class Grid
   update_span_hard(spanX, spanY)
   {
     // Resets the offset and changes squeare size
-    this.Offset = [0,0]
+    //this.Offset = [0,0]
 
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.offsetLocation, ...this.Offset);
@@ -454,7 +509,7 @@ export class Grid
     this.update_squareSize();
     
     this.update_text_labels();
-    //console.log("Span updated");
+    ////console.log("Span updated");
     this.update_secondView_span();
   }
 
@@ -497,13 +552,14 @@ export class Grid
     
     //gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffers[1].ID);
     gl.readPixels(0,0,1,1, gl.RGBA,gl.FLOAT, this.spanTransformed); // From current framebuffer
-    console.log("Span transformed ", this.spanTransformed )
+    //console.log("Span transformed ", this.spanTransformed)
+    //console.log("Real span", this.spanX, this.spanY)
 
     // Change the aspect ratio
-    const aspect = (this.spanX[1]-this.spanX[0])/(this.spanY[1]-this.spanY[0]);
+    const aspect = gl.canvas.width / gl.canvas.height ;
     const trans_aspect = (this.spanTransformed[1]-this.spanTransformed[0])/(this.spanTransformed[3]-this.spanTransformed[2])
 
-    if(trans_aspect > aspect)
+    if(trans_aspect >= aspect)
     {
       // Too wide
       const newHeight = (this.spanTransformed[1]-this.spanTransformed[0]) / aspect;
@@ -527,10 +583,6 @@ export class Grid
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   }
 
-  update_transform_function()
-  {
-    // Re do the shaders for obtainning the grid and the render shaders in the second canvas
-  }
 
   // Used when manually inputing the new span
   update_ratio()
@@ -538,7 +590,7 @@ export class Grid
     let lenX = this.spanX[1] - this.spanX[0];
     let lenY = this.spanY[1] - this.spanY[0];
 
-    console.log("Real ratio: " + lenY / lenX);
+    //console.log("Real ratio: " + lenY / lenX);
 
     let powX = lessOrEqualPowerOf2(lenX);
     let powY = lessOrEqualPowerOf2(lenY);
@@ -559,18 +611,18 @@ export class Grid
 
 */
 
-    console.log("Powers", bottomX, topX, bottomY, topY)
+    //console.log("Powers", bottomX, topX, bottomY, topY)
 
     // Map it [4,2]
     const mapX = (lenX - bottomX) / (topX - bottomX) * 2 + 2;
     const mapY = (lenY - bottomY) / (topY - bottomY) * 2 + 2;
 
     // Compute ratio
-    this.squareRatio = mapY / mapX;
+    this.squareRatio = 1;//= mapY / mapX;
 
-    console.log("Ratio: " + this.squareRatio)
+    //console.log("Ratio: " + this.squareRatio)
 
-    this.zoom = 3.0;
+    //this.zoom = 3.0;
     this.update_squareSize();
 
     this.gl.useProgram(this.Shader);

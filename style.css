@@ -1,0 +1,266 @@
+* {
+	
+}
+
+
+
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#text_overlay_input
+	{
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		color: white;
+		width: 100%;
+		height: 100%;
+		z-index: 10;
+		overflow: hidden;
+		pointer-events: none;
+	}
+.grid_numbers
+		{
+			position: absolute;
+			color: rgba(255,255,1,1);
+			font-size: 1.3rem;
+		}
+
+@media (orientation: portrait)
+{
+	#Body{
+		background-color: white;
+		position: absolute;
+		top: 0rem;
+		bottom: 0rem;
+
+		display: grid;
+		width: 100%;
+		/*min-width: 375px; hay que calcular todo a mano*/
+		height: 100%;
+
+		grid-template-rows: 0.5fr 7fr;
+		/*grid-auto-columns: auto;*/
+	}
+
+
+	#Content{
+		background-color: white;
+
+		display: grid;
+		grid-template-columns: 0.4fr 1fr;
+		grid-template-rows: 4fr 3fr 4fr;
+		place-content: center;
+
+		min-height: 0;
+
+	}
+
+	#title_div{
+		background-color: white;
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	#input_display{
+		background-color: white;
+		grid-column: 1 / span 2;
+		grid-row: 1;
+
+		position: relative;
+
+	}
+
+	#arrow{
+		background-color: white;
+		grid-column: 1;
+		grid-row: 2/3;
+
+		display: grid;
+		place-content: center;
+	}
+
+	#output_display{
+		background-color: white;
+		grid-column: 1 / span 2;
+		grid-row: 3/4;
+
+	}
+
+
+	#input{
+		background-color: white;
+		grid-column: 2;
+		grid-row: 2/3;
+
+		display: grid;
+		place-content: center;
+	}
+
+	.canvasContainer {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		/* NEW: prevent content from pushing row height */
+		overflow: hidden;
+		min-height: 0;
+	}
+
+	canvas {
+		width: calc(100% - 2rem);
+		height: calc(100% - 2rem);
+	}
+
+	/* El problema es este flex y el canvas*/
+	/*
+	.canvasContainer{
+		display: grid;
+		grid-template-columns: 50px 1fr 50px;
+		grid-template-rows: 50px 1fr 50px;
+
+		height: 100%;
+		justify-content: center;
+		align-items: center;
+	}
+
+	canvas{
+		grid-column: 2 / 3;
+		grid-row: 2/3;
+	    width: calc(100%);
+	    height: calc(100%);
+	    background: brown;
+	}
+
+	.canvasContainer{
+		display: flex;
+		flex: 0;
+		height: 100%;
+		justify-content: center;
+		align-items: center;
+	}
+
+	canvas{
+		width: calc(100% - 2rem);
+		height: calc(100% - 2rem);
+	}
+	*/
+}
+
+
+@media (orientation: landscape)
+{
+	#Body{
+		background-color: white;
+		position: absolute;
+		top: 0rem;
+		bottom: 0rem;
+
+		display: grid;
+		width: 100%;
+		height: 100%;
+
+		grid-template-rows: 0.5fr minmax(500px, 7fr);
+		/*grid-auto-columns: auto;*/
+	}
+
+
+	#Content{
+		background-color: white;
+
+		display: grid;
+		grid-template-columns: 4fr 1fr 4fr;
+		grid-template-rows: minmax(300px, 5fr) minmax(200px, 2fr);
+		place-content: center;
+		height: 100%;
+	}
+
+	#title_div{
+		background-color: white;
+	}
+
+	#input_display{
+		background-color: white;
+		grid-column: 1/2;
+		grid-row: 1/2;
+
+		position: relative;
+
+	}
+
+	#arrow{
+		background-color: white;
+		grid-column: 2/3;
+		grid-row: 1/2;
+
+		display: grid;
+		place-content: center;
+	}
+
+	#output_display{
+		background-color: white;
+		grid-column: 3/4;
+		grid-row: 1/2;
+
+	}
+
+
+	#input{
+		background-color: white;
+		grid-column: 1/4;
+
+		display: grid;
+		place-content: center;
+	}
+
+	
+
+
+	.canvasContainer{
+		display: flex;
+		flex: 1;
+		height: 100%;
+		justify-content: center;
+		align-items: center;
+	}
+
+	canvas{
+		width: calc(100% - 2rem);
+	    height: calc(100% - 2rem);
+	    background: brown;
+	    /*object-fit: contain;*/
+	}
+}
+
+
+/*Chnage span display as bloc
+isplay:inline-block;
+*/
+
+	/* The above is shorthand for:
+  flex-grow: 0,
+  flex-shrink: 1,
+  flex-basis: auto
+  */
+}
+
+/*
+#Display{
+	background-color: blue;
+	flex: 1 1 auto;
+}
+
+
+#Display canvas{
+	position: relative;
+	align: center;
+}
+
+#input{
+	flex: 0 1 15rem;
+	background-color: yellow;
+}
+*/

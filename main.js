@@ -13,11 +13,13 @@ var animate_method = 0;
 var animation_duration = 5;
 
 
+// Check ratio
+
 
 
 var spanSpeed = 0.05;
-var spanText = document.getElementById('span_text');
-spanText.style.fontSize = "x-large"; 
+//var spanText = document.getElementById('span_text');
+//spanText.style.fontSize = "x-large"; 
 
 
 /*
@@ -40,6 +42,8 @@ TODO:
 async function main() {
   const canvas_input = document.querySelector("#Grid01");
   const canvas_output = document.querySelector("#Grid02");
+  const gl = canvas_input.getContext("webgl2");
+  const ctx = canvas_output.getContext("2d");
   //canvas.width = 400;
   //canvas.height = 300;
 
@@ -52,7 +56,7 @@ async function main() {
   ctx.fillRect(0, 0, canvas_gui.width, 40);
   */
 
-  const gl = canvas_input.getContext("webgl2");
+
   if (!gl) {
     throw new Error("Error. No se pudo cargar WebGL2");
   }
@@ -73,6 +77,7 @@ async function main() {
   gl.disable(gl.DEPTH_TEST);
 
 
+
   // Get element where the text is going to be displayed
   const text_container_input = document.querySelector("#text_overlay_input");
 
@@ -88,16 +93,27 @@ async function main() {
   var sizeY = 2;
   var middleY = 0;
 
+/*
   spanX = spanX.map(x => x *  gl.canvas.width / gl.canvas.height );
   sizeX = spanX[1] - spanX[0];
   sizeY = spanY[1] - spanY[0];
 
   middleX = (spanX[1] + spanX[0])/2;
   middleY = (spanY[1] + spanY[0])/2;
+*/
 
+  const canvases = [document.getElementById("Grid01"), document.getElementById("Grid02")];
+   for (const canvas of canvases) {
+     
+     const rect = canvas.getBoundingClientRect();
+     const dpr = window.devicePixelRatio || 1;
+     canvas.width = rect.width * dpr;
+     canvas.height = rect.height * dpr;
 
-  const grid = new Grid(gl, canvas_output.getContext("2d"), text_container_input, spanSpeed);
-  await grid.build(spanX, spanY); // Add here the span it will have in the begginnig
+   }
+
+  const grid = new Grid(gl, ctx, text_container_input, spanSpeed);
+  await grid.build(); // Add here the span it will have in the begginnig
 
 
   
@@ -290,7 +306,48 @@ async function main() {
     else animation_duration = numberInput.value;
   });
 */
+
+window.addEventListener('resize', () => {
+     if (window.matchMedia("(orientation: portrait)").matches) {
+        console.log("Portrait")
+     }
+
+     if (window.matchMedia("(orientation: landscape)").matches) {
+        console.log("Landscape")
+     }
+
+
+
+     for (const canvas of canvases) {
+       
+       const rect = canvas.getBoundingClientRect();
+       const dpr = window.devicePixelRatio || 1;
+       canvas.width = rect.width * dpr;
+       canvas.height = rect.height * dpr;
+
+     }
+
+     //webgl_utils.resizeCanvasToDisplaySize(gl.canvas);
+     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+
+
+
+
+      grid.rebuildPixelContainer() // Must change a lot later
+      grid.update_text_labels()
+      grid.update_ratio()
+
+      console.log("ratio", grid.ratio)
+      //grid.draw();
+
+
+      
+    });
+
+
 }
+
+
 
 
 
