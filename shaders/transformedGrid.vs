@@ -94,9 +94,6 @@ vec2 distortionX = vec2(u_aspectScreen * u_gridRatio, 1.0);
   current_position.x = ((real_position.x - l)/(r - l)) * 2. - 1.;
   current_position.y = ((real_position.y - b)/(t - b)) * 2. - 1.;
   
-
-  current_position.y =  -current_position.y;
-  
   gl_Position = vec4(current_position, 0.0, 1.0) ;
 }
 
