@@ -1,6 +1,7 @@
 
 import * as webgl_utils from './webgl-utils.js'
 import {Grid} from './grid_class.js'
+import * as mathRenderer from './math_renderer.js';
 
 
 // Returns a random integer from 0 to range - 1.
@@ -24,17 +25,8 @@ var spanSpeed = 0.05;
 
 /*
 
-TODO: 
+MAYBE TODO: 
 
-  -> MAKE THE SHADERS FOR THE SECOND CANVAS
-
-- Add user being able to input span
-- Add UI element for the span of the axis
-- Formula parser for expressions of the form
-  x = f(x,y)
-  y = g(x,y)
-  maybe be able to define other expressions?
----- MVP ----
 - Add the option to add pictures and edit them
 */
 
@@ -266,7 +258,7 @@ async function main() {
         
         // Check if it's an SVG file
         if (file.type !== "image/svg+xml") {
-            alert("Please drop a valid XML file.");
+            alert("Please drop a valid SVG file.");
             return;
         }
 
@@ -285,8 +277,21 @@ async function main() {
   const input_f1 = document.getElementById("f1");
   const input_f2 = document.getElementById("f2");
 
-  input_f1.addEventListener("input", (event) => {grid.update_f1(event.target.value)})
-  input_f2.addEventListener("input", (event) => {grid.update_f2(event.target.value)})
+  const renderf1 = document.getElementById("renderMath1");
+  const renderf2 = document.getElementById("renderMath2");
+
+  
+
+
+  input_f1.addEventListener("input", (event) => {
+    const newTexOuput = grid.update_f1(event.target.value);
+    mathRenderer.startUpdate(renderf1, newTexOuput);
+  })
+  
+  input_f2.addEventListener("input", (event) => {
+    const newTexOuput = grid.update_f2(event.target.value);
+    mathRenderer.startUpdate(renderf2, newTexOuput);
+  });
 
 
 
@@ -315,7 +320,6 @@ window.addEventListener('resize', () => {
      if (window.matchMedia("(orientation: landscape)").matches) {
         console.log("Landscape")
      }
-
 
 
      for (const canvas of canvases) {
