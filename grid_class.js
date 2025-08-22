@@ -33,7 +33,6 @@ export class Grid
     this.colorLocation = null;
 
     this.ctx = ctx_second_canvas;
-    this.pixelContainer;
 
     this.textContainer = text_container;
     this.create_text_instances();
@@ -83,11 +82,6 @@ export class Grid
     gl.uniform1f(this.aspectScreenLocation, gl.canvas.height  / gl.canvas.width);
 
     await this.curves.build();
-
-    // Create second buffer for the second canvas
-    // contains id and texture
-    this.secondBuffer = buildFrameBuffer_ColorOnly(this.gl, 0, this.gl.canvas.width, this.gl.canvas.height);
-    this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
     
     
     // Two other frame buffers for "compute" shaders
@@ -152,8 +146,6 @@ export class Grid
   rebuildPixelContainer()
   {
     const gl = this.gl;
-    this.secondBuffer = buildFrameBuffer_ColorOnly(gl, 0, gl.canvas.width, gl.canvas.height);
-    this.pixelContainer = new Uint8ClampedArray(gl.canvas.width * gl.canvas.height * 4);
     gl.useProgram(this.programGridTransformed);
     gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
     gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_aspectScreen"), gl.canvas.height / gl.canvas.width);
@@ -185,21 +177,29 @@ export class Grid
 
     ////console.log("Span updated");
     //this.update_secondView_span();
-
+    this.update_text_labels()
   }
 
-  async update_f1(input)
-  {
-    this.f1 = Parser.toGLSL_f1(input);
-    await this.#build_new_shaders();
-    this.update_viewport(this.spanX, this.spanY)
-  }
-  async update_f2(input)
-  {
-    this.f2 = Parser.toGLSL_f2(input);
-    await this.#build_new_shaders();
-    this.update_viewport(this.spanX, this.spanY)
+  // ------------------------------------------------------------------------------ Here add the updates
 
+
+  update_f1(input)
+  {
+    const output = Parser.get_GLSL_and_Tex(input, "f1");
+    this.f1 = output.GLSL;
+
+    this.#build_new_shaders();
+
+    return output.Tex;
+  }
+  update_f2(input)
+  {
+    const output = Parser.get_GLSL_and_Tex(input, "f2");
+    this.f2 = output.GLSL;
+
+    this.#build_new_shaders();
+
+    return output.Tex;
   }
 
 
@@ -292,6 +292,7 @@ export class Grid
     gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
     gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_aspectScreen"), gl.canvas.height / gl.canvas.width);
     
+    this.update_viewport(this.spanX, this.spanY)
   }
 
   create_text_instances()
@@ -306,7 +307,7 @@ export class Grid
     }
   }
 
-  // Assumes that we are starting at -1.5 and end at 1.5
+  // Assumes that we are starting at -1.5 and end at 1.5 in view space
   update_text_labels()
   {
     // Called after zoom or drag
@@ -336,9 +337,14 @@ export class Grid
       // Transform to screen cords
       x *= this.gl.canvas.width;
 
-      curr_div.style.left = (x + 15) + "px";
-      curr_div.style.top  = 20 + "px";
-      curr_div.textContent = position.toFixed(2);
+      const dpr = window.devicePixelRatio; // To account for zoom
+      curr_div.style.left = (x + 15) / dpr + "px";
+      curr_div.style.top  = 20 / dpr + "px";
+      curr_div.textContent = position.toFixed(3);
+
+      // See what should we do for very small and very big nunmbers
+
+      
     }
 
 
@@ -364,9 +370,12 @@ export class Grid
       y = y * -1 + 1;
       y *= this.gl.canvas.height;
 
-      curr_div.style.left = 20 + "px";
-      curr_div.style.top  = (y + 15) + "px";
-      curr_div.textContent = position.toFixed(2);
+      const dpr = window.devicePixelRatio; 
+
+
+      curr_div.style.left = 20 / dpr + "px";
+      curr_div.style.top  = (y + 15) / dpr + "px";
+      curr_div.textContent = position.toFixed(3);
     }
   }
 
@@ -657,13 +666,32 @@ export class Grid
   }
 
 
-
-  draw()
+    draw()
   {
     const gl = this.gl;
 
-    // Draw to the first canvas
+    // Draw to the texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindVertexArray(this.VAO);
+    gl.useProgram(this.programGridTransformed);
+    gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_spanXY"),...this.spanX, ...this.spanY);
+    gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_transformedSpanXY"),...this.spanTransformed);
+    
+
+    gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 0, 1);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
+    gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
+
+    this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
+
+
+    //Pass the texture to the second canvas
+    this.ctx.drawImage(gl.canvas, 0, 0, gl.canvas.width, gl.canvas.height)
+
+
+    // Draw to the first canvas
+    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
     gl.uniform4f(this.spanLocation,...this.spanX, ...this.spanY);
@@ -680,29 +708,7 @@ export class Grid
 
 
 
-    
-    // Draw to the texture
-    gl.bindVertexArray(this.VAO);
-    gl.useProgram(this.programGridTransformed);
-    gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_spanXY"),...this.spanX, ...this.spanY);
-    gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_transformedSpanXY"),...this.spanTransformed);
-    
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); 
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.secondBuffer.ID);gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 0, 1);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
-    gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
-
-    this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
-
-
-    //Pass the texture to the second canvas
-    gl.readPixels(0,0,gl.canvas.width, gl.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,this.pixelContainer); // From current framebuffer
-    const imageData = new ImageData(this.pixelContainer, gl.canvas.width, gl.canvas.height);
-    this.ctx.putImageData(imageData, 0, 0);
-
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }

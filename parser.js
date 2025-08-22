@@ -217,6 +217,27 @@ function get_code(expression)
 	}
 }
 
+function get_Tex(expression) {
+	return "\\(f(x,y) = \\mathbb{R}\\)"
+}
+
+
+
+export function get_GLSL_and_Tex(expression, name) {
+	if (name == "") return {};
+	const parsed = parse_input(expression);
+	if (!parsed) {
+		if (name == "f1") return {"GLSL":"float f1(vec2 p){return p.x;}", "Tex":"\\(x\\)"};
+		if (name == "f2") return {"GLSL":"float f2(vec2 p){return p.y;}", "Tex":"\\(y\\)"};
+		return "";
+	}
+
+
+	const GLSL = "float " + name + "(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}\n";
+	const Tex = get_Tex(parsed);
+	return {"GLSL": GLSL, "Tex": Tex};
+}
+
 
 export function toGLSL_f1(expression)
 {
