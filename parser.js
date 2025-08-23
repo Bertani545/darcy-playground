@@ -285,11 +285,18 @@ function get_Tex(expression) {
 				return "\{ -" + get_Tex(expression[1]) + "\}";
 			return "\{" + get_Tex(expression[1]) + " - " + get_Tex(expression[2]) + "\}"
 		case "*":
+			let left;
+			let right;
+			if (typeof expression[1] !== 'string')
+				left = expression[1][0];
+			else left = expression[1];
 			if (typeof expression[2] !== 'string')
-				return "\{" + get_Tex(expression[1]) + get_Tex(expression[2]) + "\}";
-			console.log("exp2", expression[2])
-			if (expression[2].match("^(" + variableName + ")$") || expression[2].match("^(" + numericConstant + ")$"))
+				right = expression[2][0];
+			else right = expression[2];
+
+			if (left.match("^(" + variableName + ")$") && right.match("^(" + numericConstant + ")$"))
 				return "\{" + get_Tex(expression[1]) +"\\cdot " + get_Tex(expression[2]) + "\}";
+				
 			return "\{" + get_Tex(expression[1]) + get_Tex(expression[2]) + "\}";
 		case "/":
 			return "\\frac\{" + get_Tex(expression[1]) + "\}\{ " + get_Tex(expression[2]) + "\}";
