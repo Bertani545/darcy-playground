@@ -284,12 +284,12 @@ async function main() {
 
 
   input_f1.addEventListener("input", (event) => {
-    const newTexOuput = grid.update_f1(event.target.value);
+    const newTexOuput = "\\[" + grid.update_f1(event.target.value) + "\\]";
     mathRenderer.startUpdate(renderf1, newTexOuput);
   })
   
   input_f2.addEventListener("input", (event) => {
-    const newTexOuput = grid.update_f2(event.target.value);
+    const newTexOuput = "\\[" + grid.update_f2(event.target.value) + "\\]";
     mathRenderer.startUpdate(renderf2, newTexOuput);
   });
 

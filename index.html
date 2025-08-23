@@ -30,7 +30,7 @@
 
 						<div id="input">
 							<p>\[\begin{align}
-									F\colon \mathbb{R}^2 &\to \mathbb{R}^2\\
+									F\colon \R^2 &\to \R^2\\
 									(x,y) &\mapsto (f_1(x,y), f_2(x,y))
 								\end{align}\]</p>
 							<div>
@@ -51,6 +51,18 @@
 	
 
 	<script type="module" src="main.js"></script>
+
+	<script>
+		window.MathJax = {
+		  tex: {
+		    macros: {
+		      'lp': '\\left(',
+		      'rp': '\\right)',
+		      'R': '{\\mathbb{R}}'
+		    }
+		  }
+		};
+	</script>
 	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
 
 </body>

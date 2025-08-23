@@ -1,4 +1,5 @@
-const numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
+//const numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
+const numericConstant = "\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
 const variableName = "(e|pi|t|x|y)";
 const functionName = "ln|log|exp|gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
 const identifier = functionName + "|" + variableName;
@@ -6,21 +7,39 @@ const symbol = "[\\[\\]\\(\\)+*/^-]";
 const whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
 
 function tokenize(expression) {
+
 	var token = RegExp("(" + numericConstant + "|" + identifier + "|" + symbol + "|" + whitespace + ")", "g");
-	
+
 	var tokenStream = expression.match(token);
 	if (!tokenStream) return false;
 	if (tokenStream.join("") != expression) return false;
-	
+
 	tokenStream = tokenStream.filter(function(token) {
 		return ! token.match("^(" + whitespace + ")$");
 	});
 	
+	// Replace implicit multiplcaiton with explicit ones
+	let  tokenLen = tokenStream.length;
+	let i = 1;
+	while (i < tokenLen) {
+		if (tokenStream[i-1].match("^(" + symbol + ")$") || tokenStream[i].match("^(" + symbol + ")$"))
+		{
+			i++;
+			continue;
+		}
+
+		tokenStream.splice(i, 0, '*');
+		i += 2;
+		tokenLen++;
+	}
+	
 	tokenStream.push("\n");
 	
+
 	return tokenStream;
 
 }
+
 
 let timeDependent = false;
 
@@ -113,21 +132,40 @@ function parse(inputStream) {
 		return expression;
 	}
 
-	function parseMultiplicativeExpression() {
+	// We want this one to have priority
+	function parseDivisiveExpression() {
 		const i0 = i;
 		let left = parseExponentialExpression();
 		if (!left) return false;
-		while (inputStream[i] == '*' || inputStream[i] == '/') {
+		while (inputStream[i] == '/') {
 			const operator = inputStream[i++];
 			const right = parseExponentialExpression();
 			if (! right) {
 				i = i0;
 				return false;
 			}
-			left = [operator, left, right];
+			left = ['/', left, right];
 		}
 		return left;
 	}
+
+
+	function parseMultiplicativeExpression() {
+		const i0 = i;
+		let left = parseDivisiveExpression();
+		if (!left) return false;
+		while (inputStream[i] == '*') {
+			const operator = inputStream[i++];
+			const right = parseDivisiveExpression();
+			if (! right) {
+				i = i0;
+				return false;
+			}
+			left = ['*', left, right];
+		}
+		return left;
+	}
+
 	
 	function parseAdditiveExpression() {
 		const i0 = i;
@@ -159,13 +197,9 @@ function parse(inputStream) {
 	return expression;
 }
 
-
 function parse_input(exp)
 {	
-	let trimmed = exp.replace(/\s+/g, "");
-	//if(!is_correctly_closed(trimmed)){console.log("Please close correctly all your parethesis"); return null;}
-
-	let tokenized = tokenize(trimmed);
+	let tokenized = tokenize(exp);
 	if(!tokenized) return null;
 
 	let expression = parse(tokenized);
@@ -218,7 +252,50 @@ function get_code(expression)
 }
 
 function get_Tex(expression) {
-	return "\\(f(x,y) = \\mathbb{R}\\)"
+	let ans = "";
+	if (typeof(expression) == "string") {
+		if (expression.match("^(" + numericConstant + ")$")) {
+			return "\{"+expression+"\}";
+		} else if (expression.match("^(" + variableName + ")$")) {
+			switch(expression) {
+				case "e":
+					return "e";
+				case "pi":
+					return "\\pi";
+				case "t":
+					return "t";
+				case "x":
+					return "x";
+				case "y":
+					return "y";
+			}
+		}
+		return "{It shouldn't have reached this place: " + expression + "}";
+	}
+	if (expression[0].match("^(" + functionName + ")$")) {
+		if(expression[0] == "log") return "\\log_{10}\\lp " + get_Tex(expression[1]) + "\\rp";
+		if(expression[0] == "ln") return "\\ln\\lp " + get_Tex(expression[1]) + "\\rp";
+		return  "\\" + expression[0] + " \\lp " + get_Tex(expression[1]) + "\\rp";
+	}
+	switch(expression[0]) {
+		case "+":
+			return "\{" + get_Tex(expression[1]) + " + " + get_Tex(expression[2]) + "\}";
+		case "-":
+			if (expression.length == 2)
+				return "\{ -" + get_Tex(expression[1]) + "\}";
+			return "\{" + get_Tex(expression[1]) + " - " + get_Tex(expression[2]) + "\}"
+		case "*":
+			if (typeof expression[2] !== 'string')
+				return "\{" + get_Tex(expression[1]) + get_Tex(expression[2]) + "\}";
+			console.log("exp2", expression[2])
+			if (expression[2].match("^(" + variableName + ")$") || expression[2].match("^(" + numericConstant + ")$"))
+				return "\{" + get_Tex(expression[1]) +"\\cdot " + get_Tex(expression[2]) + "\}";
+			return "\{" + get_Tex(expression[1]) + get_Tex(expression[2]) + "\}";
+		case "/":
+			return "\\frac\{" + get_Tex(expression[1]) + "\}\{ " + get_Tex(expression[2]) + "\}";
+		case "^":
+			return "\{" + get_Tex(expression[1]) + "\}^\{" + get_Tex(expression[2]) + "\}";
+	}
 }
 
 
@@ -227,14 +304,15 @@ export function get_GLSL_and_Tex(expression, name) {
 	if (name == "") return {};
 	const parsed = parse_input(expression);
 	if (!parsed) {
-		if (name == "f1") return {"GLSL":"float f1(vec2 p){return p.x;}", "Tex":"\\(x\\)"};
-		if (name == "f2") return {"GLSL":"float f2(vec2 p){return p.y;}", "Tex":"\\(y\\)"};
+		if (name == "f1") return {"GLSL":"float f1(vec2 p){return p.x;}", "Tex":"\\text{Not a valid expression}"};
+		if (name == "f2") return {"GLSL":"float f2(vec2 p){return p.y;}", "Tex":"\\text{Not a valid expression}"};
 		return "";
 	}
 
 
 	const GLSL = "float " + name + "(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}\n";
 	const Tex = get_Tex(parsed);
+
 	return {"GLSL": GLSL, "Tex": Tex};
 }
 

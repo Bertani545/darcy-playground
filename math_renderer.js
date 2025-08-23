@@ -54,6 +54,7 @@ function updatePreview(objectWithPreview, newString) {
 
     //
     objectWithPreview.innerHTML = newString;
+    console.log(newString)
 
     MathJax.typesetPromise()
 
