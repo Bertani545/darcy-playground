@@ -288,7 +288,7 @@ function get_Tex(expression) {
 			let left;
 			let right;
 			if (typeof expression[1] !== 'string')
-				left = expression[1][0];
+				left = expression[1][expression[1].length-1];
 			else left = expression[1];
 			if (typeof expression[2] !== 'string')
 				right = expression[2][0];
