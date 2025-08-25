@@ -255,7 +255,7 @@ function get_Tex(expression) {
 	let ans = "";
 	if (typeof(expression) == "string") {
 		if (expression.match("^(" + numericConstant + ")$")) {
-			return "\{"+expression+"\}";
+			return expression;
 		} else if (expression.match("^(" + variableName + ")$")) {
 			switch(expression) {
 				case "e":
@@ -273,34 +273,56 @@ function get_Tex(expression) {
 		return "{It shouldn't have reached this place: " + expression + "}";
 	}
 	if (expression[0].match("^(" + functionName + ")$")) {
-		if(expression[0] == "log") return "\\log_{10}\\lp " + get_Tex(expression[1]) + "\\rp";
-		if(expression[0] == "ln") return "\\ln\\lp " + get_Tex(expression[1]) + "\\rp";
-		return  "\\" + expression[0] + " \\lp " + get_Tex(expression[1]) + "\\rp";
+		if(expression[0] == "log") return "\\log_{10}\\lp " + get_Tex(expression[1]) + "\\rp ";
+		if(expression[0] == "ln") return "\\ln\\lp " + get_Tex(expression[1]) + "\\rp ";
+		if(expression[0] == "sqrt") return "\\sqrt \{" + get_Tex(expression[1]) + "\}";
+		if(expression[0] == "abs") return "\\left | " + get_Tex(expression[1]) + "\\right |"; 
+		return  "\\" + expression[0] + " \{\\lp " + get_Tex(expression[1]) + "\\rp \}";
 	}
 	switch(expression[0]) {
 		case "+":
 			return "\{" + get_Tex(expression[1]) + " + " + get_Tex(expression[2]) + "\}";
 		case "-":
-			if (expression.length == 2)
+			if (expression.length == 2) {
+				if (typeof expression[1] !== 'string')
+					if (expression[1][0] !== '^')
+						return "\{ -\\lp " + get_Tex(expression[1]) + "\\rp\}";
 				return "\{ -" + get_Tex(expression[1]) + "\}";
+			}
 			return "\{" + get_Tex(expression[1]) + " - " + get_Tex(expression[2]) + "\}"
 		case "*":
-			let left;
-			let right;
-			if (typeof expression[1] !== 'string')
-				left = expression[1][expression[1].length-1];
-			else left = expression[1];
-			if (typeof expression[2] !== 'string')
-				right = expression[2][0];
-			else right = expression[2];
+			console.log(expression)
 
-			if (left.match("^(" + variableName + ")$") && right.match("^(" + numericConstant + ")$"))
-				return "\{" + get_Tex(expression[1]) +"\\cdot " + get_Tex(expression[2]) + "\}";
-				
-			return "\{" + get_Tex(expression[1]) + get_Tex(expression[2]) + "\}";
+			let left = "";
+			let right = "";
+			let middle = "";
+
+			if (typeof expression[2] === 'string') {
+				right = get_Tex(expression[2])
+				if (expression[2].match("^(" + numericConstant + ")$")) middle = " \\cdot ";
+			} else {
+				if (expression[2][0] === '+' || expression[2][0] === '-')
+					right = "\\lp " + get_Tex(expression[2]) + " \\rp ";
+				else right = get_Tex(expression[2]);
+			}
+
+			if (typeof expression[1] === 'string') {
+				left = get_Tex(expression[1]);
+			} else {
+				if (expression[1][0] === '+' || expression[1][0] === '-')
+					if (expression[1].length == 2)
+						left = get_Tex(expression[1])
+					else left = "\\lp " + get_Tex(expression[1]) + " \\rp ";
+				else left = get_Tex(expression[1]);
+			}
+
+			return "\{" + left + middle + right + "\}";
+
 		case "/":
 			return "\\frac\{" + get_Tex(expression[1]) + "\}\{ " + get_Tex(expression[2]) + "\}";
 		case "^":
+			if (typeof expression[1] !== 'string') 
+				return "\{\\lp " + get_Tex(expression[1]) + "\\rp\}^\{" + get_Tex(expression[2]) + "\}";
 			return "\{" + get_Tex(expression[1]) + "\}^\{" + get_Tex(expression[2]) + "\}";
 	}
 }
@@ -320,6 +342,7 @@ export function get_GLSL_and_Tex(expression, name) {
 	const GLSL = "float " + name + "(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}\n";
 	const Tex = get_Tex(parsed);
 
+	console.log(GLSL)
 	return {"GLSL": GLSL, "Tex": Tex};
 }
 
