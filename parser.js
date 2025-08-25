@@ -1,7 +1,7 @@
 //const numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
 const numericConstant = "\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
 const variableName = "(e|pi|t|x|y)";
-const functionName = "ln|log|exp|gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
+const functionName = "ln|log|exp|Gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
 const identifier = functionName + "|" + variableName;
 const symbol = "[\\[\\]\\(\\)+*/^-]";
 const whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
@@ -14,16 +14,18 @@ function tokenize(expression) {
 	if (!tokenStream) return false;
 	if (tokenStream.join("") != expression) return false;
 
+
 	tokenStream = tokenStream.filter(function(token) {
 		return ! token.match("^(" + whitespace + ")$");
 	});
-	
+
 	// Replace implicit multiplcaiton with explicit ones
 	let  tokenLen = tokenStream.length;
 	let i = 1;
 	while (i < tokenLen) {
 		if (tokenStream[i-1].match("^(" + symbol + ")$") || tokenStream[i].match("^(" + symbol + ")$"))
 		{
+			// Your usual operator
 			i++;
 			continue;
 		}
@@ -32,10 +34,21 @@ function tokenize(expression) {
 		i += 2;
 		tokenLen++;
 	}
+
+
+	for (i = 1; i < tokenLen-1; i++) {
+		if (tokenStream[i] === '*') {
+			const left = tokenStream[i-1];
+			const right = tokenStream[i+1];
+
+			if (right.match("^(" + numericConstant + ")$"))
+				tokenStream[i] = '\#'
+		}
+	}
 	
 	tokenStream.push("\n");
 	
-
+	console.log(tokenStream)
 	return tokenStream;
 
 }
@@ -154,14 +167,14 @@ function parse(inputStream) {
 		const i0 = i;
 		let left = parseDivisiveExpression();
 		if (!left) return false;
-		while (inputStream[i] == '*') {
+		while (inputStream[i] == '*' || inputStream[i] == '\#') {
 			const operator = inputStream[i++];
 			const right = parseDivisiveExpression();
 			if (! right) {
 				i = i0;
 				return false;
 			}
-			left = ['*', left, right];
+			left = [operator, left, right];
 		}
 		return left;
 	}
@@ -243,6 +256,7 @@ function get_code(expression)
 				return "( -" + get_code(expression[1]) + ")";
 			return "(" + get_code(expression[1]) + " - " + get_code(expression[2]) + ")"
 		case "*":
+		case "\#":
 			return "(" + get_code(expression[1]) + " * " + get_code(expression[2]) + ")";
 		case "/":
 			return "(" + get_code(expression[1]) + " / " + get_code(expression[2]) + ")";
@@ -277,32 +291,33 @@ function get_Tex(expression) {
 		if(expression[0] == "ln") return "\\ln\\lp " + get_Tex(expression[1]) + "\\rp ";
 		if(expression[0] == "sqrt") return "\\sqrt \{" + get_Tex(expression[1]) + "\}";
 		if(expression[0] == "abs") return "\\left | " + get_Tex(expression[1]) + "\\right |"; 
-		return  "\\" + expression[0] + " \{\\lp " + get_Tex(expression[1]) + "\\rp \}";
+		return  "\\" + expression[0] + " \\lp " + get_Tex(expression[1]) + "\\rp ";
 	}
 	switch(expression[0]) {
 		case "+":
-			return "\{" + get_Tex(expression[1]) + " + " + get_Tex(expression[2]) + "\}";
+			return  get_Tex(expression[1]) + " + " + get_Tex(expression[2]) ;
 		case "-":
 			if (expression.length == 2) {
 				if (typeof expression[1] !== 'string')
 					if (expression[1][0] !== '^')
-						return "\{ -\\lp " + get_Tex(expression[1]) + "\\rp\}";
-				return "\{ -" + get_Tex(expression[1]) + "\}";
+						return " -\\lp " + get_Tex(expression[1]) + " \\rp ";
+				return "-" + get_Tex(expression[1]) ;
 			}
-			return "\{" + get_Tex(expression[1]) + " - " + get_Tex(expression[2]) + "\}"
+			return get_Tex(expression[1]) + " - " + get_Tex(expression[2])
 		case "*":
+		case "\#":
 			console.log(expression)
 
 			let left = "";
 			let right = "";
-			let middle = "";
+			let middle = expression[0] === '*' ? " " : " \\cdot ";
 
 			if (typeof expression[2] === 'string') {
 				right = get_Tex(expression[2])
-				if (expression[2].match("^(" + numericConstant + ")$")) middle = " \\cdot ";
+				//if (expression[2].match("^(" + numericConstant + ")$")) middle = " \\cdot ";
 			} else {
 				if (expression[2][0] === '+' || expression[2][0] === '-')
-					right = "\\lp " + get_Tex(expression[2]) + " \\rp ";
+					right = " \\lp " + get_Tex(expression[2]) + " \\rp ";
 				else right = get_Tex(expression[2]);
 			}
 
@@ -316,14 +331,14 @@ function get_Tex(expression) {
 				else left = get_Tex(expression[1]);
 			}
 
-			return "\{" + left + middle + right + "\}";
+			return left + middle + right;
 
 		case "/":
 			return "\\frac\{" + get_Tex(expression[1]) + "\}\{ " + get_Tex(expression[2]) + "\}";
 		case "^":
 			if (typeof expression[1] !== 'string') 
-				return "\{\\lp " + get_Tex(expression[1]) + "\\rp\}^\{" + get_Tex(expression[2]) + "\}";
-			return "\{" + get_Tex(expression[1]) + "\}^\{" + get_Tex(expression[2]) + "\}";
+				return "\\lp " + get_Tex(expression[1]) + "\\rp^\{" + get_Tex(expression[2]) + "\}";
+			return  get_Tex(expression[1]) + "^\{" + get_Tex(expression[2]) + "\}";
 	}
 }
 

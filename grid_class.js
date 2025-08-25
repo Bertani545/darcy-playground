@@ -254,7 +254,7 @@ export class Grid
                               #define TAU 6.283185307179586
                               #define E 2.718281828459
 
-                              float gamma(float x) {
+                              float Gamma(float x) {
                                 // Stirling approximation
                                 x--;
                                 return sqrt(2.0 * PI * x) * pow(x, x) * 1.0 / pow(E, x);
