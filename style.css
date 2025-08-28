@@ -9,6 +9,9 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
+h1{
+	font-size: 3rem;
+}
 
 #text_overlay_input
 	{
@@ -29,6 +32,16 @@ html, body {
 			font-size: 1.3rem;
 		}
 
+#title_div{
+		background-color: white;
+		grid-column: 1;
+		grid-row: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+
 @media (orientation: portrait)
 {
 	#Body{
@@ -47,48 +60,55 @@ html, body {
 	}
 
 
+
+
 	#Content{
-		background-color: white;
+		background-color: red;
 
 		display: grid;
-		grid-template-columns: 0.4fr 1fr;
-		grid-template-rows: 4fr 3fr 4fr;
+		grid-template-columns: 0.2fr 1fr;
+		grid-template-rows: minmax(25rem, 4fr) 2.5fr minmax(25rem, 4fr);
 		place-content: center;
 
-		min-height: 0;
-
+		min-height: 0rem;
 	}
 
-	#title_div{
-		background-color: white;
-		grid-column: 1;
-		grid-row: 1;
-	}
+	
 
 	#input_display{
 		background-color: white;
 		grid-column: 1 / span 2;
-		grid-row: 1;
+		grid-row: 1/2;
 
 		position: relative;
 
-	}
-
-	#arrow{
-		background-color: white;
-		grid-column: 1;
-		grid-row: 2/3;
-
-		display: grid;
-		place-content: center;
 	}
 
 	#output_display{
 		background-color: white;
 		grid-column: 1 / span 2;
 		grid-row: 3/4;
-
 	}
+
+	#arrow{
+		background-color: white;
+		grid-column: 1/2;
+		grid-row: 2/3;
+
+		display: grid;
+		place-content: center;
+	}
+
+	#svg_Horizontal{
+		display: none;
+	}
+
+	#svg_Vertical{
+		max-height: 15rem;
+	}
+
+
+	
 
 
 	#input{
@@ -194,12 +214,14 @@ html, body {
 	}
 
 	#arrow{
-		background-color: white;
 		grid-column: 2/3;
 		grid-row: 1/2;
 
 		display: grid;
 		place-content: center;
+	}
+	#svg_Vertical {
+		display: none;
 	}
 
 	#output_display{
