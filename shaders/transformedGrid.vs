@@ -20,7 +20,7 @@ out float invisible; // when you can't even hear... MY NAME
 
 
 
-#define TOTAL_LINES 21.0
+#define TOTAL_LINES 20.0
 #define TOTAL_POINTS 500.0;
 
 

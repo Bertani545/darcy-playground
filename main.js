@@ -182,15 +182,21 @@ async function main() {
 
   // -------------------- Inputs -----------------------------
 
+  function getTouchPos(touchEvent) {
+    return {
+    x: touchEvent.touches[0].clientX,
+    y: touchEvent.touches[0].clientY
+  };
+  }
 
-  canvas_input.addEventListener('mousemove', (e) => {
-     const rect = canvas_input.getBoundingClientRect();
+  function dragMechanics(clientPos) {
+    const rect = canvas_input.getBoundingClientRect();
 
 
      if(isDragging)
      {
-        const currentMouseX = e.clientX;
-        const currentMouseY = e.clientY;
+        const currentMouseX = clientPos.x;
+        const currentMouseY = clientPos.y;
 
         let dx = currentMouseX - mouseX;
         let dy = currentMouseY - mouseY;
@@ -209,13 +215,50 @@ async function main() {
         //mouseCoordY = (currentMouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
         
      }
-  });
+  }
 
-  canvas_input.addEventListener('mousedown', (e) => {
+  let lastDistance = null;
+  function getDistanceTouches(touches) {
+    if (touches.length < 2) return null;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+
+  canvas_input.addEventListener('mousemove', (e) => {
+     dragMechanics({x:e.clientX, y:e.clientY})
+     e.preventDefault()
+  });
+  canvas_input.addEventListener("touchmove", (e) => {
+
+    if (e.touches.length === 1) {
+      dragMechanics(getTouchPos(e))
+    }
+    if (e.touches.length === 2) {
+      const distance = getDistanceTouches(e.touches);
+
+      if (lastDistance !== null) {
+        const delta = lastDistance - distance;
+        
+        if (delta !== 0) {
+          // Only care about the sign
+          if (delta > 0) grid.update_zoom(1); // zoom in
+          else grid.update_zoom(-1);           // zoom out
+        }
+      }
+
+      lastDistance = distance;
+    }
+
     
+    e.preventDefault()
+  }, {passive:false})
+
+  function clickMechanics(clientPos) {
     const rect = canvas_input.getBoundingClientRect();
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    mouseX = clientPos.x;
+    mouseY = clientPos.y;
 
     //mouseCoordX = (mouseX - rect.left) / rect.width * (spanX[1] - spanX[0]) + spanX[0];
     //mouseCoordY = (mouseY - rect.top) / rect.height * (spanY[1] - spanY[0]) + spanY[0];
@@ -231,18 +274,43 @@ async function main() {
     isDragging = true;
 
     //console.log(mouseCoordX, mouseCoordY)
+  }
 
+
+  canvas_input.addEventListener('mousedown', (e) => {
+    clickMechanics({x: e.clientX, y: e.clientY})
+    preventDefault()
+  });
+  canvas_input.addEventListener('touchstart', (e) => {
+    if (e.touches.length < 2) lastDistance = null;
+    clickMechanics(getTouchPos(e))
+    preventDefault()
   });
 
-  canvas_input.addEventListener("wheel", (e) => {
-      e.preventDefault();
-      grid.update_zoom(e.deltaY);
-  });
+
+  function stopMovement() {
+    isDragging = false;
+  }
 
 
   canvas_input.addEventListener('mouseup', () => {
-    isDragging = false;
+    stopMovement()
+    e.preventDefault()
   });
+  canvas_input.addEventListener('touchend', () => {
+    stopMovement()
+    if (e.touches.length < 2) lastDistance = null;
+    e.preventDefault()
+  });
+
+
+  canvas_input.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    grid.update_zoom(e.deltaY);
+  });
+
+
+
 
   canvas_input.addEventListener("dragover", (event) => {
     event.preventDefault(); // Required to allow dropping
