@@ -682,7 +682,7 @@ export class Grid
     gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 0, 1);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
     gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances + 1);
 
     this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
 
@@ -703,7 +703,7 @@ export class Grid
     
     // Y
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances);
+    gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances + 1);
 
     this.curves.draw(this.spanX, this.spanY);
 
