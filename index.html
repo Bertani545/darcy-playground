@@ -1,11 +1,12 @@
-	<html style="font-size: 10;">
-	  <head>
+<html style="font-size: 10;">
+	<head>
 	    <meta charset="utf-8">
 		<title>Displacement</title>
 		
 		<link rel="stylesheet" href="style.css"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	</head>
+
 	<body>
 		<div id="Body">
 				<div id="title_div">
@@ -82,28 +83,31 @@
 						</svg>
 
 					</div>
-
-					<div id="output_display" class="canvasContainer">
-							<canvas id="Grid02"></canvas>
-					</div>
-
-						<div id="input">
-							<p>\[\begin{align}
-									F\colon \R^2 &\to \R^2\\
-									(x,y) &\mapsto (f_1(x,y), f_2(x,y))
-								\end{align}\]</p>
-							<div>
+					
+					<div id="input">
+						<p>\[\begin{align}
+								F\colon \R^2 &\to \R^2\\
+								(x,y) &\mapsto (f_1(x,y), f_2(x,y))
+							\end{align}\]
+						</p>
+						<div>
 					      <p>\(f_1(x,y)\)</p>	<input type="text" id="f1" placeholder="Enter f_1(x,y)" />
 					      <div id="renderMath1"></div>
-					    </div>
-					    <div>
-					      	<p>\(f_2(x,y)\)</p>
+						</div>
+						<div>
+						  	<p>\(f_2(x,y)\)</p>
 					      <input type="text" id="f2" placeholder="Enter f_2(x,y)">
 					      <div id="renderMath2"></div>
 					    </div>
 
-						</div>
-				</div>
+					</div>
+					<input type="file" id="fileInput" accept=".svg" style="display:none;"/>
+					<button  id="uploadBtn">Upload SVG</button>
+
+					<div id="output_display" class="canvasContainer">
+							<canvas id="Grid02"></canvas>
+					</div>
+			</div>
 
 					
 		</div>

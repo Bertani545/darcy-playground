@@ -317,12 +317,10 @@ async function main() {
     console.log("Drop here")
   });
 
-  // Load file
-  canvas_input.addEventListener("drop", (event) => {
-    event.preventDefault();
-
-    if (event.dataTransfer.files.length > 0) {
-        const file = event.dataTransfer.files[0];
+  // -------------------------------- Load file
+  function loadSVGFile(files) {
+    if (files.length > 0) {
+        const file = files[0];
         
         // Check if it's an SVG file
         if (file.type !== "image/svg+xml") {
@@ -339,6 +337,17 @@ async function main() {
         // We read the whole file to parse afterwards
         reader.readAsText(file);
     }
+  }
+
+  document.getElementById('uploadBtn').addEventListener("click", () =>{
+    document.getElementById('fileInput').click();
+  })
+  document.getElementById("fileInput").addEventListener("change", (event) => {
+      loadSVGFile(event.target.files);
+  });
+  canvas_input.addEventListener("drop", (event) => {
+    event.preventDefault();
+    loadSVGFile(event.dataTransfer.files);
   });
 
 

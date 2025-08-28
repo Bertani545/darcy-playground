@@ -38,7 +38,6 @@ canvas {
 		}
 
 #title_div{
-		background-color: white;
 		grid-column: 1;
 		grid-row: 1;
 		display: flex;
@@ -51,14 +50,14 @@ canvas {
 {
 	#Body{
 		background-color: white;
-		position: absolute;
+		min-height: 100dvh;
 		top: 0rem;
 		bottom: 0rem;
-
+		position: auto;
 		display: grid;
 		width: 100%;
 		/*min-width: 375px; hay que calcular todo a mano*/
-		height: 100dvh;
+		height: auto;
 
 		grid-template-rows: 0.5fr 7fr;
 		/*grid-auto-columns: auto;*/
@@ -68,12 +67,10 @@ canvas {
 
 
 	#Content{
-		background-color: red;
-
 		display: grid;
-		height: 100%;
+		height: auto;
 		grid-template-columns: 0.2fr 1fr;
-		grid-template-rows: 1fr auto 1fr;/*minmax(25rem, 4fr) 2.5fr minmax(25rem, 4fr);*/
+		grid-template-rows: minmax(25rem, 4fr)  2.5fr minmax(25rem, 4fr);
 		place-content: center;
 
 		min-height: 0;
@@ -82,20 +79,27 @@ canvas {
 	
 
 	#input_display{
-		background-color: white;
 		grid-column: 1 / span 2;
 		grid-row: 1/2;
 
 		position: relative;
-		max-height: 100%;
 
 	}
 
 	#output_display{
-		background-color: white;
 		grid-column: 1 / span 2;
 		grid-row: 3/4;
 	}
+
+	#uploadBtn {
+		margin: 10px;
+		grid-row: 2/3;
+		grid-column: 2;
+		width: 12rem;
+		height: 3rem;
+		 justify-self: end;
+	}
+
 
 	#arrow{
 		background-color: white;
@@ -119,7 +123,7 @@ canvas {
 
 
 	#input{
-		background-color: white;
+		background-color: none;
 		grid-column: 2;
 		grid-row: 2/3;
 
@@ -199,7 +203,7 @@ canvas {
 
 		display: grid;
 		grid-template-columns: 4fr 1fr 4fr;
-		grid-template-rows: minmax(300px, 5fr) minmax(200px, 2fr);
+		grid-template-rows: minmax(300px, 5fr) 5rem minmax(200px, 2fr);
 		place-content: center;
 		height: 100%;
 	}
@@ -217,6 +221,20 @@ canvas {
 
 	}
 
+	#output_display{
+		background-color: white;
+		grid-column: 3/4;
+		grid-row: 1/2;
+
+	}
+
+	#uploadBtn {
+		margin: 10px;
+		grid-row: 2/3;
+		grid-column: 1;
+		width: 12rem;
+	}
+
 	#arrow{
 		grid-column: 2/3;
 		grid-row: 1/2;
@@ -228,17 +246,13 @@ canvas {
 		display: none;
 	}
 
-	#output_display{
-		background-color: white;
-		grid-column: 3/4;
-		grid-row: 1/2;
-
-	}
+	
 
 
 	#input{
-		background-color: white;
+		background-color: none;
 		grid-column: 1/4;
+		grid-row: 2/4;
 
 		display: grid;
 		place-content: center;
