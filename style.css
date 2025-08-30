@@ -94,15 +94,22 @@ canvas {
 		grid-row: 3/4;
 	}
 
-	#uploadBtn {
+
+	#svgButtons {
 		margin: 10px;
 		grid-row: 2/3;
 		grid-column: 2;
+		justify-self: end;
+	}
+	.svgButton{
 		width: 12rem;
 		height: 3rem;
-		 justify-self: end;
-		 cursor: pointer;
+		cursor: pointer;
 	}
+	#editBtn{
+		display: none;
+	}
+
 
 
 	#arrow{
@@ -232,12 +239,17 @@ canvas {
 
 	}
 
-	#uploadBtn {
+	#svgButtons {
 		margin: 10px;
 		grid-row: 2/3;
 		grid-column: 1;
+	}
+	.svgButton{
 		width: 12rem;
 		cursor: pointer;
+	}
+	#editBtn{
+		display: none;
 	}
 
 	#arrow{
@@ -352,6 +364,10 @@ canvas {
 /*JS*/
 .modal-container.show-modal {
 	display:block;
+}
+
+#editBtn.show-modal {
+	display: inline-block; 
 }
 
 

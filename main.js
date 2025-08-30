@@ -349,7 +349,7 @@ async function main() {
 
   document.getElementById('ok-btnPoints').addEventListener('click', () => {
     const input = document.querySelector('.resolution-input');
-    if (!input.checkValidity) {
+    if (!input.checkValidity()) {
       input.reportValidity();
     }
     else {
@@ -357,11 +357,21 @@ async function main() {
       document.getElementById('modal').classList.add('show-modal');
 
       imageData = grid.create_paths(svgText, input.value);
-      document.getElementById('widthInput').value = imageData.width;
-      document.getElementById('heightInput').value = imageData.height;
-      document.getElementById('positionXInput').value = imageData.posX;
-      document.getElementById('positionYInput').value = imageData.posY;
+      imageData.ratio = imageData.scale[0] / imageData.scale[1];
+      document.getElementById('widthInput').value = imageData.scale[0];
+      document.getElementById('heightInput').value = imageData.scale[1];
+      document.getElementById('positionXInput').value = imageData.position[0];
+      document.getElementById('positionYInput').value = imageData.position[1];
     }
+  })
+
+  document.getElementById('editBtn').addEventListener('click', () => {
+    document.getElementById('modal').classList.add('show-modal');
+    document.getElementById('widthInput').value = imageData.scale[0];
+    document.getElementById('heightInput').value = imageData.scale[1];
+    document.getElementById('positionXInput').value = imageData.position[0];
+    document.getElementById('positionYInput').value = imageData.position[1];
+    document.getElementById('rotationInput').value = imageData.rotation;
   })
 
   function parseFloatDefault(x) {
@@ -386,16 +396,17 @@ async function main() {
         const newHeigth = parseFloatDefault(document.getElementById('heightInput').value);
         const newPosX = parseFloatDefault(document.getElementById('positionXInput').value);
         const newPosY = parseFloatDefault(document.getElementById('positionYInput').value)
-        const angle = parseFloatDefault(document.getElementById('rotationInput').value) /180 * Math.PI;
+        const angle = parseFloatDefault(document.getElementById('rotationInput').value);
 
-        const newData = {
+        imageData = {
           'scale': [newWidth, newHeigth],
           'position': [newPosX, newPosY],
-          'rotation': angle
+          'rotation': angle,
+          'ratio': newWidth/newHeigth
         }
 
-        grid.update_discrete_paths(newData); 
-
+        grid.update_discrete_paths(imageData); 
+        document.getElementById('editBtn').classList.add('show-modal');  
         document.getElementById('modal').classList.remove('show-modal');
       }
       else {
@@ -413,16 +424,45 @@ async function main() {
   document.getElementById('closeRes').addEventListener("click", () => {
     document.getElementById('inputResolution').classList.remove('show-modal');
   })
-
   window.addEventListener('mousedown', (e) => {
     const input2 = document.getElementById('modal')
     const input1 = document.getElementById('inputResolution');
     if (e.target === input1 || e.target === input2) 
     {
-      input1.classList.remove('show-modal')
-      input2.classList.remove('show-modal')
+      input1.classList.remove('show-modal');
+      input2.classList.remove('show-modal');
     }
   })
+
+
+  // ------------------------- Preserve ratio (or not) when inputing size ---------------------
+
+  let lockedRatio = true;
+  const widthInput = document.getElementById('widthInput');
+  const heightInput = document.getElementById('heightInput');
+  const lockButton = document.getElementById('lockBtn');
+  widthInput.addEventListener('blur', () => {
+    if (lockedRatio) {
+      const newWidth = parseFloatDefault(widthInput.value);
+      heightInput.value = newWidth / imageData.ratio;
+    }
+    
+  })
+
+  heightInput.addEventListener('blur', () => {
+    if (lockedRatio) {
+      const newHeigth = parseFloatDefault(heightInput.value);
+      widthInput.value = newHeigth * imageData.ratio;
+    }
+  })
+  lockButton.addEventListener('click', ()=>{
+    lockedRatio = !lockedRatio;
+    if(lockedRatio) {
+      heightInput.value = widthInput.value / imageData.ratio; 
+    }
+  })
+
+
 
   document.getElementById('uploadBtn').addEventListener("click", () =>{
     document.getElementById('fileInput').click();

@@ -87,7 +87,7 @@ export class PathContainer
   }
 
 
-  read_svg_file(svgFile, pointsPerCurve)
+  create_paths(svgFile, pointsPerCurve)
   {
 
     const dataTexture = this.gl.createTexture();
@@ -208,7 +208,7 @@ export class PathContainer
       'position': [centerX, centerY],
     }
 
-    return {'height':h, 'width': w, 'posX': centerX, 'posY': centerY}
+    return this.originalData;
   }
 
   delete_temp_info()
@@ -228,7 +228,7 @@ export class PathContainer
     const scaleY =  newData.scale[1] / this.originalData.scale[1];
     const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
     const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
-    const angle = newData.rotation;
+    const angle = newData.rotation / 360.0 * Math.PI;
     const rotMatrix = gl_2dmath.get_rotation_matrix(angle);
 
     const transformMatrix = gl_2dmath.multiply_MM(gl_2dmath.multiply_MM(scaleMatrix, rotMatrix), transMatrix);

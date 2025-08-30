@@ -659,7 +659,7 @@ export class Grid
 
   create_paths(svgFile, pointsPerCurve) 
   {
-    return this.curves.read_svg_file(svgFile, pointsPerCurve);
+    return this.curves.create_paths(svgFile, pointsPerCurve);
   }
 
   clean_paths(){this.curves.delete_temp_info();}
