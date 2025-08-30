@@ -1,5 +1,5 @@
 import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, loadShaderFile, createShader_fromSourceCode } from './webgl-utils.js'
-import * as gl_2Dmath from "./gl_2Dmath.js"
+import * as gl_2dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { read_svg_file } from './svg_reader.js';
 import {BezierCurve, point_in_bezier_time } from './bezier_functions.js';
@@ -87,13 +87,19 @@ export class PathContainer
   }
 
 
-
-  // Returns a texture and how many paths
-  create_discrete_paths(svgFile, n_points)
+  read_svg_file(svgFile, pointsPerCurve)
   {
+
+    const dataTexture = this.gl.createTexture();
+    this.gl.activeTexture(this.gl.TEXTURE0 + 1),
+    this.gl.bindTexture(this.gl.TEXTURE_2D, dataTexture),
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, this.originalTexData);
+
+
+    // Reads svg and saves the points of the curves in an object
     console.log(this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE))
-    this.nPoints = n_points;
-    if(n_points > MAX_POINTS)
+    this.nPoints = pointsPerCurve;
+    if(pointsPerCurve > MAX_POINTS)
     {
       //throw new Error("Too many points. Better safe than sorry");
       alert("Too many points. Capping to " + MAX_POINTS);
@@ -107,7 +113,6 @@ export class PathContainer
     const n_paths = Object.keys(paths['lines']).length + Object.keys(paths['quadraticBeziers']).length + Object.keys(paths['cubicBeziers']).length;
 
     this.nPaths = n_paths;
-    console.log(n_paths);
     if(n_paths > MAX_PATHS)
     {
       alert("Too many paths. Capping to " + MAX_PATHS);
@@ -120,7 +125,7 @@ export class PathContainer
     // Width = n_points 
     
     
-    const data = new Float32Array(this.nPoints * this.nPaths * 4);
+    this.originalTexData = new Float32Array(this.nPoints * this.nPaths * 4);
     //new Uint32Array(this._data.buffer,0,this._width * this._height * 4)
 
     let currPathID = 0;
@@ -152,8 +157,8 @@ export class PathContainer
 
         update_bouding_box([newX, newY]);
         
-        data[4 * this.nPoints * currPathID + i * 4 + 0] = newX;
-        data[4 * this.nPoints * currPathID + i * 4 + 1] = newY;
+        this.originalTexData[4 * this.nPoints * currPathID + i * 4 + 0] = newX;
+        this.originalTexData[4 * this.nPoints * currPathID + i * 4 + 1] = newY;
 
       }
       currPathID++;
@@ -172,8 +177,8 @@ export class PathContainer
         
         update_bouding_box(pointOnCurve);
 
-        data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
-        data[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
+        this.originalTexData[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
+        this.originalTexData[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
       }
       currPathID++;
     }
@@ -186,8 +191,8 @@ export class PathContainer
           const pointOnCurve = bezierContainer.eval_by_length(i * 1/(this.nPoints-1));
           update_bouding_box(pointOnCurve);
           
-          data[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
-          data[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
+          this.originalTexData[4 * this.nPoints * currPathID + i * 4 + 0] = pointOnCurve[0];
+          this.originalTexData[4 * this.nPoints * currPathID + i * 4 + 1] = pointOnCurve[1];
         }
         currPathID++;
     }
@@ -196,18 +201,69 @@ export class PathContainer
     // Normalize it
     const h = top-bottom;
     const w = right-left;
+    const centerX = (right+left)/2
+    const centerY = (top+bottom)/2
+    this.originalData = {
+      'scale': [w, h],
+      'position': [centerX, centerY],
+    }
 
-    const normalize = h > w ? h : w;
+    return {'height':h, 'width': w, 'posX': centerX, 'posY': centerY}
+  }
+
+  delete_temp_info()
+  {
+    // Call this to delete the object with the points
+    this.originalTexData = null;
+    this.nPoints = 0;
+  }
+
+
+  // Returns a texture and how many paths using the object with points
+  update_discrete_paths(newData) 
+  {
+
+    // Build the transformation matrix
+    const scaleX =  newData.scale[0] / this.originalData.scale[0];
+    const scaleY =  newData.scale[1] / this.originalData.scale[1];
+    const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
+    const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
+    const angle = newData.rotation;
+    const rotMatrix = gl_2dmath.get_rotation_matrix(angle);
+
+    const transformMatrix = gl_2dmath.multiply_MM(gl_2dmath.multiply_MM(scaleMatrix, rotMatrix), transMatrix);
+
+
+
+    // Obtain new bounding box
+    let left = Infinity
+    let right = -Infinity
+    let top = -Infinity
+    let bottom = Infinity;
+
+    function update_bouding_box(point)
+    {
+      if(point[0] < left) left = point[0];
+      if(point[0] > right) right = point[0];
+      if(point[1] < bottom) bottom = point[1];
+      if(point[1] > top) top = point[1];
+    }
+
+
+    const texData = new Float32Array(this.nPoints * this.nPaths * 4);
 
     for(let i = 0; i < this.nPoints*this.nPaths*4; i+=4)
     {
-      data[i] /= normalize;
-      data[i + 1] /= normalize;
+      // Apply the transformation
+      let point = [this.originalTexData[i], this.originalTexData[i+1], 1];
+      point[0] -= this.originalData.position[0];
+      point[1] -= this.originalData.position[1];
+      point = gl_2dmath.multiply_MV(transformMatrix, point);
+      update_bouding_box(point)
+      texData[i] = point[0];
+      texData[i+1] = point[1];
     }
-    top /= normalize;
-    bottom /= normalize;
-    right /= normalize;
-    left /= normalize;
+
 
     // Set data
     const dataTexture = this.gl.createTexture();
@@ -217,11 +273,12 @@ export class PathContainer
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE),
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST),
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
-    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, data);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, texData);
 
-    //console.log(data)
-    console.log(top-bottom, right-left)
-    return {Top:top, Bottom:bottom, Left:left, Right:right}
+    return {Top: top,
+            Bottom: bottom,
+            Left: left, 
+            Right:right }
   }
 
 

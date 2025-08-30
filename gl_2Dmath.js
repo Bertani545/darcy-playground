@@ -131,3 +131,31 @@ export function get_scale_matrix(sx, sy)
                            0, sy, 0,
                            0, 0, 1]);
 }
+
+
+export function multiply_MM(m1, m2)
+{
+  return new Float32Array([
+    m1[0]*m2[0] + m1[3]*m2[1] + m1[6]*m2[2],
+    m1[1]*m2[0] + m1[4]*m2[1] + m1[7]*m2[2],
+    m1[2]*m2[0] + m1[5]*m2[1] + m1[8]*m2[2],
+
+    m1[0]*m2[3] + m1[3]*m2[4] + m1[6]*m2[5],
+    m1[1]*m2[3] + m1[4]*m2[4] + m1[7]*m2[5],
+    m1[2]*m2[3] + m1[5]*m2[4] + m1[8]*m2[5],
+
+    m1[0]*m2[6] + m1[3]*m2[7] + m1[6]*m2[8],
+    m1[1]*m2[6] + m1[4]*m2[7] + m1[7]*m2[8],
+    m1[2]*m2[6] + m1[5]*m2[7] + m1[8]*m2[8],
+  ]);
+}
+
+
+export function multiply_MV(m, v)
+{
+  return new Float32Array([
+    m[0]*v[0] + m[3]*v[1] + m[6]*v[2],
+    m[1]*v[0] + m[4]*v[1] + m[7]*v[2],
+    m[2]*v[0] + m[5]*v[1] + m[8]*v[2],
+  ]);
+}

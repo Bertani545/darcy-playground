@@ -657,14 +657,20 @@ export class Grid
     return this.sizeSquare;
   }
 
-  create_discrete_paths(svgFile, n_points)
+  create_paths(svgFile, pointsPerCurve) 
   {
-    const limits = this.curves.create_discrete_paths(svgFile, n_points);
-
-    this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
-
-
+    return this.curves.read_svg_file(svgFile, pointsPerCurve);
   }
+
+  clean_paths(){this.curves.delete_temp_info();}
+
+  update_discrete_paths(newData)
+  {
+    const limits = this.curves.update_discrete_paths(newData);
+    this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
+  }
+
+
 
 
     draw()

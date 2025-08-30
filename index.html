@@ -111,7 +111,108 @@
 
 					
 		</div>
-	
+	<section class="modal-container" id="inputResolution">
+		<section class="modal">
+			<button class="close-btn" id="closeRes">x</button>
+			<div class="modal-content">
+				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h1>
+				<div class = "modal-form">
+					<div>
+						<label for="pointsInput">Points per Curve</label>
+						<input 
+							type="number"
+							id="pointsInput"
+							placeholder="Enter Favourite Number"
+							class="resolution-input"
+							min="0"
+							max="1000"
+							value="100"
+						/>
+					</div>
+					<!--No usar este tipo de submits para nuestra app-->
+					<button id="ok-btnPoints" class="submit-btn"> Ok </Button>
+				</div>
+			</div>
+		</section>
+	</section>
+	<section class="modal-container" id="modal">
+		<section class="modal">
+			<button class="close-btn" id="closeModal">x</button>
+			<div class="modal-content">
+				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h1>
+				<div class = "modal-form">
+					<div>
+						<label for="widthInput">Width</label>
+						<input 
+							type="number"
+							step="0.000000000000001"
+							id="widthInput"
+							placeholder="Enter Favourite Number"
+							class="form-input"
+							min="-5000"
+							max="5000"
+							value="0"
+						/>
+					</div>
+					<div>
+						<label for="heightInput">Height</label>
+						<input 
+							type="number"
+							step="0.000000000000001"
+							id="heightInput"
+							placeholder="Enter Favourite Number"
+							class="form-input"
+							min="-5000"
+							max="5000"
+							value="0"
+						/>
+					</div>
+					<div>
+						<label for="positionXInput">Position X</label>
+						<input 
+							type="number"
+							step="0.000000000000001"
+							id="positionXInput"
+							placeholder="Enter Favourite Number"
+							class="form-input"
+							min="-5000"
+							max="5000"
+							value="0"
+						/>
+					</div>
+					<div>
+						<label for="positionYInput">Position Y</label>
+						<input 
+							type="number"
+							step="0.000000000000001"
+							id="positionYInput"
+							placeholder="Enter Favourite Number"
+							class="form-input"
+							min="-5000"
+							max="5000"
+							value="0"
+						/>
+					</div>
+					<div>
+						<label for="rotationInput">Rotation in Degrees</label>
+						<input 
+							type="number"
+							step="0.000000000000001"
+							id="rotationInput"
+							placeholder="Enter Favourite Number"
+							class="form-input"
+							min="0"
+							max="360"
+							value="0"
+						/>
+					</div>
+					<!--No usar este tipo de submits para nuestra app-->
+					<button id="ok-btn" class="submit-btn"> Ok </Button>
+				</div>
+			</div>
+		</section>
+	</section>
+
 
 	<script type="module" src="main.js"></script>
 

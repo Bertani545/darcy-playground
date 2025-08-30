@@ -2,6 +2,7 @@
 import * as webgl_utils from './webgl-utils.js'
 import {Grid} from './grid_class.js'
 import * as mathRenderer from './math_renderer.js';
+import * as gl_2dMath from './gl_2Dmath.js'
 
 
 // Returns a random integer from 0 to range - 1.
@@ -160,7 +161,7 @@ async function main() {
 
     // ---------- Animation stuff --------
     //Time in the curve
-    const t = (timeNow % animation_duration) / animation_duration
+    //const t = (timeNow % animation_duration) / animation_duration
 
 
 
@@ -279,7 +280,6 @@ async function main() {
 
   canvas_input.addEventListener('mousedown', (e) => {
     clickMechanics({x: e.clientX, y: e.clientY})
-    preventDefault()
   });
   canvas_input.addEventListener('touchstart', (e) => {
     if (e.touches.length < 2) lastDistance = null;
@@ -295,7 +295,6 @@ async function main() {
 
   canvas_input.addEventListener('mouseup', () => {
     stopMovement()
-    e.preventDefault()
   });
   canvas_input.addEventListener('touchend', () => {
     stopMovement()
@@ -317,7 +316,10 @@ async function main() {
     console.log("Drop here")
   });
 
-  // -------------------------------- Load file
+  // -------------------------------- Load file ------------------------------
+  let imageData;
+  let svgText;
+
   function loadSVGFile(files) {
     if (files.length > 0) {
         const file = files[0];
@@ -331,13 +333,96 @@ async function main() {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const svgText = e.target.result;
-            grid.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
+          console.log(e)
+            svgText = e.target.result;
+            //grid.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
+
+            document.getElementById('inputResolution').classList.add('show-modal');            
         };
         // We read the whole file to parse afterwards
+        for (let e of document.querySelectorAll('.imageName')){
+          e.innerHTML = file.name
+        }
         reader.readAsText(file);
     }
   }
+
+  document.getElementById('ok-btnPoints').addEventListener('click', () => {
+    const input = document.querySelector('.resolution-input');
+    if (!input.checkValidity) {
+      input.reportValidity();
+    }
+    else {
+      document.getElementById('inputResolution').classList.remove('show-modal');
+      document.getElementById('modal').classList.add('show-modal');
+
+      imageData = grid.create_paths(svgText, input.value);
+      document.getElementById('widthInput').value = imageData.width;
+      document.getElementById('heightInput').value = imageData.height;
+      document.getElementById('positionXInput').value = imageData.posX;
+      document.getElementById('positionYInput').value = imageData.posY;
+    }
+  })
+
+  function parseFloatDefault(x) {
+    const n = parseFloat(x);
+    return isNaN(n) ? 0 : n;
+  }
+
+  document.getElementById('ok-btn').addEventListener('click', () =>{
+    const inputs = document.querySelectorAll(".form-input");
+      let allValid = true;
+
+      inputs.forEach(input => {
+        if (!input.checkValidity()) {
+          input.reportValidity();
+          allValid = false;
+        }
+      });
+
+      if (allValid) {
+
+        const newWidth = parseFloatDefault(document.getElementById('widthInput').value);
+        const newHeigth = parseFloatDefault(document.getElementById('heightInput').value);
+        const newPosX = parseFloatDefault(document.getElementById('positionXInput').value);
+        const newPosY = parseFloatDefault(document.getElementById('positionYInput').value)
+        const angle = parseFloatDefault(document.getElementById('rotationInput').value) /180 * Math.PI;
+
+        const newData = {
+          'scale': [newWidth, newHeigth],
+          'position': [newPosX, newPosY],
+          'rotation': angle
+        }
+
+        grid.update_discrete_paths(newData); 
+
+        document.getElementById('modal').classList.remove('show-modal');
+      }
+      else {
+        grid.clean_paths();
+      }
+
+    
+    
+  })
+
+
+  document.getElementById('closeModal').addEventListener("click", () => {
+    document.getElementById('modal').classList.remove('show-modal');
+  })
+  document.getElementById('closeRes').addEventListener("click", () => {
+    document.getElementById('inputResolution').classList.remove('show-modal');
+  })
+
+  window.addEventListener('mousedown', (e) => {
+    const input2 = document.getElementById('modal')
+    const input1 = document.getElementById('inputResolution');
+    if (e.target === input1 || e.target === input2) 
+    {
+      input1.classList.remove('show-modal')
+      input2.classList.remove('show-modal')
+    }
+  })
 
   document.getElementById('uploadBtn').addEventListener("click", () =>{
     document.getElementById('fileInput').click();
@@ -350,6 +435,10 @@ async function main() {
     loadSVGFile(event.dataTransfer.files);
   });
 
+
+
+
+  // -------------------------------- Expressions input  --------------------------------
 
   const input_f1 = document.getElementById("f1");
   const input_f2 = document.getElementById("f2");
@@ -370,26 +459,9 @@ async function main() {
     mathRenderer.startUpdate(renderf2, newTexOuput);
   });
 
+  // -------------------------------- Resize ----------------------------------
 
-
-/*
-  //document.getElementById('time_button').addEventListener('click', () => {
-  //    animate_method = 0;
-  //  });
-
-  //document.getElementById('length_button').addEventListener('click', () => {
-  //  animate_method = 1;
-  //});
-
-  const numberInput = document.getElementById('numberInput');
-
-  document.getElementById('enter_button').addEventListener('click', () => {
-    if(numberInput.value < 0.1) alert('The animation time is too low!');
-    else animation_duration = numberInput.value;
-  });
-*/
-
-window.addEventListener('resize', () => {
+  window.addEventListener('resize', () => {
      if (window.matchMedia("(orientation: portrait)").matches) {
         console.log("Portrait")
      }
