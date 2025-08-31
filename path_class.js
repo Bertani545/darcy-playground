@@ -334,6 +334,13 @@ export class PathContainer
 
   }
 
+  getImageMods() {
+    return {
+      'center': [this.extraOffset[0] + this.originalOffset[0], this.extraOffset[1] + this.originalOffset[1]],
+      'zoom': this.currentZoom
+    }
+  }
+
   draw(spanX, spanY)
   {
     const gl = this.gl;

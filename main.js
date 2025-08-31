@@ -373,11 +373,14 @@ async function main() {
   })
 
   document.getElementById('editBtn').addEventListener('click', () => {
+
+    const info = grid.getImageMods();
+
     document.getElementById('modal').classList.add('show-modal');
-    document.getElementById('widthInput').value = imageData.scale[0];
-    document.getElementById('heightInput').value = imageData.scale[1];
-    document.getElementById('positionXInput').value = imageData.position[0];
-    document.getElementById('positionYInput').value = imageData.position[1];
+    document.getElementById('widthInput').value = imageData.scale[0] * info.zoom;
+    document.getElementById('heightInput').value = imageData.scale[1] * info.zoom;
+    document.getElementById('positionXInput').value = info.center[0];
+    document.getElementById('positionYInput').value = info.center[1];
     document.getElementById('rotationInput').value = imageData.rotation;
   })
 

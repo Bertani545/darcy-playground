@@ -692,7 +692,10 @@ export class Grid
     this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
   }
 
-
+  getImageMods()
+  {
+    return this.curves.getImageMods();
+  }
 
 
     draw()
