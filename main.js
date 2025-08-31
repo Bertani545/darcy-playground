@@ -319,6 +319,12 @@ async function main() {
   // -------------------------------- Load file ------------------------------
   let imageData;
   let svgText;
+  let lockedRatio = true;
+  const widthInput = document.getElementById('widthInput');
+  const heightInput = document.getElementById('heightInput');
+  const linkButton = document.getElementById('linkBtn');
+  const linkedSVG = document.getElementById('linkedSVG');
+  const unlikedSVG = document.getElementById('unlikedSVG');
 
   function loadSVGFile(files) {
     if (files.length > 0) {
@@ -330,10 +336,11 @@ async function main() {
             return;
         }
 
-
+        lockedRatio = true;
+        linkedSVG.hidden = false;
+        unlikedSVG.hidden = true;
         const reader = new FileReader();
         reader.onload = (e) => {
-          console.log(e)
             svgText = e.target.result;
             //grid.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
 
@@ -402,7 +409,7 @@ async function main() {
           'scale': [newWidth, newHeigth],
           'position': [newPosX, newPosY],
           'rotation': angle,
-          'ratio': newWidth/newHeigth
+          'ratio': imageData.ratio // Original one, does not change
         }
 
         grid.update_discrete_paths(imageData); 
@@ -437,10 +444,6 @@ async function main() {
 
   // ------------------------- Preserve ratio (or not) when inputing size ---------------------
 
-  let lockedRatio = true;
-  const widthInput = document.getElementById('widthInput');
-  const heightInput = document.getElementById('heightInput');
-  const lockButton = document.getElementById('lockBtn');
   widthInput.addEventListener('blur', () => {
     if (lockedRatio) {
       const newWidth = parseFloatDefault(widthInput.value);
@@ -455,11 +458,13 @@ async function main() {
       widthInput.value = newHeigth * imageData.ratio;
     }
   })
-  lockButton.addEventListener('click', ()=>{
+  linkButton.addEventListener('click', ()=>{
     lockedRatio = !lockedRatio;
     if(lockedRatio) {
-      heightInput.value = widthInput.value / imageData.ratio; 
+      heightInput.value = widthInput.value / imageData.ratio;
     }
+    linkedSVG.hidden = !lockedRatio;
+    unlikedSVG.hidden = lockedRatio;
   })
 
 
@@ -476,6 +481,16 @@ async function main() {
   });
 
 
+  // --------------------- Preserve transformations ----------------------
+  let lockedTrans = true;
+  const lockedSVG = document.getElementById('lockedSVG')
+  const unlockedSVG = document.getElementById('unlockedSVG')
+
+  document.getElementById('lockBtn').addEventListener('click', () =>{
+    lockedTrans = !lockedTrans;
+    lockedSVG.hidden = !lockedTrans;
+    unlockedSVG.hidden = lockedTrans;
+  })
 
 
   // -------------------------------- Expressions input  --------------------------------

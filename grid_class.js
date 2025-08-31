@@ -163,7 +163,8 @@ export class Grid
     this.spanX = [this.middleX - halfX, this.middleX + halfX];
 
     //Update offset
-    const percentage = this.Offset[0] / this.sizeSquare[0];
+    //const percentageX = this.Offset[0] / this.sizeSquare[0];
+    //const percentageY = this.Offset[1] / this.sizeSquare[1];
     
     
     //this.Offset = [0,0];
@@ -171,7 +172,8 @@ export class Grid
     this.update_span(this.spanX, this.spanY);
     this.update_ratio();
     this.update_squareSize();
-    this.Offset[0] = percentage * this.sizeSquare[0];
+    //this.Offset[0] = percentageX * this.sizeSquare[0];
+    //this.Offset[1] = percentageY * this.sizeSquare[1];
     
     //this.update_text_labels();
 
@@ -329,7 +331,7 @@ export class Grid
         curr_div.style.color = "rgba(0,0,0,0)";
       }else
       {
-        curr_div.style.color = "rgba(255,255,0,1)";
+        curr_div.style.color = "rgb(255,255,0)";
       }
 
       // Obtain position for display
@@ -339,8 +341,8 @@ export class Grid
       x *= this.gl.canvas.width;
 
       const dpr = window.devicePixelRatio; // To account for zoom
-      curr_div.style.left = (x + 15) / dpr + "px";
-      curr_div.style.top  = 20 / dpr + "px";
+      curr_div.style.left = (x + 5) / dpr  + "px";
+      curr_div.style.top  = 5 / dpr  + "px";
       curr_div.textContent = position.toFixed(3);
 
       // See what should we do for very small and very big nunmbers
@@ -358,10 +360,12 @@ export class Grid
       y = (y * this.zoom  + this.Offset[1] + 1) / 2;
       if(y < 0 || y > 1)
       {
-        curr_div.style.color = "rgba(0,0,0,0)";
+        //curr_div.style.color = "rgba(0,0,0,0)";
+        curr_div.display = 'none';
       }else
       {
-        curr_div.style.color = "rgba(255,255,0,1)";
+        curr_div.style.color = "rgb(255,255,0)";
+        curr_div.display= 'block'
       }
 
       // Obtain position for display
@@ -372,10 +376,8 @@ export class Grid
       y *= this.gl.canvas.height;
 
       const dpr = window.devicePixelRatio; 
-
-
-      curr_div.style.left = 20 / dpr + "px";
-      curr_div.style.top  = (y + 15) / dpr + "px";
+      curr_div.style.left = 5 / dpr + "px";
+      curr_div.style.top  = (y + 5) / dpr + "px";
       curr_div.textContent = position.toFixed(3);
     }
   }

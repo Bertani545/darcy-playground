@@ -222,17 +222,18 @@ export class PathContainer
   // Returns a texture and how many paths using the object with points
   update_discrete_paths(newData) 
   {
+    console.log(newData)
 
     // Build the transformation matrix
     const scaleX =  newData.scale[0] / this.originalData.scale[0];
     const scaleY =  newData.scale[1] / this.originalData.scale[1];
     const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
     const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
-    const angle = newData.rotation / 360.0 * Math.PI;
+    const angle = newData.rotation / 180.0 * Math.PI;
     const rotMatrix = gl_2dmath.get_rotation_matrix(angle);
 
-    const transformMatrix = gl_2dmath.multiply_MM(gl_2dmath.multiply_MM(scaleMatrix, rotMatrix), transMatrix);
-
+    // Order of application
+    const transformMatrix = gl_2dmath.multiply_MM(transMatrix, gl_2dmath.multiply_MM(scaleMatrix, rotMatrix));
 
 
     // Obtain new bounding box

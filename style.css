@@ -13,7 +13,7 @@ html, body {
 	padding: 0;
 }
 h1{
-	font-size: 3rem;
+	font-size: 5vh;
 }
 
 canvas {
@@ -24,21 +24,14 @@ canvas {
 #text_overlay_input
 	{
 		position: absolute;
-		left: 0px;
-		top: 0px;
 		color: white;
-		width: 100%;
-		height: 100%;
+		width: calc(100% - 2rem);
+		height: calc(100% - 2rem);
 		z-index: 1;
 		overflow: hidden;
 		pointer-events: none;
 	}
-.grid_numbers
-		{
-			position: absolute;
-			color: rgba(255,255,1,1);
-			font-size: 1.3rem;
-		}
+
 
 #title_div{
 		grid-column: 1;
@@ -79,7 +72,12 @@ canvas {
 		min-height: 0;
 	}
 
-	
+	.grid_numbers
+		{
+			position: absolute;
+			color: rgba(255,255,1,1);
+			font-size: 2vh;
+		}
 
 	#input_display{
 		grid-column: 1 / span 2;
@@ -102,7 +100,7 @@ canvas {
 		justify-self: end;
 	}
 	.svgButton{
-		width: 12rem;
+		width: 6rem;
 		height: 3rem;
 		cursor: pointer;
 	}
@@ -219,6 +217,13 @@ canvas {
 		height: 100%;
 	}
 
+	.grid_numbers
+		{
+			position: absolute;
+			color: rgba(255,255,1,1);
+			font-size: 1vw;
+		}
+
 	#title_div{
 		background-color: white;
 	}
@@ -245,7 +250,7 @@ canvas {
 		grid-column: 1;
 	}
 	.svgButton{
-		width: 12rem;
+		width: 6rem;
 		cursor: pointer;
 	}
 	#editBtn{
@@ -329,6 +334,7 @@ canvas {
 
 .modal-form div {
 	margin: 20px 0;
+	margin-right: 20px;
 }
 
 .modal-form label {
@@ -360,6 +366,57 @@ canvas {
 	cursor: pointer;
 
 }
+
+/* ---------------------- For locked ratio ------------- */
+
+#sizeInput {
+	display: grid;
+	grid-template-columns: 8fr 1.5fr;
+	row-gap: 20px;
+	grid-template-rows: auto auto;
+}
+
+#sizeInput .form-input {
+	grid-column: 1/2;
+	margin: 0;
+	padding: 8px;
+	width: 90%;
+}
+#sizeInput label {
+	display: block;
+	margin-bottom: 6px;
+}
+#linkContainer {
+	grid-column: 2/3;
+	grid-row: 1/4;
+	display: flex;
+	align-content: center;
+	align-items: center;
+}
+#linkBtn {
+	cursor: pointer;
+	background-color: transparent;
+	border:none;
+}
+
+
+/*---------- Lock tranaformations button stuff -------------*/
+
+#lockBtn {
+	position:absolute;
+	height: 2rem;
+	width: 2rem;
+	bottom: 25px;
+	right: 25px;
+	z-index: 1;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+}
+
+
+
+
 
 /*JS*/
 .modal-container.show-modal {
