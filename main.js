@@ -488,6 +488,7 @@ async function main() {
 
   document.getElementById('lockBtn').addEventListener('click', () =>{
     lockedTrans = !lockedTrans;
+    grid.updateLockPaths(lockedTrans);
     lockedSVG.hidden = !lockedTrans;
     unlockedSVG.hidden = lockedTrans;
   })

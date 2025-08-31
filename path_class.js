@@ -13,6 +13,9 @@ export class PathContainer
     constructor(gl)
   {
     this.gl = gl;
+    this.originalOffset = [0,0];
+    this.extraOffset = [0,0];
+    this.currentZoom = 1;
   }
 
   async build()
@@ -63,12 +66,14 @@ export class PathContainer
     //Save shader properties
     this.spanLocation = gl.getUniformLocation(program, "u_spanXY");
     this.pointDataLocation = gl.getUniformLocation(program, "u_pointData");
-    this.screenSizeLocation = gl.getUniformLocation(program, "u_screenSize");
-    this.pointsTotalLocation = gl.getUniformLocation(program, "u_nPoints");
-
+    //this.screenSizeLocation = gl.getUniformLocation(program, "u_screenSize");
+    //this.pointsTotalLocation = gl.getUniformLocation(program, "u_nPoints");
+    this.zoomLocation = gl.getUniformLocation(program, "u_zoom");
+    this.transLocation = gl.getUniformLocation(program, "u_trans");
 
     this.gl.useProgram(this.Shader);
     gl.uniform1i(this.pointDataLocation, 1);
+    gl.uniform1f(this.zoomLocation, 1.0);
 
 
     this.nPaths = 0;
@@ -82,8 +87,12 @@ export class PathContainer
     const vertexShader = await createShader_fromSourceCode(gl, gl.VERTEX_SHADER, this.vertexShaderTransformed_source .replace("REPLACE", new_function) );
     this.transformedShader = await createProgram(gl, vertexShader, this.fragmentShader);
 
+
     gl.useProgram(this.transformedShader);
     gl.uniform1i(gl.getUniformLocation(this.transformedShader, "u_pointData"), 1);
+    const effectiveTranslation = [this.extraOffset[0] + this.originalOffset[0], this.extraOffset[1] + this.originalOffset[1]]
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...effectiveTranslation);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
   }
 
 
@@ -228,13 +237,14 @@ export class PathContainer
     const scaleX =  newData.scale[0] / this.originalData.scale[0];
     const scaleY =  newData.scale[1] / this.originalData.scale[1];
     const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
-    const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
+    //const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
+    this.originalOffset = newData.position;
     const angle = newData.rotation / 180.0 * Math.PI;
     const rotMatrix = gl_2dmath.get_rotation_matrix(angle);
 
     // Order of application
-    const transformMatrix = gl_2dmath.multiply_MM(transMatrix, gl_2dmath.multiply_MM(scaleMatrix, rotMatrix));
-
+    //const transformMatrix = gl_2dmath.multiply_MM(transMatrix, gl_2dmath.multiply_MM(scaleMatrix, rotMatrix));
+    const transformMatrix = gl_2dmath.multiply_MM(scaleMatrix, rotMatrix);
 
     // Obtain new bounding box
     let left = Infinity
@@ -276,12 +286,49 @@ export class PathContainer
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, texData);
 
-    return {Top: top,
-            Bottom: bottom,
-            Left: left, 
-            Right:right }
+    // Set shaders
+    this.currentZoom = 1;
+    this.extraOffset = [0,0];
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform2f(this.transLocation, ...this.originalOffset);
+    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...this.originalOffset);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+
+
+    return {Top: top + this.originalOffset[1],
+            Bottom: bottom + this.originalOffset[1],
+            Left: left + this.originalOffset[0], 
+            Right:right + this.originalOffset[0]}
   }
 
+  update_translation(dx, dy) {
+    this.extraOffset[0] += dx;
+    this.extraOffset[1] += dy;
+    //this.extraOffset = new_translation;
+    const effectiveTranslation = [this.extraOffset[0] + this.originalOffset[0], this.extraOffset[1] + this.originalOffset[1]]
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform2f(this.transLocation, ...effectiveTranslation);
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...effectiveTranslation);
+  }
+
+  update_zoom(zoomFactor) {
+    this.currentZoom *= zoomFactor;
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+  }
+
+  centerPathAt(x, y) {
+    this.extraOffset = [x - this.originalOffset[0], y - this.originalOffset[1]];
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform2f(this.transLocation, x, y);
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), x, y);
+  }
 
   draw(spanX, spanY)
   {

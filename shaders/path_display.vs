@@ -2,6 +2,8 @@
  
 
 uniform vec4 u_spanXY; // (minX, maxX, minY, maxY)
+uniform vec2 u_trans;
+uniform float u_zoom;
 
 uniform sampler2D u_pointData;
 
@@ -12,6 +14,8 @@ void main() {
   vec4 data = texelFetch(u_pointData, ivec2(gl_VertexID, gl_InstanceID), 0);
 
   vec2 coords = data.xy;
+  coords *= u_zoom;
+  coords += u_trans;
 
   gl_Position.zw = vec2(.0, 1.0);
   // Transform them into [-1, 1]

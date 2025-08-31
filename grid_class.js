@@ -44,6 +44,10 @@ export class Grid
     this.middleX = [0,0]
     this.middleY = [0,0]
     this.spanTransformed = new Float32Array(4);
+
+
+    this.lockPaths = true; // ---------------------------------------------------------------------------------------------
+
   }
 
   async build(spanX = [-1,1], spanY = [-1,1])
@@ -273,6 +277,7 @@ export class Grid
                               float log10(float x) {return log(x) *0.434294481903;}
 
                               ` ;
+                              
     this.transformFunction += this.f1 + this.f2 + "vec2 f(vec2 p){ return vec2(f1(p), f2(p));}"
     //console.log(this.transformFunction)
 
@@ -408,6 +413,7 @@ export class Grid
 
           this.sizeY = (this.spanY[1] - this.spanY[0]) / (1 + this.zoomSpeed);
           this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
+          if (!this.lockPaths) this.curves.update_zoom(1 / (1 + this.zoomSpeed));
 
       } else {
           this.zoom /= (1 + this.zoomSpeed); // Zoom out
@@ -419,6 +425,8 @@ export class Grid
 
           this.sizeY = (this.spanY[1] - this.spanY[0]) * (1 + this.zoomSpeed);
           this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
+
+          if (!this.lockPaths) this.curves.update_zoom(1 + this.zoomSpeed);
       }
       this.update_span(this.spanX, this.spanY);
 
@@ -485,7 +493,15 @@ export class Grid
     this.spanY[0] += dy;
     this.spanY[1] += dy;
 
+
+    if (!this.lockPaths) this.curves.update_translation(-dx, dy);
+
     this.update_span(this.spanX, this.spanY);
+  }
+
+  updateLockPaths(lock) {
+    this.lockPaths = lock;
+    if (!lock) this.curves.centerPathAt(this.middleX, this.middleY);
   }
 
   update_span(spanX, spanY)

@@ -3,6 +3,8 @@
 
 uniform vec4 u_spanXY; // (minX, maxX, minY, maxY)
 uniform vec4 u_transformedSpanXY;
+uniform vec2 u_trans;
+uniform float u_zoom;
 
 uniform sampler2D u_pointData;
 
@@ -13,7 +15,8 @@ REPLACE
 void main() {
 
   vec4 data = texelFetch(u_pointData, ivec2(gl_VertexID, gl_InstanceID), 0);
-
+  data.xy *= u_zoom;
+  data.xy += u_trans;
     bool change = false;
     if(data.x < u_spanXY[0]) change = true;//data.x = u_spanXY[0];
     if(data.x > u_spanXY[1]) change = true;//data.x = u_spanXY[1];
@@ -22,6 +25,7 @@ void main() {
 
     if(change) invisible = 1.0;
 
+  
   vec2 coords = f(data.xy);
 
 
