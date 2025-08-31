@@ -23,6 +23,7 @@ export class Grid
     this.color = color;
     this.zoomSpeed = zoom_speed;
     this.zoom = zoom;
+    this.spaceZoom = 1;
     this.Offset = [0,0];
     this.sizeSquare = [1,1]
     this.squareRatio = 1;
@@ -414,6 +415,7 @@ export class Grid
           this.sizeY = (this.spanY[1] - this.spanY[0]) / (1 + this.zoomSpeed);
           this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
           if (!this.lockPaths) this.curves.update_zoom(1 / (1 + this.zoomSpeed));
+          this.spaceZoom /= (1 + this.zoomSpeed);
 
       } else {
           this.zoom /= (1 + this.zoomSpeed); // Zoom out
@@ -427,6 +429,7 @@ export class Grid
           this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
 
           if (!this.lockPaths) this.curves.update_zoom(1 + this.zoomSpeed);
+          this.spaceZoom *= (1 + this.zoomSpeed);
       }
       this.update_span(this.spanX, this.spanY);
 
@@ -501,7 +504,7 @@ export class Grid
 
   updateLockPaths(lock) {
     this.lockPaths = lock;
-    if (!lock) this.curves.centerPathAt(this.middleX, this.middleY);
+    if (!lock) this.curves.lockPath(this.middleX, this.middleY, this.spaceZoom);
   }
 
   update_span(spanX, spanY)
@@ -685,6 +688,7 @@ export class Grid
   update_discrete_paths(newData)
   {
     const limits = this.curves.update_discrete_paths(newData);
+    this.spaceZoom = 1;
     this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
   }
 

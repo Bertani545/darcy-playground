@@ -322,12 +322,16 @@ export class PathContainer
     this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
   }
 
-  centerPathAt(x, y) {
+  lockPath(x, y, zoom) {
     this.extraOffset = [x - this.originalOffset[0], y - this.originalOffset[1]];
+    this.currentZoom = zoom;
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.transLocation, x, y);
+    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
     this.gl.useProgram(this.transformedShader);
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), x, y);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+
   }
 
   draw(spanX, spanY)
