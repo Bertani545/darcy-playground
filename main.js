@@ -415,7 +415,12 @@ async function main() {
           'ratio': imageData.ratio // Original one, does not change
         }
 
-        grid.update_discrete_paths(imageData); 
+        /*const realBox =*/ grid.update_discrete_paths(imageData);
+        // Rotations may change the real center
+        //const centerX = (realBox.Left + realBox.Right)/2; 
+        //const centerY = (realBox.Top + realBox.Bottom)/2;
+        //console.log("Please", centerX, centerY)
+        //imageData.position = [centerX, centerY]
         document.getElementById('editBtn').classList.add('show-modal');  
         document.getElementById('modal').classList.remove('show-modal');
       }
@@ -491,7 +496,7 @@ async function main() {
 
   document.getElementById('lockBtn').addEventListener('click', () =>{
     lockedTrans = !lockedTrans;
-    grid.updateLockPaths(lockedTrans);
+    grid.updateLockPaths(lockedTrans, imageData);
     lockedSVG.hidden = !lockedTrans;
     unlockedSVG.hidden = lockedTrans;
   })

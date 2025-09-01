@@ -312,6 +312,7 @@ export class PathContainer
     this.gl.uniform2f(this.transLocation, ...effectiveTranslation);
     this.gl.useProgram(this.transformedShader);
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...effectiveTranslation);
+
   }
 
   update_zoom(zoomFactor) {

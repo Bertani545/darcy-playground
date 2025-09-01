@@ -496,15 +496,19 @@ export class Grid
     this.spanY[0] += dy;
     this.spanY[1] += dy;
 
-
-    if (!this.lockPaths) this.curves.update_translation(-dx, dy);
+    // For the picture
+    this.currentImageCenter[0] -= dx;
+    this.currentImageCenter[1] += dy;  
+    if (!this.lockPaths) {
+      this.curves.update_translation(-dx, dy);
+    }
 
     this.update_span(this.spanX, this.spanY);
   }
 
-  updateLockPaths(lock) {
+  updateLockPaths(lock, imageData) {
     this.lockPaths = lock;
-    if (!lock) this.curves.lockPath(this.middleX, this.middleY, this.spaceZoom);
+    if (!lock) this.curves.lockPath(...this.currentImageCenter, this.spaceZoom);
   }
 
   update_span(spanX, spanY)
@@ -689,7 +693,9 @@ export class Grid
   {
     const limits = this.curves.update_discrete_paths(newData);
     this.spaceZoom = 1;
+    this.currentImageCenter = [...newData.position];
     this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
+    //return limits;
   }
 
   getImageMods()
