@@ -48,7 +48,7 @@ export class Grid
 
 
     this.lockPaths = true; // ---------------------------------------------------------------------------------------------
-
+    this.currentImageCenter = [0,0]
   }
 
   async build(spanX = [-1,1], spanY = [-1,1])

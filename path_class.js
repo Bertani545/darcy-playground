@@ -16,6 +16,8 @@ export class PathContainer
     this.originalOffset = [0,0];
     this.extraOffset = [0,0];
     this.currentZoom = 1;
+    this.correctionOffset = [0 , 0];
+    this.rotation = [1, 0, 0, 0, 1, 0, 0 ,0 ,1]
   }
 
   async build()
@@ -70,6 +72,7 @@ export class PathContainer
     //this.pointsTotalLocation = gl.getUniformLocation(program, "u_nPoints");
     this.zoomLocation = gl.getUniformLocation(program, "u_zoom");
     this.transLocation = gl.getUniformLocation(program, "u_trans");
+    this.rotationLocation = gl.getUniformLocation(program, "u_rotation");
 
     this.gl.useProgram(this.Shader);
     gl.uniform1i(this.pointDataLocation, 1);
@@ -93,6 +96,8 @@ export class PathContainer
     const effectiveTranslation = [this.extraOffset[0] + this.originalOffset[0], this.extraOffset[1] + this.originalOffset[1]]
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...effectiveTranslation);
     this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+    this.gl.uniformMatrix3fv(this.gl.getUniformLocation(this.transformedShader, 'u_rotation'), false, this.rotation);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_correctionTrans') , ...this.correctionOffset); 
   }
 
 
@@ -241,16 +246,18 @@ export class PathContainer
     this.originalOffset = newData.position;
     const angle = newData.rotation / 180.0 * Math.PI;
     const rotMatrix = gl_2dmath.get_rotation_matrix(angle);
+    this.rotation = rotMatrix;
 
     // Order of application
     //const transformMatrix = gl_2dmath.multiply_MM(transMatrix, gl_2dmath.multiply_MM(scaleMatrix, rotMatrix));
-    const transformMatrix = gl_2dmath.multiply_MM(scaleMatrix, rotMatrix);
+    const transformMatrix = scaleMatrix;//gl_2dmath.multiply_MM(rotMatrix, scaleMatrix); //
 
     // Obtain new bounding box
     let left = Infinity
     let right = -Infinity
     let top = -Infinity
     let bottom = Infinity;
+
 
     function update_bouding_box(point)
     {
@@ -270,9 +277,10 @@ export class PathContainer
       point[0] -= this.originalData.position[0];
       point[1] -= this.originalData.position[1];
       point = gl_2dmath.multiply_MV(transformMatrix, point);
-      update_bouding_box(point)
       texData[i] = point[0];
       texData[i+1] = point[1];
+      update_bouding_box(point);//*gl_2dmath.multiply_MV(this.rotation, point));
+      
     }
 
 
@@ -286,21 +294,48 @@ export class PathContainer
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, texData);
 
+    // We build the containing box adding rotation
+    const boudingPoints  = [
+      [top, left],
+      [top, right],
+      [bottom, right],
+      [bottom, left]
+    ]
+    for (let p of boudingPoints) {
+      p = gl_2dmath.multiply_MV(this.rotation, [...p, 1]);
+      update_bouding_box(p)
+    }
+    
+
+    this.correctionOffset = [
+      -(left + right) / 2,
+      -(top + bottom) / 2
+    ]
+
+    const newBox = {Top: top + this.originalOffset[1],
+            Bottom: bottom + this.originalOffset[1],
+            Left: left + this.originalOffset[0], 
+            Right:right + this.originalOffset[0]}
+
+    
+    
+
     // Set shaders
     this.currentZoom = 1;
     this.extraOffset = [0,0];
     this.gl.useProgram(this.Shader);
     this.gl.uniform2f(this.transLocation, ...this.originalOffset);
     this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+    this.gl.uniformMatrix3fv(this.rotationLocation, false, this.rotation)
+    //this.gl.uniform2f(this.gl.getUniformLocation(this.Shader, 'u_correctionTrans') , ...this.correctionOffset); 
     this.gl.useProgram(this.transformedShader);
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...this.originalOffset);
     this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+    this.gl.uniformMatrix3fv(this.gl.getUniformLocation(this.transformedShader, 'u_rotation'), false, this.rotation)
+    //this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_correctionTrans') , ...this.correctionOffset); 
 
 
-    return {Top: top + this.originalOffset[1],
-            Bottom: bottom + this.originalOffset[1],
-            Left: left + this.originalOffset[0], 
-            Right:right + this.originalOffset[0]}
+    return newBox;
   }
 
   update_translation(dx, dy) {

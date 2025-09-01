@@ -3,6 +3,7 @@
 
 uniform vec4 u_spanXY; // (minX, maxX, minY, maxY)
 uniform vec2 u_trans;
+uniform mat3 u_rotation;
 uniform float u_zoom;
 
 uniform sampler2D u_pointData;
@@ -15,6 +16,8 @@ void main() {
 
   vec2 coords = data.xy;
   coords *= u_zoom;
+  coords = vec2(u_rotation * vec3(coords, 1.0));
+  //coords += u_zoom * vec2(u_rotation * vec3(u_correctionTrans, 1.0));
   coords += u_trans;
 
   gl_Position.zw = vec2(.0, 1.0);
