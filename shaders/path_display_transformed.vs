@@ -5,6 +5,7 @@ uniform vec4 u_spanXY; // (minX, maxX, minY, maxY)
 uniform vec4 u_transformedSpanXY;
 uniform vec2 u_trans;
 uniform mat3 u_rotation;
+uniform vec2 u_correctionTrans;
 uniform float u_zoom;
 
 uniform sampler2D u_pointData;
@@ -18,7 +19,7 @@ void main() {
   vec4 data = texelFetch(u_pointData, ivec2(gl_VertexID, gl_InstanceID), 0);
   data.xy *= u_zoom;
   data.xy = vec2(u_rotation * vec3(data.xy, 1.0));
-  data.xy += u_trans;
+  data.xy += u_trans - u_zoom * u_correctionTrans;
 
     bool change = false;
     if(data.x < u_spanXY[0]) change = true;//data.x = u_spanXY[0];
