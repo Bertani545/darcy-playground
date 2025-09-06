@@ -10,7 +10,11 @@ uniform float u_zoom;
 
 uniform sampler2D u_pointData;
 
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aTexCoord;
+
 out float invisible;
+out vec2 vTexCoord;
 
 REPLACE
 
