@@ -93,13 +93,13 @@ canvas {
 	}
 
 
-	#svgButtons {
+	#imageButtons {
 		margin: 10px;
 		grid-row: 2/3;
 		grid-column: 2;
 		justify-self: end;
 	}
-	.svgButton{
+	.imageButton{
 		width: 6rem;
 		height: 3rem;
 		cursor: pointer;
@@ -244,12 +244,12 @@ canvas {
 
 	}
 
-	#svgButtons {
+	#imageButtons {
 		margin: 10px;
 		grid-row: 2/3;
 		grid-column: 1;
 	}
-	.svgButton{
+	.imageButton{
 		width: 6rem;
 		cursor: pointer;
 	}

@@ -317,7 +317,7 @@ async function main() {
   });
 
   // -------------------------------- Load file ------------------------------
-  let imageData;
+  let imageData = {};
   let svgText;
   let lockedRatio = true;
   const widthInput = document.getElementById('widthInput');
@@ -326,31 +326,64 @@ async function main() {
   const linkedSVG = document.getElementById('linkedSVG');
   const unlikedSVG = document.getElementById('unlikedSVG');
 
-  function loadSVGFile(files) {
+  function loadImage(files) {
     if (files.length > 0) {
         const file = files[0];
+
+        const imageTypes = [
+          "image/png",
+          "image/jpeg",
+          "image/webp",
+          "image/bmp",
+          "image/svg+xml"
+        ];
         
-        // Check if it's an SVG file
-        if (file.type !== "image/svg+xml") {
-            alert("Please drop a valid SVG file.");
-            return;
+        if (imageTypes.includes(file.type)) {
+          lockedRatio = true;
+          linkedSVG.hidden = false;
+          unlikedSVG.hidden = true;
+          
+
+          if (file.type === "image/svg+xml") {
+
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  svgText = e.target.result;
+
+                  document.getElementById('inputResolution').classList.add('show-modal');            
+              };
+              // We read the whole file to parse afterwards
+              for (let e of document.querySelectorAll('.imageName')){
+                e.innerHTML = file.name
+              }
+              reader.readAsText(file);
+          } else {
+
+             const img = new Image();
+             img.onload = () => {
+
+                document.getElementById('modal').classList.add('show-modal');
+
+                // We are going to asume that 1px = 1 unit
+                imageData = grid.save_Image_data(img);
+                imageData.ratio = imageData.scale[0] / imageData.scale[1];
+                document.getElementById('widthInput').value = imageData.scale[0];
+                document.getElementById('heightInput').value = imageData.scale[1];
+                document.getElementById('positionXInput').value = imageData.position[0];
+                document.getElementById('positionYInput').value = imageData.position[1];
+              };
+              //img.onerror = reject;
+              img.src = URL.createObjectURL(file);
+              
+          }
+
+        } else {
+
+          alert("Please drop a valid Image. Not GIF");
+          return;
         }
 
-        lockedRatio = true;
-        linkedSVG.hidden = false;
-        unlikedSVG.hidden = true;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            svgText = e.target.result;
-            //grid.create_discrete_paths(svgText, 100); // CHANGE LATER TO ADD DEFINITION
-
-            document.getElementById('inputResolution').classList.add('show-modal');            
-        };
-        // We read the whole file to parse afterwards
-        for (let e of document.querySelectorAll('.imageName')){
-          e.innerHTML = file.name
-        }
-        reader.readAsText(file);
+        
     }
   }
 
@@ -415,7 +448,9 @@ async function main() {
           'ratio': imageData.ratio // Original one, does not change
         }
 
-        /*const realBox =*/ grid.update_discrete_paths(imageData);
+        console.log(imageData)
+
+        /*const realBox =*/ grid.update_Image(imageData);
         // Rotations may change the real center
         //const centerX = (realBox.Left + realBox.Right)/2; 
         //const centerY = (realBox.Top + realBox.Bottom)/2;
@@ -481,11 +516,11 @@ async function main() {
     document.getElementById('fileInput').click();
   })
   document.getElementById("fileInput").addEventListener("change", (event) => {
-      loadSVGFile(event.target.files);
+      loadImage(event.target.files);
   });
   canvas_input.addEventListener("drop", (event) => {
     event.preventDefault();
-    loadSVGFile(event.dataTransfer.files);
+    loadImage(event.dataTransfer.files);
   });
 
 

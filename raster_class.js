@@ -8,7 +8,7 @@ import {BezierCurve, point_in_bezier_time } from './bezier_functions.js';
 const MAX_POINTS = 1000;
 const MAX_PATHS = 2000;
 
-export class PathContainer
+export class RasterContainer
 {
     constructor(gl)
   {
@@ -18,6 +18,7 @@ export class PathContainer
     this.currentZoom = 1;
     this.correctionOffset = [0 , 0];
     this.rotation = [1, 0, 0, 0, 1, 0, 0 ,0 ,1]
+    this.isSVG = false;
   }
 
   async build()
@@ -68,8 +69,6 @@ export class PathContainer
     //Save shader properties
     this.spanLocation = gl.getUniformLocation(program, "u_spanXY");
     this.pointDataLocation = gl.getUniformLocation(program, "u_pointData");
-    //this.screenSizeLocation = gl.getUniformLocation(program, "u_screenSize");
-    //this.pointsTotalLocation = gl.getUniformLocation(program, "u_nPoints");
     this.zoomLocation = gl.getUniformLocation(program, "u_zoom");
     this.transLocation = gl.getUniformLocation(program, "u_trans");
     this.rotationLocation = gl.getUniformLocation(program, "u_rotation");
@@ -103,6 +102,8 @@ export class PathContainer
 
   create_paths(svgFile, pointsPerCurve)
   {
+
+    this.isSVG = true;
 
     const dataTexture = this.gl.createTexture();
     this.gl.activeTexture(this.gl.TEXTURE0 + 1),
@@ -225,6 +226,19 @@ export class PathContainer
     return this.originalData;
   }
 
+
+  save_Image_data(imgFile) {
+    this.rasterFile = imgFile;
+    this.isSVG = false;
+    this.originalData = {
+      'scale': [imgFile.width, imgFile.height],
+      'position': [0, 0],
+    }
+    return this.originalData;
+  }
+
+
+
   delete_temp_info()
   {
     // Call this to delete the object with the points
@@ -247,11 +261,11 @@ export class PathContainer
   // Returns a texture and how many paths using the object with points
   update_Image(newData) 
   {
-    console.log(newData)
 
     // Build the transformation matrix
     const scaleX =  newData.scale[0] / this.originalData.scale[0];
     const scaleY =  newData.scale[1] / this.originalData.scale[1];
+    console.log(scaleX, scaleY)
     const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
     //const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
     this.originalOffset = newData.position;
@@ -263,74 +277,118 @@ export class PathContainer
     //const transformMatrix = gl_2dmath.multiply_MM(transMatrix, gl_2dmath.multiply_MM(scaleMatrix, rotMatrix));
     const transformMatrix = scaleMatrix;//gl_2dmath.multiply_MM(rotMatrix, scaleMatrix); //
 
-    // Obtain new bounding box
-    let left = Infinity
-    let right = -Infinity
-    let top = -Infinity
-    let bottom = Infinity;
+
+    let newBox = {}
 
 
-    function update_bouding_box(point)
-    {
-      if(point[0] < left) left = point[0];
-      if(point[0] > right) right = point[0];
-      if(point[1] < bottom) bottom = point[1];
-      if(point[1] > top) top = point[1];
-    }
+    if (this.isSVG) {
+      // Obtain new bounding box
+      let left = Infinity
+      let right = -Infinity
+      let top = -Infinity
+      let bottom = Infinity;
 
 
-    const texData = new Float32Array(this.nPoints * this.nPaths * 4);
-
-    for(let i = 0; i < this.nPoints*this.nPaths*4; i+=4)
-    {
-      // Apply the transformation
-      let point = [this.originalTexData[i], this.originalTexData[i+1], 1];
-      point[0] -= this.originalData.position[0];
-      point[1] -= this.originalData.position[1];
-      point = gl_2dmath.multiply_MV(transformMatrix, point);
-      texData[i] = point[0];
-      texData[i+1] = point[1];
-      update_bouding_box(gl_2dmath.multiply_MV(this.rotation, point));//point);//*
-      
-    }
+      function update_bouding_box(point)
+      {
+        if(point[0] < left) left = point[0];
+        if(point[0] > right) right = point[0];
+        if(point[1] < bottom) bottom = point[1];
+        if(point[1] > top) top = point[1];
+      }
 
 
-    // Set data
-    const dataTexture = this.gl.createTexture();
-    this.gl.activeTexture(this.gl.TEXTURE0 + 1),
-    this.gl.bindTexture(this.gl.TEXTURE_2D, dataTexture),
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE),
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE),
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST),
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
-    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, texData);
+      const texData = new Float32Array(this.nPoints * this.nPaths * 4);
 
-    // We build the containing box adding rotation
-  /*
-    const boudingPoints  = [
-      [top, left],
-      [top, right],
-      [bottom, right],
-      [bottom, left]
-    ]
-    for (let p of boudingPoints) {
-      p = gl_2dmath.multiply_MV(this.rotation, [...p, 1]);
-      update_bouding_box(p)
-    }
-  */
+      for(let i = 0; i < this.nPoints*this.nPaths*4; i+=4)
+      {
+        // Apply the transformation
+        let point = [this.originalTexData[i], this.originalTexData[i+1], 1];
+        point[0] -= this.originalData.position[0];
+        point[1] -= this.originalData.position[1];
+        point = gl_2dmath.multiply_MV(transformMatrix, point);
+        texData[i] = point[0];
+        texData[i+1] = point[1];
+        update_bouding_box(gl_2dmath.multiply_MV(this.rotation, point));//point);//*
+        
+      }
 
-    this.correctionOffset = [
-      (left + right) / 2,
-      (top + bottom) / 2
-    ]
 
-    const newBox = {Top: top + this.originalOffset[1] - this.correctionOffset[1],
+      // Set data
+      const dataTexture = this.gl.createTexture();
+      this.gl.activeTexture(this.gl.TEXTURE0 + 1),
+      this.gl.bindTexture(this.gl.TEXTURE_2D, dataTexture),
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE),
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE),
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST),
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST),
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA32F, this.nPoints, this.nPaths, 0, this.gl.RGBA, this.gl.FLOAT, texData);
+
+      this.correctionOffset = [
+        (left + right) / 2,
+        (top + bottom) / 2
+      ]
+
+      newBox = {Top: top + this.originalOffset[1] - this.correctionOffset[1],
             Bottom: bottom + this.originalOffset[1] - this.correctionOffset[1],
             Left: left + this.originalOffset[0] - this.correctionOffset[0], 
             Right:right + this.originalOffset[0] - this.correctionOffset[0]}
+    } 
+    else {
+      // Normal picture
+
+      this.originalData
+      let left = this.originalData.position[0] - this.originalData.scale[0] / 2;
+      let right = this.originalData.position[0] + this.originalData.scale[0] / 2;
+      let top = this.originalData.position[1] + this.originalData.scale[1] / 2;
+      let bottom = this.originalData.position[1] - this.originalData.scale[1] / 2 
+      const corners = [
+        [left, top],
+        [left, bottom],
+        [right, top],
+        [right, bottom]
+       ]
+
+
+      left = Infinity;
+      right = -Infinity;
+      top = -Infinity;
+      bottom = Infinity;
+      function update_bouding_box(point)
+      {
+        if(point[0] < left) left = point[0];
+        if(point[0] > right) right = point[0];
+        if(point[1] < bottom) bottom = point[1];
+        if(point[1] > top) top = point[1];
+      }
+
+      for (let p of corners) {
+        // Apply the transformation
+        let point = [...p, 1]; // already centered around 0
+        point = gl_2dmath.multiply_MV(transformMatrix, point);
+        update_bouding_box(gl_2dmath.multiply_MV(this.rotation, point));
+      }
+
+      // Set data
+
+
+
+      this.correctionOffset = [
+        (left + right) / 2,
+        (top + bottom) / 2
+      ]
+      newBox = {Top: top  - this.correctionOffset[1],
+            Bottom: bottom  - this.correctionOffset[1],
+            Left: left  - this.correctionOffset[0], 
+            Right:right  - this.correctionOffset[0]}
 
     
+      console.log(newBox)
+    }
     
+    
+
+
 
     // Set shaders
     this.currentZoom = 1;

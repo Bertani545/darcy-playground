@@ -2,6 +2,7 @@ import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, bui
 import * as gl_2Dmath from "./gl_2Dmath.js"
 import {Vector2D} from "./gl_2Dmath.js"
 import { PathContainer } from './path_class.js';
+import { RasterContainer } from './raster_class.js';
 
 import * as Parser from "./parser.js";
 
@@ -38,7 +39,10 @@ export class Grid
     this.textContainer = text_container;
     this.create_text_instances();
 
-    this.curves = new PathContainer(this.gl);
+    this.displayedPath = new PathContainer(this.gl);
+    this.displayedRaster = new RasterContainer(this.gl);
+
+    this.currentDisplayer = this.displayedPath;
 
     this.spanX = [0,0]
     this.spanY = [0,0]
@@ -86,7 +90,8 @@ export class Grid
     gl.uniform4f(this.colorLocation, ...this.color);
     gl.uniform1f(this.aspectScreenLocation, gl.canvas.height  / gl.canvas.width);
 
-    await this.curves.build();
+    await this.displayedPath.build();
+    await this.displayedRaster.build();
     
     
     // Two other frame buffers for "compute" shaders
@@ -280,9 +285,9 @@ export class Grid
                               ` ;
                               
     this.transformFunction += this.f1 + this.f2 + "vec2 f(vec2 p){ return vec2(f1(p), f2(p));}"
-    //console.log(this.transformFunction)
 
-    await this.curves.update_transformed_shader(this.transformFunction);
+    await this.displayedPath.update_transformed_shader(this.transformFunction);
+    await this.displayedRaster.update_transformed_shader(this.transformFunction);
 
     const gl = this.gl;
 
@@ -414,7 +419,7 @@ export class Grid
 
           this.sizeY = (this.spanY[1] - this.spanY[0]) / (1 + this.zoomSpeed);
           this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
-          if (!this.lockPaths) this.curves.update_zoom(1 / (1 + this.zoomSpeed));
+          if (!this.lockPaths) this.currentDisplayer.update_zoom(1 / (1 + this.zoomSpeed));
           this.spaceZoom /= (1 + this.zoomSpeed);
 
       } else {
@@ -428,7 +433,7 @@ export class Grid
           this.sizeY = (this.spanY[1] - this.spanY[0]) * (1 + this.zoomSpeed);
           this.spanY = [this.middleY - this.sizeY/2, this.middleY + this.sizeY/2];
 
-          if (!this.lockPaths) this.curves.update_zoom(1 + this.zoomSpeed);
+          if (!this.lockPaths) this.currentDisplayer.update_zoom(1 + this.zoomSpeed);
           this.spaceZoom *= (1 + this.zoomSpeed);
       }
       this.update_span(this.spanX, this.spanY);
@@ -500,7 +505,7 @@ export class Grid
     this.currentImageCenter[0] -= dx;
     this.currentImageCenter[1] += dy;  
     if (!this.lockPaths) {
-      this.curves.update_translation(-dx, dy);
+      this.currentDisplayer.update_translation(-dx, dy);
     }
 
     this.update_span(this.spanX, this.spanY);
@@ -508,7 +513,7 @@ export class Grid
 
   updateLockPaths(lock, imageData) {
     this.lockPaths = lock;
-    if (!lock) this.curves.lockPath(...this.currentImageCenter, this.spaceZoom);
+    if (!lock) this.currentDisplayer.lockPath(...this.currentImageCenter, this.spaceZoom);
   }
 
   update_span(spanX, spanY)
@@ -684,14 +689,23 @@ export class Grid
 
   create_paths(svgFile, pointsPerCurve) 
   {
-    return this.curves.create_paths(svgFile, pointsPerCurve);
+    this.currentDisplayer.clean();
+    this.currentDisplayer = this.displayedPath;
+    return this.currentDisplayer.create_paths(svgFile, pointsPerCurve);
   }
 
-  clean_paths(){this.curves.delete_temp_info();}
+  save_Image_data(imgFile) {
+    this.currentDisplayer.clean();
+    this.currentDisplayer = this.displayedRaster;
+    return this.currentDisplayer.save_Image_data(imgFile);
+  }
 
-  update_discrete_paths(newData)
+
+  clean_paths(){this.displayedPath.delete_temp_info();}
+
+  update_Image(newData)
   {
-    const limits = this.curves.update_discrete_paths(newData);
+    const limits = this.currentDisplayer.update_Image(newData);
     this.spaceZoom = 1;
     this.currentImageCenter = [...newData.position];
     this.update_viewport([limits.Left, limits.Right], [limits.Bottom, limits.Top])
@@ -700,7 +714,7 @@ export class Grid
 
   getImageMods()
   {
-    return this.curves.getImageMods();
+    return this.currentDisplayer.getImageMods();
   }
 
 
@@ -721,7 +735,7 @@ export class Grid
     gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances + 1);
 
-    this.curves.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
+    this.currentDisplayer.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
 
 
     //Pass the texture to the second canvas
@@ -742,7 +756,7 @@ export class Grid
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances + 1);
 
-    this.curves.draw(this.spanX, this.spanY);
+    this.currentDisplayer.draw(this.spanX, this.spanY);
 
 
 
