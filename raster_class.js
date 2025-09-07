@@ -18,6 +18,7 @@ export class RasterContainer
     this.currentZoom = 1;
     this.correctionOffset = [0 , 0];
     this.rotation = [1, 0, 0, 0, 1, 0, 0 ,0 ,1]
+    this.originalScale = [1,1]
   }
 
   async build()
@@ -124,6 +125,7 @@ export class RasterContainer
     this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
     this.gl.uniformMatrix3fv(this.gl.getUniformLocation(this.transformedShader, 'u_rotation'), false, this.rotation);
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_correctionTrans') , ...this.correctionOffset); 
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_scale') , ...this.originalScale);
   }
 
 
@@ -151,6 +153,8 @@ export class RasterContainer
       );
 
 
+    this.create_grid(Math.min(512, imgFile.width), Math.min(512, imgFile.height));
+
     this.originalData = {
       'scale': [imgFile.width, imgFile.height],
       'position': [0, 0],
@@ -158,7 +162,65 @@ export class RasterContainer
     return this.originalData;
   }
 
+  create_grid(w, h){
+    const gl = this.gl;
 
+    const vertices  = []
+    for (let y = 0; y <= h; y++) {
+      for (let x = 0; x <= w; x++) {
+        // Coords
+        const px = x / w - 0.5;
+        const py = y / h - 0.5;
+
+        // Tex coords
+        const u = x / w;
+        const v = y / h;
+
+        vertices.push(px, py, u, v);
+      }
+    }
+    const vertexData = new Float32Array(vertices);
+
+    const indices = [];
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i0 = y * (w + 1) + x;
+        const i1 = i0 + 1;
+        const i2 = i0 + (w + 1);
+        const i3 = i2 + 1;
+
+        indices.push(i0, i1, i2); // first triangle
+        indices.push(i1, i3, i2); // second triangle
+      }
+    }
+
+    const indexData = new Uint32Array(indices);
+    this.indexCount = indexData.length;
+
+    this.gridVAO = gl.createVertexArray();
+    gl.bindVertexArray(this.gridVAO);
+
+    // VBO
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
+
+    // layout(location=0) in vec2 aPosition;
+    // layout(location=1) in vec2 aTexCoord;
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
+
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
+
+    // EBO
+    const ebo = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+
+    gl.bindVertexArray(null);
+  }
 
   delete_temp_info()
   {
@@ -186,7 +248,7 @@ export class RasterContainer
     // Build the transformation matrix
     const scaleX =  newData.scale[0];
     const scaleY =  newData.scale[1];
-    console.log(scaleX, scaleY)
+    this.originalScale = [scaleX, scaleY];
     //const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
     //const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
     this.originalOffset = newData.position;
@@ -262,13 +324,14 @@ export class RasterContainer
     this.gl.uniform1f(this.zoomLocation, this.currentZoom);
     this.gl.uniformMatrix3fv(this.rotationLocation, false, this.rotation)
     this.gl.uniform2f(this.gl.getUniformLocation(this.Shader, 'u_correctionTrans') , ...this.correctionOffset); 
-    this.gl.uniform2f(this.gl.getUniformLocation(this.Shader, 'u_scale') , scaleX, scaleY); 
+    this.gl.uniform2f(this.gl.getUniformLocation(this.Shader, 'u_scale') , ...this.originalScale); 
 
     this.gl.useProgram(this.transformedShader);
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_trans'), ...this.originalOffset);
     this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
     this.gl.uniformMatrix3fv(this.gl.getUniformLocation(this.transformedShader, 'u_rotation'), false, this.rotation)
-    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_correctionTrans') , ...this.correctionOffset); 
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_correctionTrans') , ...this.correctionOffset);
+    this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_scale') , ...this.originalScale);  
 
 
     return newBox;
@@ -327,11 +390,11 @@ export class RasterContainer
   {
     const gl = this.gl;
     
-    gl.bindVertexArray(this.VAO);
+    gl.bindVertexArray(this.gridVAO);
     gl.useProgram(this.transformedShader);
     gl.uniform4f(gl.getUniformLocation(this.transformedShader, "u_spanXY"),...spanX, ...spanY);
     gl.uniform4f(gl.getUniformLocation(this.transformedShader, "u_transformedSpanXY"),...spanXY);
-    gl.drawArraysInstanced(gl.LINE_STRIP, 0, this.nPoints, this.nPaths);
+    gl.drawElements(gl.TRIANGLES, this.indexCount, gl.UNSIGNED_INT, 0);
   }
 
 }

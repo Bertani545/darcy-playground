@@ -7,6 +7,7 @@ uniform vec2 u_trans;
 uniform mat3 u_rotation;
 uniform vec2 u_correctionTrans;
 uniform float u_zoom;
+uniform vec2 u_scale;
 
 uniform sampler2D u_pointData;
 
@@ -20,10 +21,11 @@ REPLACE
 
 void main() {
 
-  vec4 data = texelFetch(u_pointData, ivec2(gl_VertexID, gl_InstanceID), 0);
-  data.xy *= u_zoom;
-  data.xy = vec2(u_rotation * vec3(data.xy, 1.0));
-  data.xy += u_trans - u_zoom * u_correctionTrans;
+  vec2 data = aPosition;
+  data *= u_scale;
+  data *= u_zoom;
+  data = vec2(u_rotation * vec3(data, 1.0));
+  data += u_trans - u_zoom * u_correctionTrans;
 
     bool change = false;
     if(data.x < u_spanXY[0]) change = true;//data.x = u_spanXY[0];
@@ -34,7 +36,7 @@ void main() {
     if(change) invisible = 1.0;
 
   
-  vec2 coords = f(data.xy);
+  vec2 coords = f(data);
 
 
   gl_Position.zw = vec2(.0, 1.0);
@@ -44,5 +46,8 @@ void main() {
 
     //gl_Position.x = 2.0 * (coords.x - u_spanXY[0]) / (u_spanXY[1]-u_spanXY[0]) - 1.0;
     //gl_Position.y = 2.0 * (coords.y - u_spanXY[2]) / (u_spanXY[3]-u_spanXY[2]) - 1.0;
+
+    // Calculate
+    vTexCoord = aTexCoord;
 
 }
