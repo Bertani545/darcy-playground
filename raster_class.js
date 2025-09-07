@@ -19,6 +19,7 @@ export class RasterContainer
     this.correctionOffset = [0 , 0];
     this.rotation = [1, 0, 0, 0, 1, 0, 0 ,0 ,1]
     this.originalScale = [1,1]
+    this.shouldDraw = false; // To avoid drawing new pictures without cleaning the shader parameters for the last one
   }
 
   async build()
@@ -133,7 +134,7 @@ export class RasterContainer
 
   save_Image_data(imgFile) {
     
-
+    this.shouldDraw = false;
     // Set data
     const dataTexture = this.gl.createTexture();
     this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -238,6 +239,7 @@ export class RasterContainer
     this.correctionOffset = [0 , 0];
     this.rotation = [1, 0, 0, 0, 1, 0, 0 ,0 ,1]
     this.originalData = {}
+    this.indexCount = 0;
   }
 
 
@@ -333,7 +335,7 @@ export class RasterContainer
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_correctionTrans') , ...this.correctionOffset);
     this.gl.uniform2f(this.gl.getUniformLocation(this.transformedShader, 'u_scale') , ...this.originalScale);  
 
-
+    this.shouldDraw = true;
     return newBox;
   }
 
@@ -378,6 +380,7 @@ export class RasterContainer
 
   draw(spanX, spanY)
   {
+    if(!this.shouldDraw) return;
     const gl = this.gl;
 
     gl.bindVertexArray(this.VAO);
@@ -388,6 +391,7 @@ export class RasterContainer
 
   draw_transformed(spanX, spanY, spanXY)
   {
+    if(!this.shouldDraw) return;
     const gl = this.gl;
     
     gl.bindVertexArray(this.gridVAO);

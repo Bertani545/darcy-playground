@@ -490,7 +490,7 @@ async function main() {
   widthInput.addEventListener('blur', () => {
     if (lockedRatio) {
       const newWidth = parseFloatDefault(widthInput.value);
-      heightInput.value = newWidth / imageData.ratio;
+      heightInput.value = (newWidth / imageData.ratio).toFixed(6);
     }
     
   })
@@ -498,13 +498,13 @@ async function main() {
   heightInput.addEventListener('blur', () => {
     if (lockedRatio) {
       const newHeigth = parseFloatDefault(heightInput.value);
-      widthInput.value = newHeigth * imageData.ratio;
+      widthInput.value = (newHeigth * imageData.ratio).toFixed(6);
     }
   })
   linkButton.addEventListener('click', ()=>{
     lockedRatio = !lockedRatio;
     if(lockedRatio) {
-      heightInput.value = widthInput.value / imageData.ratio;
+      heightInput.value = (widthInput.value / imageData.ratio).toFixed(6);
     }
     linkedSVG.hidden = !lockedRatio;
     unlikedSVG.hidden = lockedRatio;
