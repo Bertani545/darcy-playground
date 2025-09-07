@@ -344,6 +344,11 @@ async function main() {
           unlikedSVG.hidden = true;
           
 
+          // We read the whole file to parse afterwards
+          for (let e of document.querySelectorAll('.imageName')){
+            e.innerHTML = file.name
+          }
+
           if (file.type === "image/svg+xml") {
 
               const reader = new FileReader();
@@ -352,11 +357,7 @@ async function main() {
 
                   document.getElementById('inputResolution').classList.add('show-modal');            
               };
-              // We read the whole file to parse afterwards
-              for (let e of document.querySelectorAll('.imageName')){
-                e.innerHTML = file.name
-              }
-              reader.readAsText(file);
+              
           } else {
 
              const img = new Image();
