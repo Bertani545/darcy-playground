@@ -349,6 +349,7 @@ async function main() {
             e.innerHTML = file.name
           }
 
+
           if (file.type === "image/svg+xml") {
 
               const reader = new FileReader();
@@ -357,7 +358,7 @@ async function main() {
 
                   document.getElementById('inputResolution').classList.add('show-modal');            
               };
-              
+              reader.readAsText(file);
           } else {
 
              const img = new Image();
