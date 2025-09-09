@@ -5,6 +5,8 @@ import * as mathRenderer from './math_renderer.js';
 import * as gl_2dMath from './gl_2Dmath.js'
 
 
+const MAX_IMG_SIZE = 1024;
+
 // Returns a random integer from 0 to range - 1.
 function randomInt(range) {
   return Math.floor(Math.random() * range);
@@ -326,6 +328,34 @@ async function main() {
   const linkedSVG = document.getElementById('linkedSVG');
   const unlikedSVG = document.getElementById('unlikedSVG');
 
+
+  async function resizeImageToMax(img) {
+    let w = img.width;
+    let h = img.height;
+
+    if (w <= MAX_IMG_SIZE && h <= MAX_IMG_SIZE) return img;
+
+    const aspect = w/h;
+    if (aspect > 1) {
+      w = MAX_IMG_SIZE;
+      h = Math.round(MAX_IMG_SIZE / aspect);
+    } else {
+      h = MAX_IMG_SIZE;
+      w = Math.round(MAX_IMG_SIZE * aspect);
+    }
+
+    // draw into an offscreen canvas
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, w, h);
+    const scaledImg = new Image();
+    
+    scaledImg.src = canvas.toDataURL("image/png");
+    return scaledImg; // Promise
+  }
+
   function loadImage(files) {
     if (files.length > 0) {
         const file = files[0];
@@ -338,51 +368,53 @@ async function main() {
           "image/svg+xml"
         ];
         
-        if (imageTypes.includes(file.type)) {
-          lockedRatio = true;
-          linkedSVG.hidden = false;
-          unlikedSVG.hidden = true;
-          
-
-          // We read the whole file to parse afterwards
-          for (let e of document.querySelectorAll('.imageName')){
-            e.innerHTML = file.name
-          }
-
-
-          if (file.type === "image/svg+xml") {
-
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                  svgText = e.target.result;
-
-                  document.getElementById('inputResolution').classList.add('show-modal');            
-              };
-              reader.readAsText(file);
-          } else {
-
-             const img = new Image();
-             img.onload = () => {
-
-                document.getElementById('modal').classList.add('show-modal');
-
-                // We are going to asume that 1px = 1 unit
-                imageData = grid.save_Image_data(img);
-                imageData.ratio = imageData.scale[0] / imageData.scale[1];
-                document.getElementById('widthInput').value = imageData.scale[0];
-                document.getElementById('heightInput').value = imageData.scale[1];
-                document.getElementById('positionXInput').value = imageData.position[0];
-                document.getElementById('positionYInput').value = imageData.position[1];
-              };
-              //img.onerror = reject;
-              img.src = URL.createObjectURL(file);
-              
-          }
-
-        } else {
-
+        if(!imageTypes.includes(file.type)) {
           alert("Please drop a valid Image. Not GIF");
           return;
+        }
+
+        lockedRatio = true;
+        linkedSVG.hidden = false;
+        unlikedSVG.hidden = true;
+          
+
+        // We read the whole file to parse afterwards
+        for (let e of document.querySelectorAll('.imageName')){
+          e.innerHTML = file.name
+        }
+
+
+        if (file.type === "image/svg+xml") {
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            svgText = e.target.result;
+
+            document.getElementById('inputResolution').classList.add('show-modal');            
+          };
+          reader.readAsText(file);
+          
+        } else {
+
+          const img = new Image();
+          img.onload = () => {
+            let resizedImg = null;
+            resizeImageToMax(img).then((newImg) => {
+              resizedImg = newImg;
+              document.getElementById('modal').classList.add('show-modal');
+
+              // We are going to asume that 1px = 1 unit
+              imageData = grid.save_Image_data(resizedImg);
+              imageData.ratio = imageData.scale[0] / imageData.scale[1];
+              document.getElementById('widthInput').value = imageData.scale[0];
+              document.getElementById('heightInput').value = imageData.scale[1];
+              document.getElementById('positionXInput').value = imageData.position[0];
+              document.getElementById('positionYInput').value = imageData.position[1];
+            });
+          };
+          //img.onerror = reject;
+          img.src = URL.createObjectURL(file);
+              
         }
 
         
