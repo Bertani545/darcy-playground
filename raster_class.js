@@ -364,7 +364,7 @@ export class RasterContainer
   }
 
   // Assumes that its locked
-  fit_Image(spanX, spanY) {
+  fit_Image(spanX, spanY, isLocked) {
     
     if (!this.originalData) return 1;
 
@@ -374,7 +374,6 @@ export class RasterContainer
     const screenX = spanX[1] - spanX[0];
     const screenY = spanY[1] - spanY[0];
     const screenRatio = screenX / screenY;
-
 
     if (screenRatio >= 1) { // Wider
       if (screenRatio <= ratio) {
@@ -392,12 +391,14 @@ export class RasterContainer
       }
       
     }
-    
 
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
-    this.gl.useProgram(this.transformedShader);
-    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+    if (!isLocked) {
+      this.gl.useProgram(this.Shader);
+      this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+      this.gl.useProgram(this.transformedShader);
+      this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+    }
+    
 
     return this.currentZoom;
   }

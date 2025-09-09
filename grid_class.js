@@ -191,9 +191,8 @@ export class Grid
     //this.update_secondView_span();
     this.update_text_labels()
 
-    //if (!this.lockPaths) {
-      this.spaceZoom = this.currentDisplayer.fit_Image(this.spanX, this.spanY);
-    //}
+    this.spaceZoom = this.currentDisplayer.fit_Image(this.spanX, this.spanY, this.lockPaths);
+    
   }
 
   // ------------------------------------------------------------------------------ Here add the updates

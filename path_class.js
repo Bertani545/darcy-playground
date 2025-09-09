@@ -247,13 +247,10 @@ export class PathContainer
   // Returns a texture and how many paths using the object with points
   update_Image(newData) 
   {
-    console.log(newData)
-
     // Build the transformation matrix
     const scaleX =  newData.scale[0] / this.originalData.scale[0];
     const scaleY =  newData.scale[1] / this.originalData.scale[1];
 
-    this.originalData.scale = [...newData.scale]
 
     const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
     //const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
@@ -327,6 +324,9 @@ export class PathContainer
       (left + right) / 2,
       (top + bottom) / 2
     ]
+    this.boundingBox = {
+      Top: top, Bottom: bottom, Left: left, Right: right
+    }
 
     const newBox = {Top: top + this.originalOffset[1] - this.correctionOffset[1],
             Bottom: bottom + this.originalOffset[1] - this.correctionOffset[1],
@@ -386,23 +386,47 @@ export class PathContainer
 
   }
 
-  fit_Image(spanX, spanY) {
+  fit_Image(spanX, spanY, isLocked) {
     // We modify current zoom to fit the span
     if (!this.originalData) return 1;
 
-    if (this.originalData.ratio >= 1) { // Wider
-      this.currentZoom =  (spanX[1] - spanX[0]) / this.originalData.scale[0];
+    const sizeX = this.boundingBox.Right - this.boundingBox.Left;
+    const sizeY = this.boundingBox.Top - this.boundingBox.Bottom;
+    const ratio = sizeX / sizeY;
+    const screenX = spanX[1] - spanX[0];
+    const screenY = spanY[1] - spanY[0];
+    const screenRatio = screenX / screenY;
+
+    const lastZoom = this.currentZoom;
+
+    if (screenRatio >= 1) { // Wider
+      if (screenRatio <= ratio) {
+        this.currentZoom =  screenX / sizeX;
+      } else {
+        this.currentZoom =  screenY / sizeY;
+      }
+      
+      
     } else { // Longer
-      this.currentZoom =  (spanY[1] - spanY[0]) / this.originalData.scale[1];
+      if (screenRatio >= ratio) {
+        this.currentZoom =  screenY / sizeY;
+      } else {
+        this.currentZoom =  screenX / sizeX;
+      }
+      
     }
 
-    this.gl.useProgram(this.Shader);
-    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
-    this.gl.useProgram(this.transformedShader);
-    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+    if (!isLocked) {
+      this.gl.useProgram(this.Shader);
+      this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+      this.gl.useProgram(this.transformedShader);
+      this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+    }
+    
 
     return this.currentZoom;
   }
+
 
   getImageMods() {
     return {
