@@ -252,6 +252,9 @@ export class PathContainer
     // Build the transformation matrix
     const scaleX =  newData.scale[0] / this.originalData.scale[0];
     const scaleY =  newData.scale[1] / this.originalData.scale[1];
+
+    this.originalData.scale = [...newData.scale]
+
     const scaleMatrix = gl_2dmath.get_scale_matrix(scaleX, scaleY);
     //const transMatrix = gl_2dmath.get_translation_matrix(newData.position[0], newData.position[1]);
     this.originalOffset = newData.position;
@@ -385,7 +388,7 @@ export class PathContainer
 
   fit_Image(spanX, spanY) {
     // We modify current zoom to fit the span
-
+    if (!this.originalData) return 1;
 
     if (this.originalData.ratio >= 1) { // Wider
       this.currentZoom =  (spanX[1] - spanX[0]) / this.originalData.scale[0];

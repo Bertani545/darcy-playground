@@ -366,11 +366,33 @@ export class RasterContainer
   // Assumes that its locked
   fit_Image(spanX, spanY) {
     
-    if (this.originalData.ratio >= 1) { // Wider
-      this.currentZoom =  (spanX[1] - spanX[0]) / (this.boundingBox.Right - this.BoundingBox.Left);
+    if (!this.originalData) return 1;
+
+    const sizeX = this.boundingBox.Right - this.boundingBox.Left;
+    const sizeY = this.boundingBox.Top - this.boundingBox.Bottom;
+    const ratio = sizeX / sizeY;
+    const screenX = spanX[1] - spanX[0];
+    const screenY = spanY[1] - spanY[0];
+    const screenRatio = screenX / screenY;
+
+
+    if (screenRatio >= 1) { // Wider
+      if (screenRatio <= ratio) {
+        this.currentZoom =  screenX / sizeX;
+      } else {
+        this.currentZoom =  screenY / sizeY;
+      }
+      
+      
     } else { // Longer
-      this.currentZoom =  (spanY[1] - spanY[0]) / (this.boundingBox.Top - this.boundingBox.Bottom);
+      if (screenRatio >= ratio) {
+        this.currentZoom =  screenY / sizeY;
+      } else {
+        this.currentZoom =  screenX / sizeX;
+      }
+      
     }
+    
 
     this.gl.useProgram(this.Shader);
     this.gl.uniform1f(this.zoomLocation, this.currentZoom);

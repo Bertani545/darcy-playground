@@ -21,6 +21,7 @@ void main() {
   coords *= u_scale;
   coords *= u_zoom;
   coords = vec2(u_rotation * vec3(coords, 1.0));
+  
   //coords += u_zoom * vec2(u_rotation * vec3(u_correctionTrans, 1.0));
   coords += u_trans - u_zoom * u_correctionTrans;
 
