@@ -365,7 +365,6 @@ export class RasterContainer
   fit_Image(spanX, spanY) {
     // We modify current zoom to fit the span
 
-    console.log(spanX, spanY, this.originalScale)
 
     if (this.originalData.ratio >= 1) { // Wider
       this.currentZoom =  (spanX[1] - spanX[0]) / this.originalScale[0];

@@ -383,6 +383,24 @@ export class PathContainer
 
   }
 
+  fit_Image(spanX, spanY) {
+    // We modify current zoom to fit the span
+
+
+    if (this.originalData.ratio >= 1) { // Wider
+      this.currentZoom =  (spanX[1] - spanX[0]) / this.originalData.scale[0];
+    } else { // Longer
+      this.currentZoom =  (spanY[1] - spanY[0]) / this.originalData.scale[1];
+    }
+
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+
+    return this.currentZoom;
+  }
+
   getImageMods() {
     return {
       'center': [this.extraOffset[0] + this.originalOffset[0], this.extraOffset[1] + this.originalOffset[1]],
