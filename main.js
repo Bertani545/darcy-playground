@@ -389,6 +389,26 @@ async function main() {
     }
   }
 
+  function truncateDecimals(num, decimals) {
+    const factor = Math.pow(10, decimals);
+    return Math.trunc(num * factor) / factor;
+  }
+
+  const fixedDecimals = (x, n) => {
+    x = truncateDecimals(x, n);
+    const intPart = Math.floor(x);
+
+    let currDec = x - intPart;
+    for (let i = 0; i < 5; i++) {
+      if(currDec === 0) return truncateDecimals(x, i);
+      let nX = 10 * currDec;
+      currDec = nX - Math.floor(nX);
+    }
+    
+    return x;
+
+  } 
+
   document.getElementById('ok-btnPoints').addEventListener('click', () => {
     const input = document.querySelector('.resolution-input');
     if (!input.checkValidity()) {
@@ -400,10 +420,10 @@ async function main() {
 
       imageData = grid.create_paths(svgText, input.value);
       imageData.ratio = imageData.scale[0] / imageData.scale[1];
-      document.getElementById('widthInput').value = imageData.scale[0];
-      document.getElementById('heightInput').value = imageData.scale[1];
-      document.getElementById('positionXInput').value = imageData.position[0];
-      document.getElementById('positionYInput').value = imageData.position[1];
+      document.getElementById('widthInput').value = fixedDecimals(imageData.scale[0], 6);
+      document.getElementById('heightInput').value = fixedDecimals(imageData.scale[1], 6);
+      document.getElementById('positionXInput').value = fixedDecimals(imageData.position[0], 6);
+      document.getElementById('positionYInput').value = fixedDecimals(imageData.position[1], 6);
     }
   })
 
@@ -412,11 +432,11 @@ async function main() {
     const info = grid.getImageMods();
 
     document.getElementById('modal').classList.add('show-modal');
-    document.getElementById('widthInput').value = imageData.scale[0] * info.zoom;
-    document.getElementById('heightInput').value = imageData.scale[1] * info.zoom;
-    document.getElementById('positionXInput').value = info.center[0];
-    document.getElementById('positionYInput').value = info.center[1];
-    document.getElementById('rotationInput').value = imageData.rotation;
+    document.getElementById('widthInput').value = fixedDecimals(imageData.scale[0] * info.zoom, 6);
+    document.getElementById('heightInput').value = fixedDecimals(imageData.scale[1] * info.zoom, 6);
+    document.getElementById('positionXInput').value = fixedDecimals(info.center[0], 6);
+    document.getElementById('positionYInput').value = fixedDecimals(info.center[1], 6);
+    document.getElementById('rotationInput').value = fixedDecimals(imageData.rotation, 6);
   })
 
   function parseFloatDefault(x) {
@@ -488,22 +508,6 @@ async function main() {
 
 
   // ------------------------- Preserve ratio (or not) when inputing size ---------------------
-
-  const fixedDecimals = (x, n) => {
-    
-    const intPart = Math.floor(x);
-
-    let currDec = x - intPart;
-    for (let i = 0; i < 5; i++) {
-      if(currDec === 0) return x.toFixed(i);
-      let nX = 10 * currDec;
-      currDec = nX - Math.floor(nX);
-    }
-    
-    return x.toFixed(n);
-
-  } 
-
 
   widthInput.addEventListener('blur', () => {
     if (lockedRatio) {
