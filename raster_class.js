@@ -5,9 +5,6 @@ import { read_svg_file } from './svg_reader.js';
 import {BezierCurve, point_in_bezier_time } from './bezier_functions.js';
 
 
-const MAX_POINTS = 1000;
-const MAX_PATHS = 2000;
-
 export class RasterContainer
 {
     constructor(gl)
@@ -266,11 +263,12 @@ export class RasterContainer
 
       // Normal picture
 
-      this.originalData
-      let left = this.originalData.position[0] - scaleX / 2;
-      let right = this.originalData.position[0] + scaleX / 2;
-      let top = this.originalData.position[1] + scaleY / 2;
-      let bottom = this.originalData.position[1] - scaleY / 2 
+      this.originalData // The original position for pictures is 0 this.originalData.position = [0,0]
+      let left =  - scaleX / 2;
+      let right =scaleX / 2;
+      let top =  + scaleY / 2;
+      let bottom = - scaleY / 2
+
       const corners = [
         [left, top],
         [left, bottom],
@@ -303,6 +301,9 @@ export class RasterContainer
         (left + right) / 2,
         (top + bottom) / 2
       ]
+
+      this.boundingBox = {Top: top, Bottom: bottom, Left: left, Right: right};
+
       const newBox = {Top: top + this.originalOffset[1] - this.correctionOffset[1],
             Bottom: bottom + this.originalOffset[1] - this.correctionOffset[1],
             Left: left + this.originalOffset[0] - this.correctionOffset[0], 
@@ -362,14 +363,13 @@ export class RasterContainer
 
   }
 
+  // Assumes that its locked
   fit_Image(spanX, spanY) {
-    // We modify current zoom to fit the span
-
-
+    
     if (this.originalData.ratio >= 1) { // Wider
-      this.currentZoom =  (spanX[1] - spanX[0]) / this.originalScale[0];
+      this.currentZoom =  (spanX[1] - spanX[0]) / (this.boundingBox.Right - this.BoundingBox.Left);
     } else { // Longer
-      this.currentZoom =  (spanY[1] - spanY[0]) / this.originalScale[1];
+      this.currentZoom =  (spanY[1] - spanY[0]) / (this.boundingBox.Top - this.boundingBox.Bottom);
     }
 
     this.gl.useProgram(this.Shader);
