@@ -489,10 +489,26 @@ async function main() {
 
   // ------------------------- Preserve ratio (or not) when inputing size ---------------------
 
+  const fixedDecimals = (x, n) => {
+    
+    const intPart = Math.floor(x);
+
+    let currDec = x - intPart;
+    for (let i = 0; i < 5; i++) {
+      if(currDec === 0) return x.toFixed(i);
+      let nX = 10 * currDec;
+      currDec = nX - Math.floor(nX);
+    }
+    
+    return x.toFixed(n);
+
+  } 
+
+
   widthInput.addEventListener('blur', () => {
     if (lockedRatio) {
       const newWidth = parseFloatDefault(widthInput.value);
-      heightInput.value = (newWidth / imageData.ratio).toFixed(6);
+      heightInput.value = fixedDecimals(newWidth / imageData.ratio, 6);
     }
     
   })
@@ -500,16 +516,17 @@ async function main() {
   heightInput.addEventListener('blur', () => {
     if (lockedRatio) {
       const newHeigth = parseFloatDefault(heightInput.value);
-      widthInput.value = (newHeigth * imageData.ratio).toFixed(6);
+      widthInput.value = fixedDecimals(newHeigth * imageData.ratio, 6);
     }
   })
   linkButton.addEventListener('click', ()=>{
     lockedRatio = !lockedRatio;
     if(lockedRatio) {
-      heightInput.value = (widthInput.value / imageData.ratio).toFixed(6);
+      heightInput.value = fixedDecimals(widthInput.value / imageData.ratio, 6);
     }
     linkedSVG.hidden = !lockedRatio;
     unlikedSVG.hidden = lockedRatio;
+
   })
 
 
@@ -588,8 +605,10 @@ async function main() {
 
 
       grid.rebuildPixelContainer() // Must change a lot later
-      grid.update_text_labels()
-      grid.update_ratio()
+      //grid.update_text_labels()
+      //grid.update_ratio()
+
+
 
       console.log("ratio", grid.ratio)
       //grid.draw();

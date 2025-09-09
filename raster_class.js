@@ -299,8 +299,6 @@ export class RasterContainer
 
       // Set data
 
-
-
       this.correctionOffset = [
         (left + right) / 2,
         (top + bottom) / 2
@@ -309,13 +307,6 @@ export class RasterContainer
             Bottom: bottom + this.originalOffset[1] - this.correctionOffset[1],
             Left: left + this.originalOffset[0] - this.correctionOffset[0], 
             Right:right + this.originalOffset[0] - this.correctionOffset[0]}
-
-
-    
-      console.log(newBox)
-    
-    
-
 
 
     // Set shaders
@@ -370,6 +361,26 @@ export class RasterContainer
     this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
 
   }
+
+  fit_Image(spanX, spanY) {
+    // We modify current zoom to fit the span
+
+    console.log(spanX, spanY, this.originalScale)
+
+    if (this.originalData.ratio >= 1) { // Wider
+      this.currentZoom =  (spanX[1] - spanX[0]) / this.originalScale[0];
+    } else { // Longer
+      this.currentZoom =  (spanY[1] - spanY[0]) / this.originalScale[1];
+    }
+
+    this.gl.useProgram(this.Shader);
+    this.gl.uniform1f(this.zoomLocation, this.currentZoom);
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_zoom'), this.currentZoom);
+
+    return this.currentZoom;
+  }
+
 
   getImageMods() {
     return {

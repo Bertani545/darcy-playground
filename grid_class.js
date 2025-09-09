@@ -51,7 +51,7 @@ export class Grid
     this.spanTransformed = new Float32Array(4);
 
 
-    this.lockPaths = true; // ---------------------------------------------------------------------------------------------
+    this.lockPaths = true; 
     this.currentImageCenter = [0,0]
   }
 
@@ -190,6 +190,10 @@ export class Grid
     ////console.log("Span updated");
     //this.update_secondView_span();
     this.update_text_labels()
+
+    if (!this.lockPaths) {
+      this.spaceZoom = this.currentDisplayer.fit_Image(this.spanX, this.spanY);
+    }
   }
 
   // ------------------------------------------------------------------------------ Here add the updates
