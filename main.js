@@ -114,7 +114,7 @@ async function main() {
   
 
 
-  let theta = 0.0;
+  
 
 
   //Mouse stuff
@@ -145,6 +145,7 @@ async function main() {
 
 
   // --------- Render cycle ------
+  let theta = 0.0;
   var timeThen  = 0;
 
   requestAnimationFrame(drawScene);
@@ -158,27 +159,8 @@ async function main() {
 
 
     //Render to the screen
-    grid.draw();
+    grid.draw(deltaTime);
 
-
-    // ---------- Animation stuff --------
-    //Time in the curve
-    //const t = (timeNow % animation_duration) / animation_duration
-
-
-
-    // Render to one pixel so we can determine which object is being click
-    //gl.bindFramebuffer(gl.FRAMEBUFFER, select_obj.ID); gl.clear(gl.COLOR_BUFFER_BIT);
-    //gl.viewport(0, 0, 1, 1);
-    // Render things to pick
-
-
-    // UI elements
-    //spanText.textContent = "width from " + spanX[0].toFixed(4) + " to " + spanX[1].toFixed(4) + "\n" +
-    //"height from " + spanY[0].toFixed(4) + " to " + spanY[1].toFixed(4);
-
-
-    theta += 1 * deltaTime;
     requestAnimationFrame(drawScene);
   }
 

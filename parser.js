@@ -384,4 +384,3 @@ export function toGLSL_f2(expression)
 //const full_graph = parse_input('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / cos(10x^2 / (3+y))')
 //console.log(toGLSL('1.5 + 2.5 * exp(10 + 10.0 * pi) - 5 / (10 + x^2)'))
 //  
-// Tokenize first, do my shit later

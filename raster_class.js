@@ -411,6 +411,11 @@ export class RasterContainer
     }
   }
 
+  update_time(t) {
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_t'), t);
+  }
+
   draw(spanX, spanY)
   {
     if(!this.shouldDraw) return;

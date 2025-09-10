@@ -53,6 +53,9 @@ export class Grid
 
     this.lockPaths = true; 
     this.currentImageCenter = [0,0]
+
+    this.currentTime = 0;
+    this.timeStopped = false; // ザ・ワールド
   }
 
   async build(spanX = [-1,1], spanY = [-1,1])
@@ -721,9 +724,31 @@ export class Grid
   }
 
 
-    draw()
+  update_time(t) {
+    this.currentTime = t;
+  }
+
+    draw(deltaTime)
   {
     const gl = this.gl;
+
+    if (!this.timeStopped) {
+      gl.useProgram(this.functionProgram);
+      this.gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_t"), this.currentTime);
+      this.update_secondView_span(); // Persinado
+
+      this.currentDisplayer.update_time(this.currentTime);
+
+      gl.useProgram(this.programGridTransformed);
+      this.gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_t"), this.currentTime);
+      
+      this.currentTime += deltaTime / 5; // 5 secons
+
+      if (this.currentTime > 1) {
+        this.currentTime = 0; // loop
+      }
+      
+    }
 
     // Draw to the texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);

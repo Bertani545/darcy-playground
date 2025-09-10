@@ -386,6 +386,11 @@ export class PathContainer
 
   }
 
+  update_time(t) {
+    this.gl.useProgram(this.transformedShader);
+    this.gl.uniform1f(this.gl.getUniformLocation(this.transformedShader, 'u_t'), t);
+  }
+
   fit_Image(spanX, spanY, isLocked) {
     // We modify current zoom to fit the span
     if (!this.originalData) return 1;
