@@ -33,167 +33,11 @@ canvas {
 	}
 
 
-#title_div{
-		grid-column: 1;
-		grid-row: 1;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
-
-@media (orientation: portrait)
-{
-	#Body{
-		background-color: white;
-		min-height: 100dvh;
-		top: 0rem;
-		bottom: 0rem;
-		position: auto;
-		display: grid;
-		width: 100%;
-		/*min-width: 375px; hay que calcular todo a mano*/
-		height: auto;
-
-		grid-template-rows: 0.5fr 7fr;
-		/*grid-auto-columns: auto;*/
-	}
-
-
-
-
-	#Content{
-		display: grid;
-		height: auto;
-		grid-template-columns: 0.2fr 1fr;
-		grid-template-rows: minmax(25rem, 4fr)  2.5fr minmax(25rem, 4fr);
-		place-content: center;
-
-		min-height: 0;
-	}
-
-	.grid_numbers
-		{
-			position: absolute;
-			color: rgba(255,255,1,1);
-			font-size: 2vh;
-		}
-
-	#input_display{
-		grid-column: 1 / span 2;
-		grid-row: 1/2;
-
-		position: relative;
-
-	}
-
-	#output_display{
-		grid-column: 1 / span 2;
-		grid-row: 3/4;
-	}
-
-
-	#imageButtons {
-		margin: 10px;
-		grid-row: 2/3;
-		grid-column: 2;
-		justify-self: end;
-	}
-	.imageButton{
-		width: 6rem;
-		height: 3rem;
-		cursor: pointer;
-	}
-	#editBtn{
-		display: none;
-	}
-
-
-
-	#arrow{
-		background-color: white;
-		grid-column: 1/2;
-		grid-row: 2/3;
-
-		display: grid;
-		place-content: center;
-	}
-
-	#svg_Horizontal{
-		display: none;
-	}
-
-	#svg_Vertical{
-		max-height: 15rem;
-	}
-
-
-	
-
-
-	#input{
-		background-color: none;
-		grid-column: 2;
-		grid-row: 2/3;
-
-		display: grid;
-		place-content: center;
-	}
-
-	.canvasContainer {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
-		/* NEW: prevent content from pushing row height */
-		overflow: hidden;
-		min-height: 50px;
-		min-width: 50px;
-
-	}
-
-	
-
-	/* El problema es este flex y el canvas*/
-	/*
-	.canvasContainer{
-		display: grid;
-		grid-template-columns: 50px 1fr 50px;
-		grid-template-rows: 50px 1fr 50px;
-
-		height: 100%;
-		justify-content: center;
-		align-items: center;
-	}
-
-	canvas{
-		grid-column: 2 / 3;
-		grid-row: 2/3;
-	    width: calc(100%);
-	    height: calc(100%);
-	    background: brown;
-	}
-
-	.canvasContainer{
-		display: flex;
-		flex: 0;
-		height: 100%;
-		justify-content: center;
-		align-items: center;
-	}
-
-	canvas{
-		width: calc(100% - 2rem);
-		height: calc(100% - 2rem);
-	}
-	*/
-}
 
 
 @media (orientation: landscape)
 {
 	#Body{
-		background-color: white;
 		position: absolute;
 		top: 0rem;
 		bottom: 0rem;
@@ -203,84 +47,52 @@ canvas {
 		height: 100%;
 
 		grid-template-rows: 0.5fr minmax(500px, 7fr);
+		overflow-y: auto;
 		/*grid-auto-columns: auto;*/
 	}
 
+	#title_div {
+		grid-column: 1;
+		grid-row: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		place-content: center;
+	}
 
 	#Content{
-		background-color: white;
+		grid-row: 2;
+		display: grid;
+		grid-template-rows: 5fr 5rem 2fr;
+		grid-template-columns: 100%;
+		place-content: center;
+		height: auto;
+		width: 100%;
+	}
 
+	
+
+	#display-section {
+		grid-row: 1;
 		display: grid;
 		grid-template-columns: 4fr 1fr 4fr;
-		grid-template-rows: minmax(300px, 5fr) 5rem minmax(200px, 2fr);
-		place-content: center;
-		height: 100%;
+		height: auto;
+		width: 100%;
 	}
 
-	.grid_numbers
-		{
-			position: absolute;
-			color: rgba(255,255,1,1);
-			font-size: 1vw;
-		}
-
-	#title_div{
-		background-color: white;
-	}
-
-	#input_display{
-		background-color: white;
-		grid-column: 1/2;
-		grid-row: 1/2;
-
-		position: relative;
-
-	}
-
-	#output_display{
-		background-color: white;
-		grid-column: 3/4;
-		grid-row: 1/2;
-
-	}
-
-	#imageButtons {
-		margin: 10px;
-		grid-row: 2/3;
-		grid-column: 1;
-	}
-	.imageButton{
-		width: 6rem;
-		cursor: pointer;
-	}
-	#editBtn{
-		display: none;
-	}
-
-	#arrow{
-		grid-column: 2/3;
-		grid-row: 1/2;
-
+	#info-section {
+		grid-row: 2;
 		display: grid;
+		grid-template-columns: 4fr 1fr 4fr;
+		height: auto;
+		width: 100%;
+	}
+
+	#input-section {
+		grid-row: 3;
+		display: flex;
 		place-content: center;
 	}
-	#svg_Vertical {
-		display: none;
-	}
-
-	
-
-
-	#input{
-		background-color: none;
-		grid-column: 1/4;
-		grid-row: 2/4;
-
-		display: grid;
-		place-content: center;
-	}
-
-	
 
 
 	.canvasContainer{
@@ -293,6 +105,76 @@ canvas {
 		min-height: 50px;
 		min-width: 50px;
 		overflow: hidden;
+	}
+
+	#input_display{
+		background-color: white;
+		grid-column: 1/2;
+		grid-row:1;
+
+		position: relative;
+
+	}
+
+	#output_display{
+		background-color: white;
+		grid-column: 3/4;
+
+	}
+
+	.grid_numbers
+	{
+		position: absolute;
+		color: rgba(255,255,1,1);
+		font-size: 1vw;
+	}
+
+
+	
+
+	#arrow{
+		grid-column: 2/3;
+
+		display: grid;
+		place-content: center;
+	}
+	#svg_Vertical {
+		display: none;
+	}
+
+
+	#imageButtons {
+		height: 40px;
+		grid-column: 1;
+		margin-left: 1rem;
+	}
+	.imageButton{
+		height: 100%;
+		width: auto;
+		cursor: pointer;
+	}
+	#editBtn{
+		height: 100%;
+		width: auto;
+		display: none;
+	}
+
+
+	#time-container {
+		background-color: blue;
+		grid-column: 3;
+		justify-self: end;
+		display: flex;
+		justify-content: center;
+		vertical-align: center;
+		height: 40px;
+		margin-right: 1rem;
+
+	}
+
+	/*Change*/
+	button{
+		background-color: transparent;
 	}
 
 }
@@ -431,31 +313,3 @@ canvas {
 }
 
 
-/*Chnage span display as bloc
-isplay:inline-block;
-*/
-
-	/* The above is shorthand for:
-  flex-grow: 0,
-  flex-shrink: 1,
-  flex-basis: auto
-  */
-}
-
-/*
-#Display{
-	background-color: blue;
-	flex: 1 1 auto;
-}
-
-
-#Display canvas{
-	position: relative;
-	align: center;
-}
-
-#input{
-	flex: 0 1 15rem;
-	background-color: yellow;
-}
-*/

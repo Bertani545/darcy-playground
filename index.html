@@ -14,147 +14,262 @@
 				</div>
 				<div id="Content">
 
-					<div id="input_display" class="canvasContainer">
-						<canvas id="Grid01"></canvas>
-						<div id="text_overlay_input">
-							<!--- See how can we make text_overlay input be displayed only over the canvas.
-							Now, it renders over canvas container so a little spills out-->
+
+					<section id="display-section">
+						<div id="input_display" class="canvasContainer">
+							<canvas id="Grid01"></canvas>
+							<div id="text_overlay_input">
+								<!--- See how can we make text_overlay input be displayed only over the canvas.
+								Now, it renders over canvas container so a little spills out-->
+							</div>
+								<button id="lockBtn">
+									<span id="lockedSVG">
+										<svg
+										   height="100%"
+										   viewBox="0 0 18.45 24.45"
+										   version="1.1"
+										   xmlns="http://www.w3.org/2000/svg"
+										   xmlns:svg="http://www.w3.org/2000/svg">
+										  <defs
+										     id="defs2" />
+										  <path
+										     fill="#494c4e"
+										     d="m 11.225,15.225 c 0,0.74 -0.4,1.38 -1,1.73 v 2.27 c 0,0.55 -0.4500001,1 -1.0000001,1 -0.55,0 -1,-0.45 -1,-1 v -2.27 c -0.6,-0.35 -1,-0.99 -1,-1.73 0,-1.1 0.9,-2 2,-2 1.1000001,0 2.0000001,0.9 2.0000001,2 z"
+										     id="path1"
+										     style="fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.6;stroke-dasharray:none;stroke-opacity:1" />
+										  <path
+										     fill="#494c4e"
+										     d="m 16.225,9.225 h -1 v -4 c 0,-2.76 -2.24,-5.00000001 -5,-5.00000001 H 8.2249999 c -2.76,0 -5,2.24000001 -5,5.00000001 v 4 h -1 c -1.1,0 -2,0.9 -2,2 v 11 c 0,1.1 0.9,2 2,2 H 16.225 c 1.1,0 2,-0.9 2,-2 v -11 c 0,-1.1 -0.9,-2 -2,-2 z m -11.0000001,-4 c 0,-1.65 1.35,-3 3,-3 H 10.225 c 1.65,0 3,1.35 3,3 v 4 H 5.2249999 Z M 16.225,21.725 c 0,0.28 -0.22,0.5 -0.5,0.5 H 2.7249999 c -0.28,0 -0.5,-0.22 -0.5,-0.5 v -10 c 0,-0.28 0.22,-0.5 0.5,-0.5 H 15.725 c 0.28,0 0.5,0.22 0.5,0.5 z"
+										     id="path2"
+										     style="fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.6;stroke-dasharray:none;stroke-opacity:1" />
+										</svg>
+									</span>
+									<span id="unlockedSVG" hidden>
+										<svg
+										   height="100%"
+										   viewBox="0 0 24.45 23.450001"
+										   version="1.1"
+										   xmlns="http://www.w3.org/2000/svg"
+										   xmlns:svg="http://www.w3.org/2000/svg">
+										  <defs
+										     id="defs2" />
+										  <path
+										     fill="#494c4e"
+										     d="m 19.225,0.22499997 h -1 c -2.76,0 -5,2.24000003 -5,5.00000003 v 3 h -11 c -1.1,0 -2.00000001,0.9 -2.00000001,2 v 11 c 0,1.1 0.90000001,2 2.00000001,2 h 14 c 1.1,0 2,-0.9 2,-2 v -11 c 0,-1.1 -0.9,-2 -2,-2 h -1 v -3 c 0,-1.65 1.35,-3 3,-3 h 1 c 1.65,0 3,1.35 3,3 v 6 c 0,0.55 0.45,1 1,1 0.55,0 1,-0.45 1,-1 v -6 c 0,-2.76 -2.24,-5.00000003 -5,-5.00000003 z M 15.725,10.225 c 0.28,0 0.5,0.22 0.5,0.5 v 10 c 0,0.27 -0.22,0.5 -0.5,0.5 h -13 c -0.28,0 -0.5,-0.22 -0.5,-0.5 v -10 c 0,-0.27 0.22,-0.5 0.5,-0.5 z"
+										     id="path1"
+										     style="fill:#07ff00;fill-opacity:1;stroke:#ffffff;stroke-width:0.6;stroke-dasharray:none;stroke-opacity:1" />
+										  <path
+										     fill="#494c4e"
+										     d="m 11.225,14.225 c 0,0.74 -0.4,1.38 -1,1.73 v 2.27 c 0,0.55 -0.45,1 -1,1 -0.55,0 -1,-0.45 -1,-1 v -2.27 c -0.6,-0.35 -1,-0.99 -1,-1.73 0,-1.1 0.9,-2 2,-2 1.1,0 2,0.9 2,2 z"
+										     id="path2"
+										     style="fill:#07ff00;fill-opacity:1;stroke:#ffffff;stroke-width:0.;stroke-dasharray:none;stroke-opacity:1" />
+										</svg>
+									</span>
+								</button>
 						</div>
-							<button id="lockBtn">
-								<span id="lockedSVG">
+
+
+						<div id="arrow">
+							<svg
+							   width="100%"
+							   viewBox="0 0 179.84215 82.504021"
+							   version="1.1"
+							   id="svg_Horizontal"
+							   xmlns="http://www.w3.org/2000/svg"
+							   xmlns:svg="http://www.w3.org/2000/svg">
+							  <defs
+							     id="defs1" />
+							  <g
+							     id="layer1">
+							    <path
+							       id="rect1"
+							       style="fill:#3f16e9;fill-opacity:0.986834;stroke:#000000;stroke-width:2.003;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:1.2018;paint-order:normal"
+							       d="M 105.6871,1.692148 V 21.753459 H 1.0015 v 38.9971 h 104.6856 v 20.06131 l 72.07364,-39.55986 z" />
+							    <text
+							       xml:space="preserve"
+							       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-linecap:square;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:4.54224;stroke-opacity:1"
+							       x="46.944424"
+							       y="46.867077"
+							       id="text1"><tspan
+							         id="tspan1"
+							         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
+							         x="46.944424"
+							         y="46.867077">F (x,y)</tspan></text>
+							  </g>
+							</svg>
+							
+							<svg
+							   width="100%"
+							   viewBox="0 0 82.504013 179.84216"
+							   version="1.1"
+							   id="svg_Vertical"
+							   xmlns="http://www.w3.org/2000/svg"
+							   xmlns:svg="http://www.w3.org/2000/svg">
+							  <defs
+							     id="defs2" />
+							  <g
+							     id="layer2">
+							    <path
+							       id="rect2"
+							       style="fill:#3f16e9;fill-opacity:0.986834;stroke:#000000;stroke-width:2.003;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:1.2018;paint-order:normal"
+							       d="M 80.811866,105.6871 H 60.750556 V 1.0015 H 21.753458 V 105.6871 H 1.6921479 l 39.5598601,72.07365 z" />
+							    <text
+							       xml:space="preserve"
+							       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;line-height:0;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-linecap:square;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:4.54224;stroke-opacity:1"
+							       x="-108.99285"
+							       y="48.140285"
+							       id="text2"
+							       transform="rotate(-90)"><tspan
+							         id="tspan2"
+							         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;line-height:0;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
+							         x="-108.99285"
+							         y="48.140285">F (x,y)</tspan></text>
+							  </g>
+							</svg>
+
+						</div>
+
+						<div id="output_display" class="canvasContainer">
+								<canvas id="Grid02"></canvas>
+						</div>
+					</section>
+
+
+					<section id="info-section">
+						<input type="file" id="fileInput" accept=".svg,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,image/png,image/jpeg,image/webp,image/bmp,image/tiff" style="display:none;"/>
+						<div id="imageButtons">
+							<button  id="uploadBtn" class="imageButton">Upload Image</button>
+							<button id="editBtn" class="imagebutton"> Edit Image</button>
+						</div>
+
+
+						
+
+
+						<div class="time-slider" id="time-container">
+							<button id="stop-button">
+								<span>
 									<svg
-									   height="100%"
-									   viewBox="0 0 18.45 24.45"
-									   version="1.1"
-									   xmlns="http://www.w3.org/2000/svg"
-									   xmlns:svg="http://www.w3.org/2000/svg">
-									  <defs
-									     id="defs2" />
-									  <path
-									     fill="#494c4e"
-									     d="m 11.225,15.225 c 0,0.74 -0.4,1.38 -1,1.73 v 2.27 c 0,0.55 -0.4500001,1 -1.0000001,1 -0.55,0 -1,-0.45 -1,-1 v -2.27 c -0.6,-0.35 -1,-0.99 -1,-1.73 0,-1.1 0.9,-2 2,-2 1.1000001,0 2.0000001,0.9 2.0000001,2 z"
-									     id="path1"
-									     style="fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.6;stroke-dasharray:none;stroke-opacity:1" />
-									  <path
-									     fill="#494c4e"
-									     d="m 16.225,9.225 h -1 v -4 c 0,-2.76 -2.24,-5.00000001 -5,-5.00000001 H 8.2249999 c -2.76,0 -5,2.24000001 -5,5.00000001 v 4 h -1 c -1.1,0 -2,0.9 -2,2 v 11 c 0,1.1 0.9,2 2,2 H 16.225 c 1.1,0 2,-0.9 2,-2 v -11 c 0,-1.1 -0.9,-2 -2,-2 z m -11.0000001,-4 c 0,-1.65 1.35,-3 3,-3 H 10.225 c 1.65,0 3,1.35 3,3 v 4 H 5.2249999 Z M 16.225,21.725 c 0,0.28 -0.22,0.5 -0.5,0.5 H 2.7249999 c -0.28,0 -0.5,-0.22 -0.5,-0.5 v -10 c 0,-0.28 0.22,-0.5 0.5,-0.5 H 15.725 c 0.28,0 0.5,0.22 0.5,0.5 z"
-									     id="path2"
-									     style="fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.6;stroke-dasharray:none;stroke-opacity:1" />
-									</svg>
-								</span>
-								<span id="unlockedSVG" hidden>
-									<svg
-									   height="100%"
-									   viewBox="0 0 24.45 23.450001"
-									   version="1.1"
-									   xmlns="http://www.w3.org/2000/svg"
-									   xmlns:svg="http://www.w3.org/2000/svg">
-									  <defs
-									     id="defs2" />
-									  <path
-									     fill="#494c4e"
-									     d="m 19.225,0.22499997 h -1 c -2.76,0 -5,2.24000003 -5,5.00000003 v 3 h -11 c -1.1,0 -2.00000001,0.9 -2.00000001,2 v 11 c 0,1.1 0.90000001,2 2.00000001,2 h 14 c 1.1,0 2,-0.9 2,-2 v -11 c 0,-1.1 -0.9,-2 -2,-2 h -1 v -3 c 0,-1.65 1.35,-3 3,-3 h 1 c 1.65,0 3,1.35 3,3 v 6 c 0,0.55 0.45,1 1,1 0.55,0 1,-0.45 1,-1 v -6 c 0,-2.76 -2.24,-5.00000003 -5,-5.00000003 z M 15.725,10.225 c 0.28,0 0.5,0.22 0.5,0.5 v 10 c 0,0.27 -0.22,0.5 -0.5,0.5 h -13 c -0.28,0 -0.5,-0.22 -0.5,-0.5 v -10 c 0,-0.27 0.22,-0.5 0.5,-0.5 z"
-									     id="path1"
-									     style="fill:#07ff00;fill-opacity:1;stroke:#ffffff;stroke-width:0.6;stroke-dasharray:none;stroke-opacity:1" />
-									  <path
-									     fill="#494c4e"
-									     d="m 11.225,14.225 c 0,0.74 -0.4,1.38 -1,1.73 v 2.27 c 0,0.55 -0.45,1 -1,1 -0.55,0 -1,-0.45 -1,-1 v -2.27 c -0.6,-0.35 -1,-0.99 -1,-1.73 0,-1.1 0.9,-2 2,-2 1.1,0 2,0.9 2,2 z"
-									     id="path2"
-									     style="fill:#07ff00;fill-opacity:1;stroke:#ffffff;stroke-width:0.;stroke-dasharray:none;stroke-opacity:1" />
+									height="100%"
+									viewBox="-1 0 8 8"
+									version="1.1"
+									id="pause-button"
+									xmlns="http://www.w3.org/2000/svg"
+									xmlns:xlink="http://www.w3.org/1999/xlink">
+									    
+									    <title>pause [#1006]</title>
+									    <desc>Created with Sketch.</desc>
+									    <defs>
+
+									</defs>
+									    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+									        <g id="Dribbble-Light-Preview" transform="translate(-227.000000, -3765.000000)" fill="#000000">
+									            <g id="icons" transform="translate(56.000000, 160.000000)">
+									                <path d="M172,3605 C171.448,3605 171,3605.448 171,3606 L171,3612 C171,3612.552 171.448,3613 172,3613 C172.552,3613 173,3612.552 173,3612 L173,3606 C173,3605.448 172.552,3605 172,3605 M177,3606 L177,3612 C177,3612.552 176.552,3613 176,3613 C175.448,3613 175,3612.552 175,3612 L175,3606 C175,3605.448 175.448,3605 176,3605 C176.552,3605 177,3605.448 177,3606" id="pause-[#1006]">
+
+									</path>
+									            </g>
+									        </g>
+									    </g>
 									</svg>
 								</span>
 							</button>
-					</div>
 
-					<div id="arrow">
-						<svg
-						   width="100%"
-						   viewBox="0 0 179.84215 82.504021"
-						   version="1.1"
-						   id="svg_Horizontal"
-						   xmlns="http://www.w3.org/2000/svg"
-						   xmlns:svg="http://www.w3.org/2000/svg">
-						  <defs
-						     id="defs1" />
-						  <g
-						     id="layer1">
-						    <path
-						       id="rect1"
-						       style="fill:#3f16e9;fill-opacity:0.986834;stroke:#000000;stroke-width:2.003;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:1.2018;paint-order:normal"
-						       d="M 105.6871,1.692148 V 21.753459 H 1.0015 v 38.9971 h 104.6856 v 20.06131 l 72.07364,-39.55986 z" />
-						    <text
-						       xml:space="preserve"
-						       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-linecap:square;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:4.54224;stroke-opacity:1"
-						       x="46.944424"
-						       y="46.867077"
-						       id="text1"><tspan
-						         id="tspan1"
-						         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
-						         x="46.944424"
-						         y="46.867077">F (x,y)</tspan></text>
-						  </g>
-						</svg>
-						
-						<svg
-						   width="100%"
-						   viewBox="0 0 82.504013 179.84216"
-						   version="1.1"
-						   id="svg_Vertical"
-						   xmlns="http://www.w3.org/2000/svg"
-						   xmlns:svg="http://www.w3.org/2000/svg">
-						  <defs
-						     id="defs2" />
-						  <g
-						     id="layer2">
-						    <path
-						       id="rect2"
-						       style="fill:#3f16e9;fill-opacity:0.986834;stroke:#000000;stroke-width:2.003;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:1.2018;paint-order:normal"
-						       d="M 80.811866,105.6871 H 60.750556 V 1.0015 H 21.753458 V 105.6871 H 1.6921479 l 39.5598601,72.07365 z" />
-						    <text
-						       xml:space="preserve"
-						       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;line-height:0;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-linecap:square;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:4.54224;stroke-opacity:1"
-						       x="-108.99285"
-						       y="48.140285"
-						       id="text2"
-						       transform="rotate(-90)"><tspan
-						         id="tspan2"
-						         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.5778px;line-height:0;font-family:MathJax_Math;-inkscape-font-specification:MathJax_Math;fill:#ffffff;fill-opacity:0.986834;stroke:#ffffff;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
-						         x="-108.99285"
-						         y="48.140285">F (x,y)</tspan></text>
-						  </g>
-						</svg>
-
-					</div>
-					
-					<div id="input">
-						<p>\[\begin{align}
-								F\colon \R^2 &\to \R^2\\
-								(x,y) &\mapsto (f_1(x,y), f_2(x,y))
-							\end{align}\]
-						</p>
-						<div>
-					      <p>\(f_1(x,y)\)</p>	<input type="text" id="f1" placeholder="Enter f_1(x,y)" />
-					      <div id="renderMath1"></div>
+							<div class="slidecontainer">
+							  <input type="range" min="0" max="1" value="0" step="0.000001" class="slider" id="myRange">
+							</div>
+							<button id="settings-button">
+								<span>
+									<svg  height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+									  <path fill="#494c4e" d="M12 17c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5zm0-8c-1.654 0-3 1.346-3 3s1.346 3 3 3 3-1.346 3-3-1.346-3-3-3z"/>
+									  <path fill="#494c4e" d="M22.59 9.09c-.18-.06-.93-.09-.93-.09-.55 0-1-.45-1-1 0-.28.12-.54.31-.72 0 0 .49-.54.57-.72.4-.75.28-1.71-.35-2.34l-1.41-1.41c-.39-.39-.9-.58-1.41-.58-.32 0-.64.08-.93.23-.18.08-.7.56-.7.56-.18.2-.44.32-.74.32-.55 0-1-.45-1-1V2c0-.21-.03-.41-.09-.59C14.66.59 13.89 0 13 0h-2c-.89 0-1.66.59-1.91 1.41-.06.18-.09.38-.09.59v.34c0 .55-.45 1-1 1-.3 0-.56-.12-.74-.32 0 0-.52-.48-.7-.56-.29-.15-.61-.23-.93-.23-.51 0-1.02.19-1.41.58L2.81 4.22c-.63.63-.75 1.59-.35 2.34.08.18.57.72.57.72.19.18.31.44.31.72 0 .55-.45 1-1 1 0 0-.75.03-.93.09C.59 9.34 0 10.11 0 11v2c0 .89.59 1.66 1.41 1.91.18.06.93.09.93.09.55 0 1 .45 1 1 0 .28-.12.54-.31.72 0 0-.49.54-.57.72-.4.75-.28 1.71.35 2.34l1.41 1.41c.39.39.9.58 1.41.58.32 0 .64-.08.93-.23.18-.08.7-.56.7-.56.18-.2.44-.32.74-.32.55 0 1 .45 1 1V22c0 .21.03.41.09.59.25.82 1.02 1.41 1.91 1.41h2c.89 0 1.66-.59 1.91-1.41.06-.18.09-.38.09-.59v-.34c0-.55.45-1 1-1 .3 0 .56.12.74.32 0 0 .52.48.7.56.29.15.61.23.93.23.51 0 1.02-.19 1.41-.58l1.41-1.41c.63-.63.75-1.59.35-2.34-.08-.18-.57-.72-.57-.72-.19-.18-.31-.44-.31-.72 0-.55.45-1 1-1 0 0 .75-.03.93-.09.82-.25 1.41-1.02 1.41-1.91v-2c0-.89-.59-1.66-1.41-1.91zM22 12.5c0 .27-.21.49-.48.5-1.59.07-2.86 1.39-2.86 3 0 .75.29 1.48.79 2.03.08.09.13.2.13.33 0 .14-.05.25-.13.34l-.73.72c-.09.09-.21.15-.35.15-.13 0-.25-.05-.34-.13-.54-.5-1.27-.78-2.03-.78-1.61 0-2.93 1.28-3.01 2.87-.01.26-.22.47-.49.47h-1c-.27 0-.48-.21-.49-.47-.08-1.59-1.4-2.87-3.01-2.87-.76 0-1.49.28-2.03.78-.09.08-.21.13-.34.13-.14 0-.26-.06-.35-.15l-.73-.72c-.08-.09-.13-.2-.13-.34 0-.13.05-.24.13-.33.5-.55.79-1.28.79-2.03 0-1.61-1.27-2.93-2.86-3-.27-.01-.48-.23-.48-.5v-1c0-.28.22-.5.5-.5 1.58-.08 2.84-1.4 2.84-3 0-.74-.28-1.45-.77-2 0 0-.01-.01-.01-.02-.09-.08-.14-.21-.14-.34 0-.14.06-.27.15-.36l.69-.7h.01c.09-.1.21-.16.36-.16.14 0 .26.06.35.15.55.49 1.27.77 2.02.77 1.6 0 2.91-1.26 3-2.84 0-.28.22-.5.5-.5h1c.28 0 .5.22.5.5.09 1.58 1.4 2.84 3 2.84.75 0 1.47-.28 2.02-.77.09-.09.21-.15.35-.15.15 0 .27.06.36.16h.01l.69.7c.09.09.15.22.15.36 0 .13-.05.26-.14.34 0 .01-.01.02-.01.02-.49.55-.77 1.26-.77 2 0 1.6 1.26 2.92 2.84 3 .28 0 .5.22.5.5v1z"/>
+									</svg>
+								</span>
+							</button>
 						</div>
-						<div>
-						  	<p>\(f_2(x,y)\)</p>
-					      <input type="text" id="f2" placeholder="Enter f_2(x,y)">
-					      <div id="renderMath2"></div>
-					    </div>
 
-					</div>
-					<input type="file" id="fileInput" accept=".svg,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,image/png,image/jpeg,image/webp,image/bmp,image/tiff" style="display:none;"/>
-					<div id="imageButtons">
-						<button  id="uploadBtn" class="imageButton">Upload Image</button>
-						<button id="editBtn" class="imagebutton"> Edit Image</button>
-					</div>
-					<div id="output_display" class="canvasContainer">
-							<canvas id="Grid02"></canvas>
-					</div>
-			</div>
+					</section>
+
+
+					<section id="input-section">
+							<p>\[\begin{align}
+									F\colon \R^2 &\to \R^2\\
+									(x,y) &\mapsto (f_1(x,y), f_2(x,y))
+								\end{align}\]
+							</p>
+							<div>
+						      <p>\(f_1(x,y)\)</p>	<input type="text" id="f1" placeholder="Enter f_1(x,y)" />
+						      <div id="renderMath1">\[x\]</div>
+							</div>
+							<div>
+							  	<p>\(f_2(x,y)\)</p>
+						      <input type="text" id="f2" placeholder="Enter f_2(x,y)">
+						      <div id="renderMath2">\[y\]</div>
+						    </div>
+					</section>
 
 					
+			</div>	
 		</div>
+
+														<!-- Time slider settings-->
+	
+
+	<section class="modal-container" id="editTime">
+		<section class="modal">
+			<button class="close-btn" id="closeEditTime">x</button>
+			<div class="modal-content">
+				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Time parameter settings</h1>
+				<div class = "modal-form">
+					<div>
+						<label for="minT-input">Min \[t\]</label>
+						<input 
+							type="number"
+							id="minT"
+							placeholder="Enter Favourite Number"
+							class="editTime-input"
+							min="-5000"
+							max="5000"
+							step="0.0001"
+							value="0"
+						/>
+					</div>
+					<div>
+						<label for="maxT-input">Max \[t\]</label>
+						<input 
+							type="number"
+							id="maxT"
+							placeholder="Enter Favourite Number"
+							class="editTime-input"
+							min="-5000"
+							max="5000"
+							step="0.0001"
+							value="1"
+						/>
+					</div>
+					<div>
+						<label for="pointsInput">Speed</label>
+						<input 
+							type="number"
+							id="speedT"
+							placeholder="Enter Favourite Number"
+							class="editTime-input"
+							min="-5000"
+							max="5000"
+							step="0.0001"
+							value="0"
+						/>
+					</div>
+					<!--No usar este tipo de submits para nuestra app-->
+					<button id="ok-btnTime" class="submit-btn"> Ok </Button>
+				</div>
+			</div>
+		</section>
+	</section>
+
+												<!-- Settings for Images-->
+
+
 	<section class="modal-container" id="inputResolution">
 		<section class="modal">
 			<button class="close-btn" id="closeRes">x</button>
