@@ -1,4 +1,7 @@
-//const numericConstant = "[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
+/*
+	Original parser by David Bau(github:davidbau) and  Sean Papay (github:person594)
+	Modified by Jesus Bertani
+*/
 const numericConstant = "\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
 const variableName = "(e|pi|t|x|y)";
 const functionName = "ln|log|exp|Gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
