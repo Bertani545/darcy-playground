@@ -684,7 +684,7 @@ async function main() {
         minT.reportValidity();
         allValid = false;
       }
-      if (durationT.value === 0) {
+      if (durationT.value == 0) {
         durationT.setCustomValidity("Duration cannot be equal to 0");
         durationT.reportValidity();
         allValid = false;

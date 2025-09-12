@@ -774,6 +774,10 @@ export class Grid
     if (this.timeParameters.currentTime > this.timeParameters.maxTime) {
       this.timeParameters.currentTime = this.timeParameters.minTime; // loop
     }
+
+    if (this.timeParameters.currentTime < this.timeParameters.minTime) {
+      this.timeParameters.currentTime = this.timeParameters.maxTime; // loop for backward speed
+    }
     
   }
 
