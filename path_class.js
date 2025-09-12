@@ -327,6 +327,7 @@ export class PathContainer
     this.boundingBox = {
       Top: top, Bottom: bottom, Left: left, Right: right
     }
+    console.log(this.boundingBox)
 
     const newBox = {Top: top + this.originalOffset[1] - this.correctionOffset[1],
             Bottom: bottom + this.originalOffset[1] - this.correctionOffset[1],
@@ -393,7 +394,7 @@ export class PathContainer
 
   fit_Image(spanX, spanY, isLocked) {
     // We modify current zoom to fit the span
-    if (!this.originalData) return 1;
+    if (!this.originalData || !this.boundingBox) return 1;
 
     const sizeX = this.boundingBox.Right - this.boundingBox.Left;
     const sizeY = this.boundingBox.Top - this.boundingBox.Bottom;

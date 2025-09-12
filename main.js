@@ -805,64 +805,6 @@ async function main() {
 
   }
 
-/*
-  window.addEventListener('resize', () => {
-     if (window.matchMedia("(orientation: portrait)").matches) {
-        console.log("Portrait")
-     }
-
-     if (window.matchMedia("(orientation: landscape)").matches) {
-        console.log("Landscape")
-     }
-
-
-     for (const canvas of canvases) {
-       
-       const rect = canvas.getBoundingClientRect();
-       
-       const dpr = window.devicePixelRatio || 1;
-       canvas.width = rect.width * dpr;
-       canvas.height = rect.height * dpr;
-       
-
-     }
-
-     const {displayWidth, displayHeight} = canvases[0].getBoundingClientRect();
-    //const displayWidth = canvases[0].clientWidth;
-    //const displayHeight = canvases[0].clientHeight;
-       
-
-      const dpr = window.devicePixelRatio;
-      const newWidth = Math.round(displayWidth * dpr);
-      const newHeigth = Math.round(displayHeight * dpr);
-
-      //gl.canvas.width = newWidth;
-      //gl.canvas.height = newHeigth;
-
-      for (const canvas of canvases) {
-        const needResize = canvas.width  !== newWidth ||
-                           canvas.height !== newHeigth;
-        if (needResize) {
-          canvas.width = newWidth;
-          canvas.height = newHeigth;
-        }
-     }
-
-     
-     //webgl_utils.resizeCanvasToDisplaySize(gl.canvas);
-     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-      //gl.viewport(0, 0, newWidth, newHeigth);
-      grid.rebuildPixelContainer() // Must change a lot later
-      //grid.update_text_labels()
-      //grid.update_ratio()
-
-
-
-      console.log("ratio", grid.ratio)
-
-      
-    });
-  */
 
 }
 

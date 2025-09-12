@@ -366,7 +366,7 @@ export class RasterContainer
   // Assumes that its locked
   fit_Image(spanX, spanY, isLocked) {
     
-    if (!this.originalData) return 1;
+    if (!this.originalData || !this.boundingBox) return 1;
 
     const sizeX = this.boundingBox.Right - this.boundingBox.Left;
     const sizeY = this.boundingBox.Top - this.boundingBox.Bottom;
