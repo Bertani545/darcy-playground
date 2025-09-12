@@ -122,9 +122,6 @@ export class Grid
     this.floatGrid02 = buildFrameBuffer_computeShader(this.gl, 3, 1024, 1024);
     this.floatGrid02.texID = 3;
     this.gl.bindVertexArray(null);
-    /*
-      All the code to support a varying shader
-    */
     
 
     // We save the original version
@@ -162,11 +159,19 @@ export class Grid
     
   }
 
+/*
+  update_canvas() {    
+    const gl = this.gl;
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.useProgram(this.Shader)
+    gl.uniform1f(this.aspectScreenLocation, gl.canvas.height  / gl.canvas.width);
+  }
+  */
+
   rebuildPixelContainer()
   {
     const gl = this.gl;
     gl.useProgram(this.programGridTransformed);
-    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
     gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_aspectScreen"), gl.canvas.height / gl.canvas.width);
 
     gl.useProgram(this.Shader)

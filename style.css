@@ -19,6 +19,7 @@ h1{
 canvas {
 	width: calc(100% - 2rem);
 	height: calc(100% - 2rem);
+	max-height: 4fr;
 }
 
 #text_overlay_input{
@@ -62,7 +63,7 @@ canvas {
 	#Content{
 		grid-row: 2;
 		display: grid;
-		grid-template-rows: 5fr 5rem 2fr;
+		grid-template-rows: 4fr 5rem 2fr;
 		grid-template-columns: 100%;
 		place-content: center;
 		height: auto;
@@ -75,8 +76,9 @@ canvas {
 		grid-row: 1;
 		display: grid;
 		grid-template-columns: 4fr 1fr 4fr;
-		height: auto;
-		width: 100%;
+		height: 40hv;
+		width: 100wv;
+		background-color: red;
 	}
 
 	#info-section {
@@ -84,20 +86,20 @@ canvas {
 		display: grid;
 		grid-template-columns: 4fr 1fr 4fr;
 		height: auto;
-		width: 100%;
+		width: 100wv;
 	}
 
 	#input-section {
 		grid-row: 3;
 		display: flex;
 		place-content: center;
+		width: 100wv;
 	}
 
 
 	.canvasContainer{
 		display: flex;
 		flex: 1;
-		height: 100%;
 		justify-content: center;
 		align-items: center;
 
@@ -119,6 +121,7 @@ canvas {
 		background-color: white;
 		grid-column: 3/4;
 
+		position: relative;
 	}
 
 	.grid_numbers{
@@ -158,17 +161,7 @@ canvas {
 	}
 
 
-	#time-container {
-		background-color: blue;
-		grid-column: 3;
-		justify-self: end;
-		display: flex;
-		justify-content: center;
-		vertical-align: center;
-		height: 40px;
-		margin-right: 1rem;
-
-	}
+	
 
 		/*Change*/
 	button{
@@ -299,8 +292,26 @@ canvas {
 }
 
 
+/*--------------------- Time related stuff ----------------*/
+#time-container {
+	background-color: blue;
+	grid-column: 3;
+	justify-self: end;
+	display: flex;
+	justify-content: center;
+	vertical-align: center;
+	height: 40px;
+	margin-right: 1rem;
+	min-width: 0;
+}
 
-
+#time-progress {
+  max-width: 100%;   /* prevents overflow */
+  width: 150px;      /* fixed or reasonable width */
+  flex-shrink: 1;    /* allows it to shrink */
+  box-sizing: border-box;
+  flex: 0 1 auto;
+}
 
 /*JS*/
 .modal-container.show-modal {
@@ -310,6 +321,8 @@ canvas {
 #editBtn.show-modal {
 	display: inline-block; 
 }
+
+
 
 
 /* Information */
@@ -328,7 +341,7 @@ canvas {
 
 	position:absolute;
 	top: 10px;
-	left: 10px;
+	left: 1rem;
 
 }
 	
@@ -415,7 +428,7 @@ a:hover {
 
 	position:absolute;
 	top: 10px;
-	right: 10px;
+	right: 1rem;
 }
 
 #examples:before {
