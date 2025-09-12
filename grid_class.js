@@ -54,8 +54,14 @@ export class Grid
     this.lockPaths = true; 
     this.currentImageCenter = [0,0]
 
-    this.currentTime = 0;
-    this.timeStopped = false; // ザ・ワールド
+
+    this.timeParameters = {
+      maxTime: 1,
+      minTime: 0,
+      duration: 5,
+      currentTime: 0,
+      isStopped: true // ザ・ワールド
+    };
   }
 
   async build(spanX = [-1,1], spanY = [-1,1])
@@ -304,15 +310,20 @@ export class Grid
     this.functionProgram = await createProgram(gl, this.simpleVS, this.computeFunctionFS);
     gl.useProgram(this.functionProgram)
     gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_numberDivisions"), 1024);
+    gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_t"), this.timeParameters.currentTime);
     
     
     this.gridTransformedVS = await createShader_fromSourceCode(gl, gl.VERTEX_SHADER, this.gridTransVertexShader_source.replace("REPLACE", this.transformFunction));
     this.programGridTransformed = await createProgram(gl, this.gridTransformedVS, this.fragmentShader);
     gl.useProgram(this.programGridTransformed);
-    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
+    //gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_zoom"), this.zoom);
     gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_aspectScreen"), gl.canvas.height / gl.canvas.width);
-    
+    gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_t"), this.timeParameters.currentTime);
+
     this.update_viewport(this.spanX, this.spanY)
+
+    this.currentDisplayer.update_time(this.timeParameters.currentTime);
+
   }
 
   create_text_instances()
@@ -724,29 +735,56 @@ export class Grid
   }
 
 
-  update_time(t) {
-    this.currentTime = t;
+  getTimeParameters() {
+    return this.timeParameters;
+  }
+
+  getCurrentTime() {
+    return this.timeParameters.currentTime;
+  }
+
+  setIsTimeStoppedStatus(status) {
+    this.timeParameters.isStopped = status;
+  }
+
+
+  update_time_parameters(newData) {
+    this.timeParameters.maxTime = newData.maxTime;
+    this.timeParameters.minTime = newData.minTime;
+    this.timeParameters.duration = newData.duration;
+
+    this.timeParameters.currentTime =  this.timeParameters.minTime;
+    //this.timeParameters.isStopped = false;
+  }
+
+  updateCurrentTime(t) {
+    const gl = this.gl;
+    this.timeParameters.currentTime = t;
+
+    gl.useProgram(this.functionProgram);
+    this.gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_t"), this.timeParameters.currentTime);
+    this.update_secondView_span(); // Persinado
+
+    this.currentDisplayer.update_time(this.timeParameters.currentTime);
+
+    gl.useProgram(this.programGridTransformed);
+    this.gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_t"), this.timeParameters.currentTime);
+    
+
+    if (this.timeParameters.currentTime > this.timeParameters.maxTime) {
+      this.timeParameters.currentTime = this.timeParameters.minTime; // loop
+    }
+    
   }
 
     draw(deltaTime)
   {
     const gl = this.gl;
 
-    if (!this.timeStopped) {
-      gl.useProgram(this.functionProgram);
-      this.gl.uniform1f(gl.getUniformLocation(this.functionProgram, "u_t"), this.currentTime);
-      this.update_secondView_span(); // Persinado
-
-      this.currentDisplayer.update_time(this.currentTime);
-
-      gl.useProgram(this.programGridTransformed);
-      this.gl.uniform1f(gl.getUniformLocation(this.programGridTransformed, "u_t"), this.currentTime);
-      
-      this.currentTime += deltaTime / 5; // 5 secons
-
-      if (this.currentTime > 1) {
-        this.currentTime = 0; // loop
-      }
+    if (!this.timeParameters.isStopped) {
+      const pastTime = this.timeParameters.currentTime
+      const currTime = pastTime + (this.timeParameters.maxTime - this.timeParameters.minTime) * deltaTime / this.timeParameters.duration; 
+      this.updateCurrentTime(currTime);
       
     }
 

@@ -147,13 +147,13 @@
 
 
 						<div class="time-slider" id="time-container">
-							<button id="stop-button">
-								<span>
+							<button id="time-state-button">
+								<span id="pause-button" hidden>
+									<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
 									<svg
 									height="100%"
 									viewBox="-1 0 8 8"
 									version="1.1"
-									id="pause-button"
 									xmlns="http://www.w3.org/2000/svg"
 									xmlns:xlink="http://www.w3.org/1999/xlink">
 									    
@@ -173,11 +173,34 @@
 									    </g>
 									</svg>
 								</span>
+								<span id="play-button">
+									<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+									<svg height="100%" viewBox="-0.5 0 7 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+									    
+									    <title>play [#1003]</title>
+									    <desc>Created with Sketch.</desc>
+									    <defs>
+
+									</defs>
+									    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+									        <g id="Dribbble-Light-Preview" transform="translate(-347.000000, -3766.000000)" fill="#000000">
+									            <g id="icons" transform="translate(56.000000, 160.000000)">
+									                <path d="M296.494737,3608.57322 L292.500752,3606.14219 C291.83208,3605.73542 291,3606.25002 291,3607.06891 L291,3611.93095 C291,3612.7509 291.83208,3613.26444 292.500752,3612.85767 L296.494737,3610.42771 C297.168421,3610.01774 297.168421,3608.98319 296.494737,3608.57322" id="play-[#1003]">
+
+									</path>
+									            </g>
+									        </g>
+									    </g>
+									</svg>
+								</span>
 							</button>
 
 							<div class="slidecontainer">
-							  <input type="range" min="0" max="1" value="0" step="0.000001" class="slider" id="myRange">
+							  <input type="range" min="0" max="1" value="0" step="0.000001" class="slider" id="time-progress">
 							</div>
+							<p>\(t =\)</p>
+							<input  id="time-input" type="number" min="0" max="1" value="0" step="0.00001" disabled>
+							<button id="time-input-activate"/>
 							<button id="settings-button">
 								<span>
 									<svg  height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -198,12 +221,12 @@
 								\end{align}\]
 							</p>
 							<div>
-						      <p>\(f_1(x,y)\)</p>	<input type="text" id="f1" placeholder="Enter f_1(x,y)" />
+						      <p>\(f_1(x,y)\)</p>	<input type="text" id="f1" placeholder="Enter f_1(x,y)" value="x"/>
 						      <div id="renderMath1">\[x\]</div>
 							</div>
 							<div>
 							  	<p>\(f_2(x,y)\)</p>
-						      <input type="text" id="f2" placeholder="Enter f_2(x,y)">
+						      <input type="text" id="f2" placeholder="Enter f_2(x,y)" value="y">
 						      <div id="renderMath2">\[y\]</div>
 						    </div>
 					</section>
@@ -219,15 +242,15 @@
 		<section class="modal">
 			<button class="close-btn" id="closeEditTime">x</button>
 			<div class="modal-content">
-				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Time parameter settings</h1>
+				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Time parameter settings</h1>
 				<div class = "modal-form">
 					<div>
-						<label for="minT-input">Min \[t\]</label>
+						<label for="minT-input">Min \(t\)</label>
 						<input 
 							type="number"
 							id="minT"
 							placeholder="Enter Favourite Number"
-							class="editTime-input"
+							class="form-input time-input"
 							min="-5000"
 							max="5000"
 							step="0.0001"
@@ -235,12 +258,12 @@
 						/>
 					</div>
 					<div>
-						<label for="maxT-input">Max \[t\]</label>
+						<label for="maxT-input">Max \(t\)</label>
 						<input 
 							type="number"
 							id="maxT"
 							placeholder="Enter Favourite Number"
-							class="editTime-input"
+							class="form-input time-input"
 							min="-5000"
 							max="5000"
 							step="0.0001"
@@ -248,16 +271,16 @@
 						/>
 					</div>
 					<div>
-						<label for="pointsInput">Speed</label>
+						<label for="pointsInput">Duration in seconds</label>
 						<input 
 							type="number"
-							id="speedT"
+							id="durationT"
 							placeholder="Enter Favourite Number"
-							class="editTime-input"
+							class="form-input time-input"
 							min="-5000"
 							max="5000"
 							step="0.0001"
-							value="0"
+							value="5"
 						/>
 					</div>
 					<!--No usar este tipo de submits para nuestra app-->

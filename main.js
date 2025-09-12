@@ -157,7 +157,9 @@ async function main() {
     timeThen = timeNow;
 
 
-
+    if (isPlaying) {
+      updateGUI();
+    }
     //Render to the screen
     grid.draw(deltaTime);
 
@@ -477,14 +479,19 @@ async function main() {
         const newPosY = parseFloatDefault(document.getElementById('positionYInput').value)
         const angle = parseFloatDefault(document.getElementById('rotationInput').value);
 
+        // If something bad Happened
+        if (newHeigth === 0) {
+          newHeigth = 1;
+          newWidth = newHeigth * imageData.ratio;
+        }
+
+
         imageData = {
           'scale': [newWidth, newHeigth],
           'position': [newPosX, newPosY],
           'rotation': angle,
           'ratio': imageData.ratio // Original one, does not change
         }
-
-        console.log(imageData)
 
         /*const realBox =*/ grid.update_Image(imageData);
         // Rotations may change the real center
@@ -511,12 +518,12 @@ async function main() {
     document.getElementById('inputResolution').classList.remove('show-modal');
   })
   window.addEventListener('mousedown', (e) => {
-    const input2 = document.getElementById('modal')
-    const input1 = document.getElementById('inputResolution');
-    if (e.target === input1 || e.target === input2) 
+    const inputs = [document.getElementById('modal'),
+                    document.getElementById('inputResolution'),
+                    document.getElementById('editTime'),]
+    if (inputs.includes(e.target)) 
     {
-      input1.classList.remove('show-modal');
-      input2.classList.remove('show-modal');
+      e.target.classList.remove('show-modal');
     }
   })
 
@@ -572,6 +579,135 @@ async function main() {
     lockedSVG.hidden = !lockedTrans;
     unlockedSVG.hidden = lockedTrans;
   })
+
+
+  // --------------------- Time variables and settings ----------------------
+  let isPlaying = false;
+  const playButtonSVG = document.getElementById('play-button');
+  const pauseButtonSVG = document.getElementById('pause-button');
+  const timeSettingsButton = document.getElementById('settings-button');
+  const minT = document.getElementById("minT");
+  const maxT = document.getElementById("maxT");
+  const durationT = document.getElementById("durationT");
+  const timeSlider = document.getElementById('time-progress');
+  const timeInput = document.getElementById('time-input');
+  const activatetimeInput = document.getElementById('time-input-activate');
+
+  function setPlayStatus(status) {
+    isPlaying = status;
+    grid.setIsTimeStoppedStatus(!status);
+    playButtonSVG.hidden = status;
+    pauseButtonSVG.hidden = !status;
+  }
+
+  function updateGUI() {
+    const data = grid.getTimeParameters();
+    timeSlider.value = data.currentTime;
+    timeInput.value = fixedDecimals(data.currentTime, 2);
+  }
+
+
+  timeSlider.addEventListener("mousedown", () => {
+    setPlayStatus(false)
+  });
+  timeSlider.addEventListener("touchstart", () => {
+    setPlayStatus(false)
+  });
+
+  timeSlider.addEventListener("input", () => {
+    grid.updateCurrentTime(parseFloatDefault(timeSlider.value));
+    timeInput.value = fixedDecimals(timeSlider.value, 2);
+  });
+
+  activatetimeInput.addEventListener("dblclick", () => {
+    timeInput.disabled = false;
+    activatetimeInput.hidden = true;       
+    timeInput.focus();
+
+    setPlayStatus(false);
+  });
+
+  timeInput.addEventListener("blur", () => {
+    timeInput.disabled = true;       // enable editing
+    activatetimeInput.hidden = false;
+
+    let t_val = parseFloatDefault(timeInput.value);
+    t_val = Math.max(Math.min(timeSlider.max, t_val), timeSlider.min);
+    grid.updateCurrentTime(t_val);
+    updateGUI()
+  });
+
+
+  document.getElementById('time-state-button').addEventListener('click', () =>{
+    setPlayStatus(!isPlaying);
+  });
+
+  timeSettingsButton.addEventListener('click', () =>{
+
+    const data = grid.getTimeParameters();
+    minT.value = fixedDecimals(data.minTime, 6);
+    maxT.value = fixedDecimals(data.maxTime, 6);
+    durationT.value = fixedDecimals(data.duration, 6);
+
+    document.getElementById('editTime').classList.add('show-modal');
+  })
+
+  document.getElementById('closeEditTime').addEventListener("click", () => {
+    document.getElementById('editTime').classList.remove('show-modal');
+  })
+
+  const timeInputs = document.querySelectorAll(".time-input");
+  timeInputs.forEach((input) => {
+    input.addEventListener("input", () => {
+      input.setCustomValidity("");
+    })
+  })
+
+  document.getElementById('ok-btnTime').addEventListener("click", () => {
+
+    timeInputs.forEach(input => input.setCustomValidity("")); // Clean
+
+    let allValid = true;
+    timeInputs.forEach(input => {
+      if (!input.checkValidity()) {
+        input.reportValidity();
+        allValid = false;
+      }
+    });
+
+    
+
+    if (allValid) {
+
+      if (minT.value >= maxT.value) {
+        minT.setCustomValidity("Value of min t must be less than max t.");
+        minT.reportValidity();
+        allValid = false;
+      }
+      if (durationT.value === 0) {
+        durationT.setCustomValidity("Duration cannot be equal to 0");
+        durationT.reportValidity();
+        allValid = false;
+      }
+    }
+
+    if (allValid) {
+      const newData = {}
+      newData.maxTime = parseFloatDefault(maxT.value);
+      newData.minTime = parseFloatDefault(minT.value);
+      newData.duration = parseFloatDefault(durationT.value);
+      grid.update_time_parameters(newData);
+
+      timeSlider.max = newData.maxTime;
+      timeSlider.min = newData.minTime;
+      updateGUI();
+
+      document.getElementById('editTime').classList.remove('show-modal');
+      setPlayStatus(true);
+    }
+  })
+
+  
 
 
   // -------------------------------- Expressions input  --------------------------------
