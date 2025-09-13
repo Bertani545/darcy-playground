@@ -141,41 +141,7 @@ async function main() {
   var curr_ID = -1;
   //var select_obj =   webgl_utils.buildFrameBuffer_ColorOnly(gl, 0, 1,1);
 
-
-
-
-  // --------- Render cycle ------
-  let theta = 0.0;
-  var timeThen  = 0;
-
-  requestAnimationFrame(drawScene);
-  function drawScene(timeNow)
-  {
-    // ---- Time -----
-    let resized = false;
-    for (const canvas of canvases) {
-      resized = resizeCanvasToDisplaySize(canvas)
-    }
-    if (resized) {
-      //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-        //gl.viewport(0, 0, newWidth, newHeigth);
-      grid.rebuildPixelContainer()
-    }
-
-    timeNow *= 0.001; //To seconds
-    const deltaTime = timeNow - timeThen;
-    timeThen = timeNow;
-
-
-    if (isPlaying) {
-      updateGUI();
-    }
-    //Render to the screen
-    grid.draw(deltaTime);
-
-    requestAnimationFrame(drawScene);
-  }
-
+  // The render cycle was here
 
   // -------------------- Inputs -----------------------------
 
@@ -527,10 +493,12 @@ async function main() {
   document.getElementById('closeRes').addEventListener("click", () => {
     document.getElementById('inputResolution').classList.remove('show-modal');
   })
+
   window.addEventListener('mousedown', (e) => {
     const inputs = [document.getElementById('modal'),
                     document.getElementById('inputResolution'),
-                    document.getElementById('editTime'),]
+                    document.getElementById('editTime'),
+                    document.getElementById("examples-loading"),]
     if (inputs.includes(e.target)) 
     {
       e.target.classList.remove('show-modal');
@@ -717,7 +685,6 @@ async function main() {
     }
   })
 
-  
 
 
   // -------------------------------- Expressions input  --------------------------------
@@ -740,6 +707,96 @@ async function main() {
     const newTexOuput = "\\[" + grid.update_f2(event.target.value) + "\\]";
     mathRenderer.startUpdate(renderf2, newTexOuput);
   });
+
+
+
+
+  // ------------------------------- Examples input -----------------------------------
+  const examplesForm =  document.getElementById("examples-loading");
+  const examplesButton = document.getElementById("examples-button");
+  const examplesContainer = document.getElementById("examples-container");
+  let examplesInfo;
+  await fetch('./resources/examples/examples_list.json').then(response => response.json()).then(examplesData  => {
+    const ids = examplesData["id_list"];
+    for (let id of ids) {
+      const currData = examplesData[id];
+      const button = document.createElement("button");
+      button.classList.add("example-option");
+
+      const img = document.createElement("img");
+      img.src = currData["path"];
+      console.log(img.source)
+      img.alt = id;
+
+      const label = document.createElement("span");
+      label.textContent = currData["name"]
+
+      button.appendChild(img);
+      button.appendChild(label);
+
+      button.addEventListener("click", () => {
+        console.log(currData);
+        examplesForm.classList.remove('show-modal');
+
+        // Set the example
+        input_f1.value = currData["f_1"];
+        input_f1.dispatchEvent(new Event("input", { bubbles: true }));
+        input_f2.value = currData["f_2"];
+        input_f2.dispatchEvent(new Event("input", { bubbles: true }));
+
+        fetch(currData["path"]).then(result => result.text()).then(data => {
+          imageData = grid.create_paths(data, currData["nPoints"]);
+          imageData.ratio = imageData.scale[0] / imageData.scale[1];
+
+          let w = 1, h = 1;
+
+          if (currData["width"] && currData["height"]) {
+            w = parseFloatDefault(currData["width"]);
+            h = parseFloatDefault(currData["height"]);
+          } else if(currData["width"]){
+            w = parseFloatDefault(currData["width"]);
+            h = w / imageData.ratio;
+          } else if (currData["height"]) {
+            h = parseFloatDefault(currData["height"]);
+            w = h * imageData.ratio;
+          }
+
+
+          imageData = {
+            'scale': [w, h],
+            'position': [parseFloatDefault(currData["posX"]), parseFloatDefault(currData["posY"])],
+            'rotation': parseFloatDefault(currData["rotation"]),
+            'ratio': imageData.ratio // Original one, does not change
+          }
+
+          grid.update_Image(imageData);
+          for (let e of document.querySelectorAll('.imageName')){
+            e.innerHTML = currData["name"]
+          }
+          document.getElementById('editBtn').classList.add('show-modal'); 
+        });
+
+
+        ":)"
+
+
+      });
+
+      examplesContainer.appendChild(button);
+
+    }
+    
+  });
+
+
+  examplesButton.addEventListener("click", () => {
+    examplesForm.classList.add('show-modal');
+  })
+  document.getElementById("close-examples").addEventListener("click", () => {
+    examplesForm.classList.remove('show-modal');
+  })
+
+
 
   // -------------------------------- Resize ----------------------------------
 
@@ -805,6 +862,39 @@ async function main() {
 
   }
 
+
+
+  // --------- Render cycle ------
+  let theta = 0.0;
+  var timeThen  = 0;
+
+  requestAnimationFrame(drawScene);
+  function drawScene(timeNow)
+  {
+    // ---- Time -----
+    let resized = false;
+    for (const canvas of canvases) {
+      resized = resizeCanvasToDisplaySize(canvas)
+    }
+    if (resized) {
+      //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+        //gl.viewport(0, 0, newWidth, newHeigth);
+      grid.rebuildPixelContainer()
+    }
+
+    timeNow *= 0.001; //To seconds
+    const deltaTime = timeNow - timeThen;
+    timeThen = timeNow;
+
+
+    if (isPlaying) {
+      updateGUI();
+    }
+    //Render to the screen
+    grid.draw(deltaTime);
+
+    requestAnimationFrame(drawScene);
+  }
 
 }
 

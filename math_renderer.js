@@ -17,65 +17,19 @@ export function startUpdate(objectWithPreview, newString) {
 
 
 function updatePreview(objectWithPreview, newString) {
+  if (!objectWithPreview) return;
 
-    //
+  // Clear old math items
+  MathJax.startup.document.clearMathItemsWithin([objectWithPreview]);
+  MathJax.texReset();
 
-    //  Record that we are running MathJax and that no additional update
+  // Update HTML
+  objectWithPreview.innerHTML = newString;
 
-    //  is needed after that.
-
-    //
-
-    mjRunning = true;
-
-    updatePending = false;
-
-    //
-
-    //  Forget about any old math expressions from the preview
-
-    //
-
-    MathJax.startup.document.clearMathItemsWithin([objectWithPreview]);
-
-    //
-
-    //  Reset any TeX labels or equation numbers
-
-    MathJax.texReset();
-
-    //  Start a new sandbox for new macro definitions (and remove any old ones)
-
-    //MathJax.tex2mml('\\begingroupSandbox');
-
-    //
-
-    //  Update the preview HTML and typeset the math
-
-    //
-    objectWithPreview.innerHTML = newString;
-    console.log(newString)
-
-    MathJax.typesetPromise()
-
-      .then(() => {
-
-        //
-
-        //  MathJax has completed, so is no longer running
-
-        //  If an update was needed while MathJax was running, update the
-
-        //    preview again.
-
-        //
-
-        mjRunning = false;
-
-        if (updatePending) updatePreview();
-
-      })
-
-      .catch((err) => console.error('Math typeset failed:', err));
-
-  }
+  // Typeset the new content
+  MathJax.typesetPromise([objectWithPreview])
+    .then(() => {
+      //console.log("MathJax typeset complete");
+    })
+    .catch(err => console.error("Math typeset failed:", err));
+}

@@ -1,0 +1,18 @@
+{
+	"id_list": [
+		"yunocchi"
+	],
+
+	"yunocchi": {
+		"name": "ゆのっち",
+		"path": "./resources/examples/yunocchi.svg",
+		"nPoints": 100,
+		"width": 1,
+		"posX": 0,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "2x",
+		"f_2": "y"
+	}
+
+}

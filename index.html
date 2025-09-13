@@ -21,7 +21,7 @@
 		Nullam non pretium ipsum. Morbi vel luctus leo. Mauris dignissim, purus sagittis rutrum vulputate, justo tortor commodo metus, at porttitor odio massa a lorem. Sed ultricies nibh id nunc sagittis lacinia. Duis non magna vel ante egestas pulvinar sed et enim. Donec ut est tempus, consequat ante sit amet, finibus urna. Mauris maximus consequat mi, sed suscipit felis fermentum vitae. Integer iaculis, augue non mattis fringilla, metus ante venenatis eros, nec tristique tellus lorem vitae orci. Aenean dictum porta nisl eu elementum. Maecenas aliquam viverra augue. In hac habitasse platea dictumst. Etiam nunc urna, sollicitudin sit amet tellus sit amet, placerat sagittis lectus. Donec iaculis, leo non condimentum scelerisque, dui enim lobortis lorem, ac elementum nibh elit sagittis odio. Nunc quis facilisis ex, vel luctus tortor. Ut pulvinar erat eget facilisis volutpat. Morbi convallis odio orci, maximus consequat dolor euismod quis. 
 			</div>
 		</div>
-		<button id="examples"></button>
+		<button id="examples-button"></button>
 
 		<div id="Body">
 				<div id="title_div">
@@ -196,10 +196,9 @@
 									    </g>
 									</svg>
 								</span>
-								<span id="play-button">
-									<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-									<svg height="100%" viewBox="-0.5 0 7 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									    
+								<span id="play-button" >
+									<svg id="play-button-svg" height="100%" viewBox="-0.5 0 7 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+									    <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
 									    <title>play [#1003]</title>
 									    <desc>Created with Sketch.</desc>
 									    <defs>
@@ -263,7 +262,7 @@
 		<section class="modal">
 			<button class="close-btn" id="closeEditTime">x</button>
 			<div class="modal-content">
-				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Time parameter settings</h1>
+				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Time parameter settings</h2>
 				<div class = "modal-form">
 					<div>
 						<label for="minT-input">Min \(t\)</label>
@@ -305,7 +304,7 @@
 						/>
 					</div>
 					<!--No usar este tipo de submits para nuestra app-->
-					<button id="ok-btnTime" class="submit-btn"> Ok </Button>
+					<button id="ok-btnTime" class="submit-btn"> Ok </button>
 				</div>
 			</div>
 		</section>
@@ -318,7 +317,7 @@
 		<section class="modal">
 			<button class="close-btn" id="closeRes">x</button>
 			<div class="modal-content">
-				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h1>
+				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h2>
 				<div class = "modal-form">
 					<div>
 						<label for="pointsInput">Points per Curve</label>
@@ -334,7 +333,7 @@
 						/>
 					</div>
 					<!--No usar este tipo de submits para nuestra app-->
-					<button id="ok-btnPoints" class="submit-btn"> Ok </Button>
+					<button id="ok-btnPoints" class="submit-btn"> Ok </button>
 				</div>
 			</div>
 		</section>
@@ -343,7 +342,7 @@
 		<section class="modal">
 			<button class="close-btn" id="closeModal">x</button>
 			<div class="modal-content">
-				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h1>
+				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h2>
 				
 					<div id="sizeInput">
 						<div>
@@ -457,12 +456,23 @@
 						/>
 					</div>
 					<!--No usar este tipo de submits para nuestra app-->
-					<button id="ok-btn" class="submit-btn"> Ok </Button>
+					<button id="ok-btn" class="submit-btn"> Ok </button>
 				</div>
 			</div>
 		</section>
 	</section>
 
+	<!------------------------------------- Examples loading ------------------------------>
+	<section class="modal-container" id="examples-loading">
+		<section class="modal">
+			<button class="close-btn" id="close-examples">x</button>
+			<div class="modal-content">
+				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Load Example</h2>
+				<div class = "modal-form" id="examples-container">
+				</div>
+			</div>
+		</section>
+	</section>
 
 	<script type="module" src="main.js"></script>
 
