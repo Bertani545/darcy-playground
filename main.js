@@ -773,14 +773,18 @@ async function main() {
           
           document.getElementById('editBtn').classList.add('show-modal');
 
-          console.log("zzz")
-          document.getElementById('widthInput').value = w;
-          document.getElementById('heightInput').value = h;
-          document.getElementById('positionXInput').value = imageData.position[0];
-          document.getElementById('positionYInput').value = imageData.position[1];
-          document.getElementById('rotationInput').value = imageData.rotation;
+          if (currData["uses_time"]) {
+              const newData = {}
+              newData.maxTime = parseFloatDefault(currData["maxT"]);
+              newData.minTime = parseFloatDefault(currData["minT"]);
+              newData.duration = parseFloatDefault(currData["duration"]);
+              grid.update_time_parameters(newData);
 
-
+              timeSlider.max = newData.maxTime;
+              timeSlider.min = newData.minTime;
+              updateGUI();
+              setPlayStatus(true);
+          }
         }
 
         if (currData["type"] === "svg") {
