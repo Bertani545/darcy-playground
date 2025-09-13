@@ -358,9 +358,8 @@ async function main() {
 
           const img = new Image();
           img.onload = () => {
-            let resizedImg = null;
             resizeImageToMax(img).then((newImg) => {
-              resizedImg = newImg;
+              const resizedImg = newImg;
               document.getElementById('modal').classList.add('show-modal');
 
               // We are going to asume that 1px = 1 unit
@@ -422,7 +421,6 @@ async function main() {
   document.getElementById('editBtn').addEventListener('click', () => {
 
     const info = grid.getImageMods();
-
     document.getElementById('modal').classList.add('show-modal');
     document.getElementById('widthInput').value = fixedDecimals(imageData.scale[0] * info.zoom, 6);
     document.getElementById('heightInput').value = fixedDecimals(imageData.scale[1] * info.zoom, 6);
@@ -725,7 +723,6 @@ async function main() {
 
       const img = document.createElement("img");
       img.src = currData["path"];
-      console.log(img.source)
       img.alt = id;
 
       const label = document.createElement("span");
@@ -744,8 +741,11 @@ async function main() {
         input_f2.value = currData["f_2"];
         input_f2.dispatchEvent(new Event("input", { bubbles: true }));
 
-        fetch(currData["path"]).then(result => result.text()).then(data => {
-          imageData = grid.create_paths(data, currData["nPoints"]);
+        for (let e of document.querySelectorAll('.imageName')){
+          e.innerHTML = currData["name"]
+        }
+
+        const finish_setup = () => {
           imageData.ratio = imageData.scale[0] / imageData.scale[1];
 
           let w = 1, h = 1;
@@ -760,7 +760,7 @@ async function main() {
             h = parseFloatDefault(currData["height"]);
             w = h * imageData.ratio;
           }
-
+          console.log(w, h)
 
           imageData = {
             'scale': [w, h],
@@ -770,11 +770,38 @@ async function main() {
           }
 
           grid.update_Image(imageData);
-          for (let e of document.querySelectorAll('.imageName')){
-            e.innerHTML = currData["name"]
+          
+          document.getElementById('editBtn').classList.add('show-modal');
+
+          console.log("zzz")
+          document.getElementById('widthInput').value = w;
+          document.getElementById('heightInput').value = h;
+          document.getElementById('positionXInput').value = imageData.position[0];
+          document.getElementById('positionYInput').value = imageData.position[1];
+          document.getElementById('rotationInput').value = imageData.rotation;
+
+
+        }
+
+        if (currData["type"] === "svg") {
+          fetch(currData["path"]).then(result => result.text()).then(data => {
+            imageData = grid.create_paths(data, currData["nPoints"]);
+            finish_setup(imageData);
+          });
+        }
+
+        if (currData["type"] === "raster") {
+          const img = new Image();
+          img.onload = () => {
+            resizeImageToMax(img).then((newImg) => {
+              const resizedImg = newImg;
+              // We are going to asume that 1px = 1 unit
+              imageData = grid.save_Image_data(resizedImg);
+              finish_setup(imageData);
+            });
           }
-          document.getElementById('editBtn').classList.add('show-modal'); 
-        });
+          img.src = currData["path"];
+        }
 
 
         ":)"
