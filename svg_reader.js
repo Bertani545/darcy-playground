@@ -17,92 +17,77 @@ Only accepts paths that are made out of lines or Bezier Curves. Will
     Arcs will be skipped
 Only saves points, no other information is saved
 */
-const EPS = 0.00001; // Change to allow different resolutions
+const EPS = 0.0000001; // Change to allow different resolutions
 
 
 // <------------------------------- Acount for the view box
 
+function parseFloatDefault(x) {
+  const n = parseFloat(x);
+  if (isNaN(n)) console.log("Tried to parse " + x);
+  return isNaN(n) ? 0 : n;
+}
+
+const numericConstant = "[-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
+const commands = "[a-zA-Z]"
+const whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
 
 class TextTraveler
 {
-    constructor(text)
-    {
-        this.text = text;
-        this.currentPosition = -1;
-        this.lastPosition = -1;
-        do
-        {
-            // Starts with an instruction
-            this.currentPosition++;
-        }
-        while((this.text.charCodeAt(this.currentPosition) < 97  || this.text.charCodeAt(this.currentPosition) > 122)
-            &&(this.text.charCodeAt(this.currentPosition) < 65  || this.text.charCodeAt(this.currentPosition) > 90));
+    constructor(text) {
+        this.tokens = this.tokenize(text);
+        this.currentIndex = 0;
+    }
+
+
+    tokenize(text) {
+        const regex = RegExp("(" + numericConstant + "|" + commands + "|" + whitespace + ")", "g");
         
-        this.start = this.currentPosition;
+        let tokenStream = text.match(regex);
 
-    }
-    get_next()
-    {
-        if(this.currentPosition >= this.text.length){return null;}
-        // Delete spaces or line jump
-        while(this.text[this.currentPosition] === ' ' || this.text[this.currentPosition] === '\n'
-                || this.text[this.currentPosition] === ',')
-        {
-            this.currentPosition++;
-            if(this.currentPosition >= this.text.length){return null;}
-        }
+        if (!tokenStream) return [];
+        //if (tokenStream.join("") != text) return [];
 
-        // Either a letter or a number
-        if((this.text.charCodeAt(this.currentPosition) >= 97  && this.text.charCodeAt(this.currentPosition) <= 122)
-            ||(this.text.charCodeAt(this.currentPosition) >= 65 && this.text.charCodeAt(this.currentPosition) <= 90))
-        {    
-            // A letter. Only one char and jump to the next position
-            this.lastPosition = this.currentPosition;
-            this.currentPosition++;
-
-            //console.log("Letter = " + this.text[this.currentPosition-1])
-            return this.text[this.currentPosition-1];
-        }
-
-        // It must be a number then
-        // Read until NaN or two points
-        this.lastPosition = this.currentPosition;
-        let number = ''
-        let points = 0;
-        do
-        {
-            number += this.text[this.currentPosition];
-            if(this.text[this.currentPosition] === '.') points++;
-            this.currentPosition++;
-        }
-        while((this.text.charCodeAt(this.currentPosition) >= 48 && this.text.charCodeAt(this.currentPosition) <= 57)
-                || (this.text[this.currentPosition] === '.' && points == 0))
-        //console.log("Number = " + number)
-        return number;
-    }
-    return_to_prev()
-    {
-        if(this.lastPosition < 0) throw new Error("No valid previous state");
-
-        this.currentPosition = this.lastPosition;
-        this.lastPosition = -1;
+        tokenStream = tokenStream.filter(function(token) {
+            return ! token.match("^(" + whitespace + ")$");
+        });
+        //console.log(tokenStream)
+        return tokenStream;
     }
 
-    go_to_start()
-    {
-        this.currentPosition = this.start;
+    get_next() {
+        if (this.currentIndex >= this.tokens.length) {
+            return null;
+        }
+        const token = this.tokens[this.currentIndex];
+        this.currentIndex++;
+        //if (!isNaN(parseFloat(token)) && Math.abs(parseFloat(token) < 0.001))
+        //console.log(token)
+        return token;
+    }
+
+    return_to_prev() {
+        if (this.currentIndex <= 0) {
+            throw new Error("No valid previous state");
+        }
+        this.currentIndex--;
+    }
+
+    go_to_start() {
+        this.currentIndex = 0;
     }
 }
 
 
 export function read_svg_file(file)
 {
+    const a = new TextTraveler("c-0.67945,0.63112-2.99579,3.21416");
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(file, "image/svg+xml");
     const paths = xmlDoc.getElementsByTagName("path");
     const SVGElement = xmlDoc.documentElement;
     let height = SVGElement.getAttribute("height");
-    if(height){ height = parseFloat(height);}
+    if(height){ height = parseFloatDefault(height);}
     else {height = 0;}
 
     //const width = SVGElement.getAttribute("width");
@@ -131,8 +116,8 @@ export function read_svg_file(file)
                     current_point = [0,0];
                 case 'm':
                     {
-                        const dx = parseFloat(values.get_next());
-                        const dy = parseFloat(values.get_next());
+                        const dx = parseFloatDefault(values.get_next());
+                        const dy = parseFloatDefault(values.get_next());
                         current_point[0] += dx;
                         current_point[1] += dy;
 
@@ -143,8 +128,8 @@ export function read_svg_file(file)
                 case 'L':
                 case 'l':
                     {
-                        let dx = parseFloat(values.get_next());
-                        let dy = parseFloat(values.get_next());
+                        let dx = parseFloatDefault(values.get_next());
+                        let dy = parseFloatDefault(values.get_next());
 
                         if (current_command === 'l') { // Relative
                             dx += current_point[0];
@@ -169,7 +154,7 @@ export function read_svg_file(file)
                 case 'H':
                 case 'h':
                     {
-                        let dx = parseFloat(values.get_next());
+                        let dx = parseFloatDefault(values.get_next());
 
                         if (current_command === 'h') { // Relative
                             dx += current_point[0];
@@ -187,7 +172,7 @@ export function read_svg_file(file)
                 case 'V':
                 case 'v':
                     {
-                        let dy = parseFloat(values.get_next());
+                        let dy = parseFloatDefault(values.get_next());
 
                         if (current_command === 'v') { // Relative
                             dy += current_point[1];
@@ -211,11 +196,12 @@ export function read_svg_file(file)
                             // A point
                             break;
                         }
+                        
                         path_container['lines'].push({});
                         path_container['lines'][idLine].p1 = [current_point[0], current_point[1] * -1 + height];
                         path_container['lines'][idLine].p2 = [initial_point[0], initial_point[1] * -1 + height];
                         current_point = [...initial_point];
-                            
+                        
                         change_command = true;
                         idLine++;
                         break;
@@ -223,10 +209,10 @@ export function read_svg_file(file)
                 case 'Q':
                 case 'q':
                     {
-                        let cx = parseFloat(values.get_next());
-                        let cy = parseFloat(values.get_next());
-                        let dx = parseFloat(values.get_next());
-                        let dy = parseFloat(values.get_next());
+                        let cx = parseFloatDefault(values.get_next());
+                        let cy = parseFloatDefault(values.get_next());
+                        let dx = parseFloatDefault(values.get_next());
+                        let dy = parseFloatDefault(values.get_next());
 
                         if (current_command === 'q') { // Relative
                             cx += current_point[0];
@@ -248,8 +234,8 @@ export function read_svg_file(file)
                 case 'T':
                 case 't':
                     {
-                        let dx = parseFloat(values.get_next());
-                        let dy = parseFloat(values.get_next());
+                        let dx = parseFloatDefault(values.get_next());
+                        let dy = parseFloatDefault(values.get_next());
                         if (current_command === 't') { // Relative
                             dx += current_point[0];
                             dy += current_point[1];
@@ -285,12 +271,12 @@ export function read_svg_file(file)
                 case 'C':
                 case 'c':
                     {
-                        let c1x = parseFloat(values.get_next());
-                        let c1y = parseFloat(values.get_next());
-                        let c2x = parseFloat(values.get_next());
-                        let c2y = parseFloat(values.get_next());
-                        let dx = parseFloat(values.get_next());
-                        let dy = parseFloat(values.get_next());
+                        let c1x = parseFloatDefault(values.get_next());
+                        let c1y = parseFloatDefault(values.get_next());
+                        let c2x = parseFloatDefault(values.get_next());
+                        let c2y = parseFloatDefault(values.get_next());
+                        let dx = parseFloatDefault(values.get_next());
+                        let dy = parseFloatDefault(values.get_next());
 
                         if (current_command === 'c') { // Relative
                             c1x += current_point[0];
@@ -315,10 +301,10 @@ export function read_svg_file(file)
                 case 'S':
                 case 's':
                     {
-                        let c2x = parseFloat(values.get_next());
-                        let c2y = parseFloat(values.get_next());
-                        let dx = parseFloat(values.get_next());
-                        let dy = parseFloat(values.get_next());
+                        let c2x = parseFloatDefault(values.get_next());
+                        let c2y = parseFloatDefault(values.get_next());
+                        let dx = parseFloatDefault(values.get_next());
+                        let dy = parseFloatDefault(values.get_next());
                         if (current_command === 's') { // Relative
                             c2x += current_point[0];
                             c2y += current_point[1];
@@ -392,13 +378,16 @@ export function read_svg_file(file)
         {
             last_command = current_command;
             current_command = values.get_next();
+
         }
         else
         {
             current_command = last_command;
-            if(current_command === 'M' || current_command === 'm')
+            //console.log(current_command)
+            if(current_command == 'M' || current_command == 'm')
                 current_command = 'l';
         }  
+        //console.log(current_command)
         
         }while(current_command != null)
     }
