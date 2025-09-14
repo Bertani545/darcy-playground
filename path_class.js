@@ -158,6 +158,7 @@ export class PathContainer
       if(point[1] > top) top = point[1];
     }
 
+
     for(const line of paths['lines'])
     {
       const distX = (line.p2[0] - line.p1[0]) / (this.nPoints - 1);
@@ -327,7 +328,7 @@ export class PathContainer
     this.boundingBox = {
       Top: top, Bottom: bottom, Left: left, Right: right
     }
-    console.log(this.boundingBox)
+    //console.log(this.boundingBox)
 
     const newBox = {Top: top + this.originalOffset[1] - this.correctionOffset[1],
             Bottom: bottom + this.originalOffset[1] - this.correctionOffset[1],

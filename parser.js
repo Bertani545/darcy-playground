@@ -4,7 +4,7 @@
 */
 const numericConstant = "\\d*\\.?\\d+(?:[eE][-+]?\\d+)?";
 const variableName = "(e|pi|t|x|y)";
-const functionName = "ln|log|exp|Gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?";
+const functionName = "ln|log|exp|Gamma|abs|sqrt|sinh?|cosh?|tanh?|asin|acos|atan|sech?|csch?|coth?|sign";
 const identifier = functionName + "|" + variableName;
 const symbol = "[\\[\\]\\(\\)+*/^-]";
 const whitespace = "(\\s|\\t|\\n|\\r|\\v)+";
@@ -264,7 +264,7 @@ function get_code(expression)
 		case "/":
 			return "(" + get_code(expression[1]) + " / " + get_code(expression[2]) + ")";
 		case "^":
-			return "pow(" + get_code(expression[1]) + "," + get_code(expression[2]) + ")";
+			return "safePow(" + get_code(expression[1]) + "," + get_code(expression[2]) + ")";
 	}
 }
 

@@ -369,6 +369,7 @@ async function main() {
               document.getElementById('heightInput').value = imageData.scale[1];
               document.getElementById('positionXInput').value = imageData.position[0];
               document.getElementById('positionYInput').value = imageData.position[1];
+              document.getElementById('rotationInput').value = 0;
             });
           };
           //img.onerror = reject;
@@ -415,6 +416,7 @@ async function main() {
       document.getElementById('heightInput').value = fixedDecimals(imageData.scale[1], 6);
       document.getElementById('positionXInput').value = fixedDecimals(imageData.position[0], 6);
       document.getElementById('positionYInput').value = fixedDecimals(imageData.position[1], 6);
+      document.getElementById('rotationInput').value = 0;
     }
   })
 
@@ -806,10 +808,6 @@ async function main() {
           }
           img.src = currData["path"];
         }
-
-
-        ":)"
-
 
       });
 

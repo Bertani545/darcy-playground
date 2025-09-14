@@ -289,6 +289,12 @@ export class Grid
                                 return sqrt(2.0 * PI * x) * pow(x, x) * 1.0 / pow(E, x);
                               }
 
+                              float safePow(float x, float y) {
+                                  if (x >= 0.0) return pow(x,y);
+                                  if (fract(y) != 0.0) return 0.0/0.0; // Undefined
+                                  return pow(-x, y) * (mod(y, 2.0) == 0.0 ? 1.0 : -1.0);
+                              }
+
                               float cot(float x) {return 1.0 / tan(x);}
                               float sec(float x) {return 1.0 / cos(x);}
                               float csc(float x) {return 1.0 / sin(x);}
