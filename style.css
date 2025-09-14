@@ -34,10 +34,48 @@ canvas {
 	pointer-events: none;
 }
 
+@media (orientation: portrait){
+	#disclaimer {
+		position: fixed;
+		top:0;
+		left: 0;
+		z-index: 10;
+		height: 100vh;
+		width: 100vw;
+		background-color: #111;
+		pointer-events: all;
+		    display: flex;
+    flex-direction: column; /* stack children vertically */
+    align-items: center;    /* optional: center horizontally */
+    justify-content: center; /* optional: center vertically */
+	}
 
+	#disclaimer p {
+		margin: 1vh 10vw; /* spacing */
+		color: white;
+		font-size: max(5vw, 3vh);
+		height: 30vh;
+		margin-top: 2rem;
+		text-align: justify;
+	}
+
+	#disclaimer img {
+		height: 70vh;
+		margin-bottom: 2rem;
+	}
+
+	body {
+		height: 100vh;
+		overflow-y: hidden;
+	}
+
+}
 
 
 @media (orientation: landscape){
+	#disclaimer {
+		display: none;
+	}
 	#Body{
 		position: absolute;
 		top: 0rem;
