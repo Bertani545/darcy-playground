@@ -311,12 +311,16 @@ async function main() {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, w, h);
 
+/*
     const scaledImg = new Image();
     scaledImg.src = canvas.toDataURL("image/png");
-    
+
     return new Promise((resolve) => {
         scaledImg.onload = () => resolve(scaledImg);
       });
+      */
+
+    return canvas;
   }
 
   function loadImage(files) {
