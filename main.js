@@ -310,10 +310,13 @@ async function main() {
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, w, h);
+
     const scaledImg = new Image();
-    
     scaledImg.src = canvas.toDataURL("image/png");
-    return scaledImg; // Promise
+    
+    return new Promise((resolve) => {
+        scaledImg.onload = () => resolve(scaledImg);
+      });
   }
 
   function loadImage(files) {
