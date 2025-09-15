@@ -578,6 +578,10 @@ async function main() {
   const timeInput = document.getElementById('time-input');
   const activatetimeInput = document.getElementById('time-input-activate');
 
+  // Clean
+  timeSlider.value = 0;
+  timeInput.value = 0;
+
   function setPlayStatus(status) {
     isPlaying = status;
     grid.setIsTimeStoppedStatus(!status);
@@ -698,6 +702,8 @@ async function main() {
 
   const input_f1 = document.getElementById("f1");
   const input_f2 = document.getElementById("f2");
+  input_f1.value = "x";
+  input_f2.value = "y";
 
   const renderf1 = document.getElementById("renderMath1");
   const renderf2 = document.getElementById("renderMath2");
@@ -898,6 +904,12 @@ async function main() {
 
   }
 
+  // Clean scrolls
+  window.scrollTo(0, 0);
+  window.scrollTop = 0;
+  document.querySelectorAll(".scroll-element").forEach(el => {
+    el.scrollTop = 0;
+  });
 
 
   // --------- Render cycle ------
