@@ -745,6 +745,10 @@ export class Grid
     return this.currentDisplayer.getImageMods();
   }
 
+  resetTime() {
+    this.timeParameters.currentTime =  this.timeParameters.minTime;
+  }
+
 
   getTimeParameters() {
     return this.timeParameters;
@@ -805,6 +809,9 @@ export class Grid
 
     // Draw to the texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clear(gl.COLOR_BUFFER_BIT);
+
+    this.currentDisplayer.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
+
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.programGridTransformed);
     gl.uniform4f(gl.getUniformLocation(this.programGridTransformed, "u_spanXY"),...this.spanX, ...this.spanY);
@@ -816,7 +823,7 @@ export class Grid
     gl.uniform2f(gl.getUniformLocation(this.programGridTransformed, "u_lineSpawnDirection"), 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances + 1);
 
-    this.currentDisplayer.draw_transformed(this.spanX, this.spanY, this.spanTransformed);
+    
 
 
     //Pass the texture to the second canvas
@@ -825,6 +832,9 @@ export class Grid
 
     // Draw to the first canvas
     gl.clear(gl.COLOR_BUFFER_BIT);
+
+    this.currentDisplayer.draw(this.spanX, this.spanY);
+
     gl.bindVertexArray(this.VAO);
     gl.useProgram(this.Shader);
     gl.uniform4f(this.spanLocation,...this.spanX, ...this.spanY);
@@ -837,7 +847,7 @@ export class Grid
     gl.uniform2f(this.lineSpawnDirectionLocation, 1, 0);
     gl.drawArraysInstanced(gl.LINE_STRIP, 0, n_p + 2, n_instances + 1);
 
-    this.currentDisplayer.draw(this.spanX, this.spanY);
+    
 
 
 

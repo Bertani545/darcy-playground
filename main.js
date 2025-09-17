@@ -799,6 +799,10 @@ async function main() {
               timeSlider.min = newData.minTime;
               updateGUI();
               setPlayStatus(true);
+          } else {
+            grid.resetTime();
+            updateGUI();
+            setPlayStatus(false);
           }
         }
 
