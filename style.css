@@ -3,11 +3,20 @@
 }
 
 :root {
-	--inputs-height: 6vh;
+	--inputs-height: 6dvh;
 }
 
+/*Deletes the arrows next to number inputs*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
-
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 
 html, body {
 	height: 100%;
@@ -15,7 +24,7 @@ html, body {
 	padding: 0;
 }
 h1{
-	font-size: max(4vh, 1.5rem);
+	font-size: max(4dvh, 1.5rem);
 }
 
 canvas {
@@ -40,8 +49,8 @@ canvas {
 		top:0;
 		left: 0;
 		z-index: 10;
-		height: 100vh;
-		width: 100vw;
+		height: 100dvh;
+		width: 100dvw;
 		background-color: #111;
 		pointer-events: all;
 		    display: flex;
@@ -51,21 +60,21 @@ canvas {
 	}
 
 	#disclaimer p {
-		margin: 1vh 10vw; /* spacing */
+		margin: 1dvh 10dvw; /* spacing */
 		color: white;
-		font-size: max(5vw, 3vh);
-		height: 30vh;
+		font-size: max(5dvw, 3dvh);
+		height: 30dvh;
 		margin-top: 2rem;
 		text-align: justify;
 	}
 
 	#disclaimer img {
-		height: 70vh;
+		height: 70dvh;
 		margin-bottom: 2rem;
 	}
 
 	body {
-		height: 100vh;
+		height: 100dvh;
 		overflow-y: hidden;
 	}
 
@@ -166,7 +175,7 @@ canvas {
 	.grid_numbers{
 		position: absolute;
 		color: rgba(255,255,1,1);
-		font-size: 1vw;
+		font-size: 1dvw;
 	}
 
 
@@ -192,7 +201,7 @@ canvas {
 
 	#imageButtons button{
 		height: 100%;
-		width: min(150px, 18vw);
+		width: min(150px, 18dvw);
 		cursor: pointer;
 
 		font-size: 1rem;
@@ -216,9 +225,12 @@ canvas {
 	  touch-action: manipulation;
 	  z-index: 1;
 	  
-
+	  overflow: hidden;
+  	text-overflow: ellipsis;
+	  
 
 	}
+
 
 	
 
@@ -274,7 +286,7 @@ canvas {
 	max-width: 100%;
 	width: 400px;
 
-	max-height: 90vh;
+	max-height: 90dvh;
 	overflow-y: auto;
 }
 
@@ -382,39 +394,60 @@ canvas {
 	min-height: 1.5rem;
 }
 
-#time-progress {
-	grid-column: 2;
-  max-width: 100%;   /* prevents overflow */
+
+.slider {
+  -webkit-appearance: none;
+  width: calc(100% - 15px);
+  height: 15px;
+  background: #000;
+  outline: none;
+  border: 3px solid #649e97;
+  border-radius: 8px;
+  transform: translate(0, calc(max(var(--inputs-height), 1.5rem)/2 - 12px)); /*Container height/2 - ~half the height of the element*/
 }
+
+
+/* for chrome/safari */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: min(25px, 1.5rem);
+  background: #000;
+  cursor: pointer;
+  border: 3px solid #99f0e5;
+  border-radius: 4px;
+}
+
+/* for firefox */
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: min(25px, 1rem);
+  background: #000;
+  cursor: pointer;
+  border: 3px solid #99f0e5;
+  border-radius: 4px;
+}
+
 
 #time-container .text {
 	grid-column: 3;
 	height: var(--inputs-height);
 	min-height: 1.5rem;
 	width: 100%;
-	align-self: center;
-	font-size: 2vw;
+	font-size: 2dvw;
 	display: flex;
   justify-content: center; /* horizontal center */
   align-items: center;     /* vertical center */
-}
-
-#time-container .svg-button {
-	height: var(--inputs-height); /* why does 100% doesn't work? */
-	min-height: 1.5rem;
-	overflow: hidden;
-	border: none;
-}
-
-#time-container .svg-button:active {
-  transform: scale(0.9); /* shrink to 90% while clicked */
+  /*transform: translateY(-10px);*/
 }
 
 .stack {
 	grid-column: 4;
-	height: 8vh;
+	height: 8dvh;
 	position: relative;
 }
+
 .overlap {
 	position: absolute;   /* stack them in the same spot */
 	left: 0;
@@ -424,15 +457,14 @@ canvas {
 }
 
 #time-input {
-	all: unset;
 	z-index: 0;
 	width: 100%;
 	height: var(--inputs-height);
 	min-height: 1.5rem;
-
-	appearance: none;       /* removes default OS styling, like arrows on number inputs */
-  -moz-appearance: none;  /* Firefox */
-  -webkit-appearance: none; 
+	border: none;
+	color: black;
+	font-size: 1.9dvw;
+	background-color: transparent;
 }
 
 #time-input-activate{
@@ -446,6 +478,16 @@ canvas {
 }
 
 
+#time-container .svg-button {
+	height: var(--inputs-height); /* why does 100% doesn't work? */
+	min-height: 1.5rem;
+	overflow: hidden;
+	border: none;
+}
+
+#time-container .svg-button:active {
+  transform: scale(0.9); /* shrink to 90% while clicked */
+}
 
 #time-state-button {
 	grid-column: 1;
@@ -488,8 +530,8 @@ canvas {
 	
 .helpframe:hover{
 	color: white;
-	width:40vw;
-	height:75vh;
+	width:40dvw;
+	height:75dvh;
 }
 	
 .helpframe:before {
@@ -512,8 +554,8 @@ canvas {
 	box-sizing: border-box;
 	padding: 20px 20px 10px;
 	overflow: auto;
-	width:40vw;
-	height:75vh;
+	width:40dvw;
+	height:75dvh;
 	position: relative;
 	left:0px;
 	top:0px;
