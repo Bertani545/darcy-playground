@@ -188,7 +188,7 @@
 						
 
 
-						<div class="time-slider" id="time-container">
+						<div id="time-container">
 							<button id="time-state-button" class="svg-button">
 								<span id="pause-button" hidden clas="svg-time">
 									<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
@@ -236,7 +236,7 @@
 								</span>
 							</button>
 
-							<input id="time-progress" type="range" min="0" max="1" value="0" step="0.000001" class="slider" >
+							<input id="time-progress" class="slider" type="range" min="0" max="1" value="0" step="0.000001" style="background-color: black;">
 							<div class="text"><p>\(t =\)</p></div>
 							<div class="stack">
 								<input class="overlap" id="time-input" type="number" min="0" max="1" value="0" step="0.00001" disabled>
@@ -256,20 +256,23 @@
 
 
 					<section id="input-section">
+						<div id="F-definiton">
 							<p>\[\begin{align}
 									F\colon \R^2 &\to \R^2\\
 									(x,y) &\mapsto (f_1(x,y), f_2(x,y))
 								\end{align}\]
 							</p>
-							<div>
-						      <p>\(f_1(x,y)\)</p>	<input type="text" id="f1" placeholder="Enter f_1(x,y)" value="x"/>
-						      <div id="renderMath1">\[x\]</div>
-							</div>
-							<div>
-							  	<p>\(f_2(x,y)\)</p>
-						      <input type="text" id="f2" placeholder="Enter f_2(x,y)" value="y">
-						      <div id="renderMath2">\[y\]</div>
-						    </div>
+						</div>
+						<div id="div-function1" class="div-func">
+						    <p class="func-name">\(f_1(x,y)=\)</p>
+						    <input type="text" id="f1" placeholder="Enter f1(x,y)" value="x"/>
+						    <div id="renderMath1" class="func-render">\[x\]</div>
+						</div>
+						<div id="div-function2" class="div-func">
+							<p class="func-name">\(f_2(x,y)=\)</p>
+						    <input type="text" id="f2" placeholder="Enter f2(x,y)" value="y">
+						    <div id="renderMath2" class="func-render">\[y\]</div>
+						</div>
 					</section>
 
 					
@@ -513,7 +516,7 @@
 		  }
 		};
 	</script>
-	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-mml-chtml.js"></script>
 
 </body>
 </html>
