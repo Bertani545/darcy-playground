@@ -3,7 +3,7 @@
 }
 
 :root {
-	--inputs-height: 8vh;
+	--inputs-height: 6vh;
 }
 
 
@@ -15,7 +15,7 @@ html, body {
 	padding: 0;
 }
 h1{
-	font-size: 5vh;
+	font-size: max(4vh, 1.5rem);
 }
 
 canvas {
@@ -187,15 +187,15 @@ canvas {
 		height: var(--inputs-height);
 		grid-column: 1;
 		margin-left: 1rem;
-		max-height: 8vh;
+		min-height: 1.8rem;
 	}
 
 	#imageButtons button{
 		height: 100%;
-		width: auto;
+		width: min(150px, 18vw);
 		cursor: pointer;
 
-		font-size: 1.5vw;
+		font-size: 1rem;
 		align-items: center;
 		background-color: #fff;
 		border-radius: 12px;
@@ -206,7 +206,7 @@ canvas {
 	  font-family: Inter,sans-serif;
 	  font-weight: 700;
 	  outline: none;
-	  padding: 0.5rem 0.5rem;
+	  padding: 0;
 	  text-decoration: none;
 	  transition: box-shadow .2s,-webkit-box-shadow .2s;
 	  white-space: nowrap;
@@ -379,6 +379,7 @@ canvas {
 	align-items: stretch;
 	height: var(--inputs-height);
 	max-height: var(--inputs-height);
+	min-height: 1.5rem;
 }
 
 #time-progress {
@@ -389,6 +390,7 @@ canvas {
 #time-container .text {
 	grid-column: 3;
 	height: var(--inputs-height);
+	min-height: 1.5rem;
 	width: 100%;
 	align-self: center;
 	font-size: 2vw;
@@ -399,6 +401,7 @@ canvas {
 
 #time-container .svg-button {
 	height: var(--inputs-height); /* why does 100% doesn't work? */
+	min-height: 1.5rem;
 	overflow: hidden;
 	border: none;
 }
@@ -417,6 +420,7 @@ canvas {
 	left: 0;
 	top: 0;
 	height: var(--inputs-height);
+	min-height: 1.5rem;
 }
 
 #time-input {
@@ -424,6 +428,7 @@ canvas {
 	z-index: 0;
 	width: 100%;
 	height: var(--inputs-height);
+	min-height: 1.5rem;
 
 	appearance: none;       /* removes default OS styling, like arrows on number inputs */
   -moz-appearance: none;  /* Firefox */
@@ -434,6 +439,7 @@ canvas {
 	z-index: 1;
 	width: 100%;
 	height: var(--inputs-height);
+	min-height: 1.5rem;
 	background-color: transparent;
 	border: none;
 	/*cursor: default;*/
