@@ -915,7 +915,7 @@ async function main() {
   });
 
   // Place all the information in some language
-  let currLanguage = Language.initializeLanguage();
+  let currLanguage = Language.initializeLanguage(`./lang/$.json`);
   await Language.setPageText();
   
   const description = document.querySelector(".scrollframe")

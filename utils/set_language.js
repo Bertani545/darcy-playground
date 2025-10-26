@@ -1,4 +1,5 @@
 let language = "en";
+let path = "";
 
 export function setLanguage(lang) {
   language = lang;
@@ -10,8 +11,9 @@ function getBrowserLanguage() {
   setLanguage(lang)
 }
 
-export function initializeLanguage() {
-  const l_lang = localStorage.getItem("lang")
+export function initializeLanguage(lang_path) {
+  const l_lang = localStorage.getItem("lang");
+  path = lang_path;
   if (l_lang){
     setLanguage(l_lang)
     return language;
@@ -21,7 +23,8 @@ export function initializeLanguage() {
 }
 
 export async function setPageText() {
-  const res = await fetch(`../lang/${language}.json`);
+  const real_path = path.replace("$", language)
+  const res = await fetch(real_path);
   const translations = await res.json();
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
