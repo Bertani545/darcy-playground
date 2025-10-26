@@ -21,7 +21,7 @@ export function initializeLanguage() {
 }
 
 export async function setPageText() {
-  const res = await fetch(`/lang/${language}.json`);
+  const res = await fetch(`../lang/${language}.json`);
   const translations = await res.json();
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
