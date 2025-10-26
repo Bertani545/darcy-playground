@@ -546,6 +546,7 @@ async function main() {
   })
   document.getElementById("fileInput").addEventListener("change", (event) => {
       loadImage(event.target.files);
+      event.target.value = "";
   });
   canvas_input.addEventListener("drop", (event) => {
     event.preventDefault();
@@ -747,7 +748,6 @@ async function main() {
       button.appendChild(label);
 
       button.addEventListener("click", () => {
-        console.log(currData);
         examplesForm.classList.remove('show-modal');
 
         // Set the example
@@ -775,7 +775,6 @@ async function main() {
             h = parseFloatDefault(currData["height"]);
             w = h * imageData.ratio;
           }
-          console.log(w, h)
 
           imageData = {
             'scale': [w, h],

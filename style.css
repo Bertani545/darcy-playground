@@ -169,6 +169,10 @@ canvas {
 		align-items: center;
 	}
 
+	#f1, #f2 {
+		font-size: 1em;
+	}
+
 	#div-function1 {
 		grid-row: 2;
 		grid-column: 1/2;

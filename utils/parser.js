@@ -51,7 +51,7 @@ function tokenize(expression) {
 	
 	tokenStream.push("\n");
 	
-	console.log(tokenStream)
+	//console.log(tokenStream)
 	return tokenStream;
 
 }
@@ -309,7 +309,6 @@ function get_Tex(expression) {
 			return get_Tex(expression[1]) + " - " + get_Tex(expression[2])
 		case "*":
 		case "\#":
-			console.log(expression)
 
 			let left = "";
 			let right = "";
@@ -360,7 +359,7 @@ export function get_GLSL_and_Tex(expression, name) {
 	const GLSL = "float " + name + "(vec2 p){\nfloat x = p.x; float y = p.y;\n return " + get_code(parsed) + ";\n}\n";
 	const Tex = get_Tex(parsed);
 
-	console.log(GLSL)
+	//console.log(GLSL)
 	return {"GLSL": GLSL, "Tex": Tex};
 }
 

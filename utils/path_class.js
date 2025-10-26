@@ -111,7 +111,7 @@ export class PathContainer
 
 
     // Reads svg and saves the points of the curves in an object
-    console.log(this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE))
+    //console.log(this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE))
     this.nPoints = pointsPerCurve;
     if(pointsPerCurve > MAX_POINTS)
     {

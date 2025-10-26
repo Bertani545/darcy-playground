@@ -502,15 +502,18 @@
 
 	<script>
 		window.MathJax = {
-		  tex: {
-		    macros: {
-		      'lp': '\\left(',
-		      'rp': '\\right)',
-		      'R': '{\\mathbb{R}}',
-		      'atan': '\\operatorname{atan}',
-		      'acos': '\\operatorname{acos}',
-		      'asin': '\\operatorname{asin}',
-		      'sign': '\\operatorname{sign}',
+			options: {
+				enableEnrichment: false
+			},
+		  	tex: {
+		    	macros: {
+			      'lp': '\\left(',
+			      'rp': '\\right)',
+			      'R': '{\\mathbb{R}}',
+			      'atan': '\\operatorname{atan}',
+			      'acos': '\\operatorname{acos}',
+			      'asin': '\\operatorname{asin}',
+			      'sign': '\\operatorname{sign}',
 		    }
 		  }
 		};
