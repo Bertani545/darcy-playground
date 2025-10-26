@@ -14,9 +14,10 @@ export function initializeLanguage() {
   const l_lang = localStorage.getItem("lang")
   if (l_lang){
     setLanguage(l_lang)
-    return;
+    return language;
   }
   getBrowserLanguage();
+  return language;
 }
 
 export async function setPageText() {

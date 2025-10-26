@@ -915,7 +915,7 @@ async function main() {
   });
 
   // Place all the information in some language
-  Language.initializeLanguage();
+  let currLanguage = Language.initializeLanguage();
   await Language.setPageText();
   
   const description = document.querySelector(".scrollframe")
@@ -927,6 +927,14 @@ async function main() {
     transHidden.style.visibility = 'visible';
   }
 
+  const langSelect = document.getElementById("langSelect");
+  langSelect.value = currLanguage;
+  langSelect.addEventListener("change", (e) => {
+    const newLang = e.target.value;
+    Language.setLanguage(newLang);
+    Language.setPageText();
+    currLanguage = newLang;
+  });
 
   // --------- Render cycle ------
   let theta = 0.0;
