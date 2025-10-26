@@ -1,8 +1,8 @@
 
-import * as webgl_utils from './webgl-utils.js'
+import * as webgl_utils from './utils/webgl-utils.js'
 import {Grid} from './grid_class.js'
-import * as mathRenderer from './math_renderer.js';
-import * as gl_2dMath from './gl_2Dmath.js'
+import * as mathRenderer from './utils/math_renderer.js';
+import * as gl_2dMath from './utils/gl_2Dmath.js'
 
 
 const MAX_IMG_SIZE = 1024;

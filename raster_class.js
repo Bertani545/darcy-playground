@@ -1,8 +1,8 @@
-import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, loadShaderFile, createShader_fromSourceCode } from './webgl-utils.js'
-import * as gl_2dmath from "./gl_2Dmath.js"
-import {Vector2D} from "./gl_2Dmath.js"
-import { read_svg_file } from './svg_reader.js';
-import {BezierCurve, point_in_bezier_time } from './bezier_functions.js';
+import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, loadShaderFile, createShader_fromSourceCode } from './utils/webgl-utils.js'
+import * as gl_2dmath from "./utils/gl_2Dmath.js"
+import {Vector2D} from "./utils/gl_2Dmath.js"
+import { read_svg_file } from './utils/svg_reader.js';
+import {BezierCurve, point_in_bezier_time } from './utils/bezier_functions.js';
 
 
 export class RasterContainer

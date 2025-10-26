@@ -1,10 +1,8 @@
-import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly, buildFrameBuffer_computeShader, loadShaderFile, createShader_fromSourceCode } from './webgl-utils.js'
-import * as gl_2Dmath from "./gl_2Dmath.js"
-import {Vector2D} from "./gl_2Dmath.js"
-import { PathContainer } from './path_class.js';
+import { createShader, createProgram, resizeCanvasToDisplaySize, getIdColor, buildFrameBuffer_ColorOnly, buildFrameBuffer_computeShader, loadShaderFile, createShader_fromSourceCode } from './utils/webgl-utils.js'
+import * as gl_2Dmath from "./utils/gl_2Dmath.js"
+import { PathContainer } from './utils/path_class.js';
 import { RasterContainer } from './raster_class.js';
-
-import * as Parser from "./parser.js";
+import * as Parser from "./utils/parser.js";
 
 const n_p = 500;
 const n_instances = 20;
