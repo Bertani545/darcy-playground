@@ -3,7 +3,7 @@ import * as webgl_utils from './utils/webgl-utils.js'
 import {Grid} from './grid_class.js'
 import * as mathRenderer from './utils/math_renderer.js';
 import * as gl_2dMath from './utils/gl_2Dmath.js'
-
+import * as Language from './utils/set_language.js'
 
 const MAX_IMG_SIZE = 1024;
 
@@ -914,6 +914,19 @@ async function main() {
   document.querySelectorAll(".scroll-element").forEach(el => {
     el.scrollTop = 0;
   });
+
+  // Place all the information in some language
+  Language.initializeLanguage();
+  await Language.setPageText();
+  
+  const description = document.querySelector(".scrollframe")
+  for (let ch of description.children) {
+    mathRenderer.startUpdate(ch, ch.innerHTML);
+  }
+  
+  for (let transHidden of document.querySelectorAll(".translated")){
+    transHidden.style.visibility = 'visible';
+  }
 
 
   // --------- Render cycle ------

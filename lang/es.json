@@ -1,0 +1,16 @@
+{
+  "disclaimer": "No pude encontrar una manera de que esta aplicación se pudiera disfrutar en vertical, así que por favor gire su teléfono o aumente el ancho de su navegador.",
+  "scrollframe": "<h2>D'arcy Playground</h2><p>Por <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://github.com/Bertani545/darcy-playground\">Jesús Bertani Ramírez</a>.</p><p>Sea bienvenid@ a D'arcy Playground. Aquí, puede subir la imagen que quiera y deformarla usando transformaciones \\(\\R^2 \\to \\R^2\\). Esta página tomó inspiración en el trabajo del biólogo D'Arcy Wentworth Thompson, quien dijo que los cambios en las plantas y animales podían ser explicados usando transformaciones continuas del plano cartesiano. Puedes aprender más sobre él en el siguiente <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://es.wikipedia.org/wiki/D%27Arcy_Wentworth_Thompson\">enlace</a>.</p><h2>¿Cómo se usa?</h2><p>Vaya a \"!\" si quiere ver algunos ejemplos.</p><p>Suba sus propias imágenes (.jpg, .png, .svg, ...) usando el botón correspondiente o arrástrelas y suéltelas en la cuadrícula de la izquierda y ¡juegue con ellas! Arrastre la cuadrícula de la izquierda y observe como la función de la parte inferior transforma diferentes secciones del espacio. Cuando el cando está rojo, la imagen se quedará en su actual posición en el espacio y lo demás se moverá. Si presionas el candado, este cambiará a verde y ahora la imagen se pegará al centro de la cuadrícula, moviéndose en conjunto con el resto del espacio.</p><p>Si quiere cambiar los parámetros iniciales de su imagen, lo puede hacer usando el botón correspondiente.</p><p>Junto a \\(f_1\\)  y \\(f_2\\) puedes introducir la expresión de una función \\(\\R^2\\to\\R\\), que al combinarse transformarán el espacio en la segunda cuadrícula.</p><p>Todas las funciones trigonométricas de siempre están disponibles: \\(\\sin, \\cos, \\tan, \\sec, \\csc, \\cot \\) con su contraparte hiperbólica correspondiente. También están disponibles \\( \\asin, \\acos, \\atan \\). Otras funciones que se pueden usar son \\(\\ln\\), \\(\\log_{10}\\) (como log), \\(\\exp\\), \\(\\Gamma\\) (como Gamma), \\(|\\cdot|\\) (como abs) y \\(\\sqrt{\\cdot}\\) (como sqrt). Por favor indique el inicio y el final de los parámetros con paréntesis.</p><p>Las constantes disponibles son \\(e\\) y \\(\\pi\\) (como \"pi\"), y las variables disponibles son \\(x\\), \\(y\\) y \\(t\\)</p><p>¡Con la variable \\(t\\) puede jugar con el tiempo! Use los controles a la derecha de la pantalla para iniciar y pausar el flujo del tiempo, ver y modificar el valor actual de \\(t\\), y el botón de configuración para ingresar sus propios parámetros.</p>",
+  "uploadBtn": "Subir Img.",
+  "editBtn": "Editar Img.",
+  "title": "Transformaciones del Plano",
+  "loadTitle": "Cargar Ejemplo",
+  "ppc": "Puntos por Curva",
+  "width": "Ancho",
+  "height": "Alto",
+  "posX": "Posición en X",
+  "posY": "Posición en Y",
+  "rotation": "Rotación en grados",
+  "timeTitle": "Ajuste del Tiempo",
+  "timeDuration": "Duración en segundos (pueden ser negativos)"
+}

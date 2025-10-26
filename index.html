@@ -19,23 +19,22 @@
 	<body>
 
 		<div id="disclaimer">
-			<p>I could not find a way to make this application enjoyable to use in a vertical way, so please turn your phone sideways or increase the browser width.</p>
+			<p data-i18n="disclaimer"></p>
 			<img src="./resources/bow.png">
 		</div>
 
 		<div class="helpframe">
-			<div class="scrollframe scroll-element">
+			<div data-i18n="scrollframe" class="scrollframe scroll-element translated">
 				<h2>D'arcy Playground</h2>
-				<p>Better things are going to be written here</p>
-				<h2>How to use?</h2>
-				<p>Go to "!" for examples.</p>
-				<p>Upload your own images (.jpg, .png, .svg, ...) using the corresponding button and play with them! (You can also drag them to the left grid.)</p>
-				<p>Under \(f_1\) and \(f_2\) you can input the expression of a \(\R^2\to\R\) function, wich combined will
-					transform the space.</p>
-				<p>All regular trigonometric formulas are available: \(\sin, \cos, \tan, \sec, \csc, \cot \) with their respective hyperbolic counterpart. Also available are \( \asin, \acos, \atan \). Other functions that you can use are \(\ln\), \(\log_{10}\) (as log), \(\exp\), \(\Gamma\) (as Gamma), \(|\cdot|\) (as abs) and \(\sqrt{\cdot}\) (as sqrt). Please indicate the start and end of the parameters with parenthesis.</p>
-				<p>The available variables are \(x\), \(y\), \(e\), \(\pi\) and \(t\). (Please write \(\pi\) as "pi".) </p>
-				<p>With the varaible \(t\) you can play with time! Use the controller to the right to start and pause the passage of time, view and modifie the current value, and use the settings to input your own intervals.</p>
-
+<p>Welcome to D'arcy Playground. Here, you can upload any picture you want and deform it using \(\R^2 \to \R^2\) plane transformations. This page was inspired by the work of the biologist D'Arcy Wentworth Thompson, who stated that the change in plants and animals over could be explained using continuous transformations of the cartesian grid. You can learn more about him in this <a href="https://en.wikipedia.org/wiki/D%27Arcy_Wentworth_Thompson">link</a></p>
+<h2>How to use?</h2>
+<p>Go to "!" for examples.</p>
+<p>Upload your own images (.jpg, .png, .svg, ...) using the corresponding button or drag them to the left grid and play with them! Drag the image on the left grid and observe how the function transforms diferent sections of the space.  When the lock is red, the image will be locked to its position in space, while everything else moves. When you click on the lock, it turns green and now the image is locked on the center of the grid and will follow any changes you make to the space.</p>
+<p>If you want to change the initial parameters of your image, you can do so using the corresponding button,</p>
+<p>Next to \(f_1\) and \(f_2\) you can input the expression of a \(\R^2\to\R\) function, wich combined will transform the space on the right grid.</p>
+<p>All regular trigonometric formulas are available: \(\sin, \cos, \tan, \sec, \csc, \cot \) with their respective hyperbolic counterpart. Also available are \( \asin, \acos, \atan \). Other functions that you can use are \(\ln\), \(\log_{10}\) (as log), \(\exp\), \(\Gamma\) (as Gamma), \(|\cdot|\) (as abs) and \(\sqrt{\cdot}\) (as sqrt). Please indicate the start and end of the parameters with parenthesis.</p>
+<p>The available variables are \(x\), \(y\), \(e\), \(\pi\) and \(t\). (Please write \(\pi\) as "pi".) </p>
+<p>With the varaible \(t\) you can play with time! Use the controller to the right of the screen to start and pause the flow of time, view and modify the current value of \(t\), and use the settings button to input your own parameters.</p>
 			</div>
 		</div>
 		<button id="examples-button">
@@ -51,7 +50,7 @@
 						    This is some extra information that shows up when you hover.
 						  </div>
 					</div-->
-					<h1>2D Plane Transformations</h1>
+					<h1  data-i18n="title"  class="translated">Plane Transformations</h1>
 					
 				</div>
 				<div id="Content">
@@ -180,8 +179,8 @@
 					<section id="info-section">
 						<input type="file" id="fileInput" accept=".svg,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,image/png,image/jpeg,image/webp,image/bmp,image/tiff" style="display:none;"/>
 						<div id="imageButtons">
-							<button  id="uploadBtn" class="imageButton">Upload Image</button>
-							<button id="editBtn" class="imagebutton"> Edit Image</button>
+							<button  data-i18n="uploadBtn" id="uploadBtn" class="imageButton translated">Upload Image</button>
+							<button data-i18n="editBtn" id="editBtn" class="imagebutton translated"> Edit Image</button>
 						</div>
 
 
@@ -286,7 +285,7 @@
 		<section class="modal">
 			<button class="close-btn" id="closeEditTime">x</button>
 			<div class="modal-content">
-				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Time parameter settings</h2>
+				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n="timeTitle" class="translated">Time parameter settings</h2>
 				<div class = "modal-form">
 					<div>
 						<label for="minT-input">Min \(t\)</label>
@@ -315,7 +314,7 @@
 						/>
 					</div>
 					<div>
-						<label for="pointsInput">Duration in seconds (can be negative)</label>
+						<label for="pointsInput" data-i18n="timeDuration" class="translated">Duration in seconds (can be negative)</label>
 						<input 
 							type="number"
 							id="durationT"
@@ -344,7 +343,7 @@
 				<h2 class="imageName" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">:)</h2>
 				<div class = "modal-form">
 					<div>
-						<label for="pointsInput">Points per Curve</label>
+						<label for="pointsInput" data-i18n="ppc" class="translated">Points per Curve</label>
 						<input 
 							type="number"
 							id="pointsInput"
@@ -371,7 +370,7 @@
 				
 					<div id="sizeInput">
 						<div>
-							<label for="widthInput">Width</label>
+							<label for="widthInput" data-i18n="width" class="translated">Width</label>
 							<input 
 								type="number"
 								step="0.000000000000001"
@@ -384,7 +383,7 @@
 							/>
 						</div>
 						<div>
-							<label for="heightInput">Height</label>
+							<label for="heightInput" data-i18n="height" class="translated">Height</label>
 							<input 
 								type="number"
 								step="0.000000000000001"
@@ -442,7 +441,7 @@
 					
 				<div class = "modal-form">
 					<div>
-						<label for="positionXInput">Position X</label>
+						<label for="positionXInput" data-i18n="posX" class="translated">Position X</label>
 						<input 
 							type="number"
 							step="0.000000000000001"
@@ -455,7 +454,7 @@
 						/>
 					</div>
 					<div>
-						<label for="positionYInput">Position Y</label>
+						<label for="positionYInput" data-i18n="posY" class="translated">Position Y</label>
 						<input 
 							type="number"
 							step="0.000000000000001"
@@ -468,7 +467,7 @@
 						/>
 					</div>
 					<div>
-						<label for="rotationInput">Rotation in Degrees</label>
+						<label for="rotationInput" data-i18n="rotation" class="translated">Rotation in Degrees</label>
 						<input 
 							type="number"
 							step="0.000001"
@@ -492,7 +491,7 @@
 		<section class="modal">
 			<button class="close-btn" id="close-examples">x</button>
 			<div class="modal-content ">
-				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Load Example</h2>
+				<h2 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n = "loadTitle" class="translated">Load Example</h2>
 				<div class = "modal-form" id="examples-container">
 				</div>
 			</div>

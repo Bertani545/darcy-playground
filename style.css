@@ -2,6 +2,10 @@
 	
 }
 
+.translated {
+	visibility: hidden;
+}
+
 :root {
 	--inputs-height: 6dvh;
 }

@@ -1,0 +1,17 @@
+{
+  "disclaimer": "I could not find a way to make this application enjoyable to use in a vertical way, so please turn your phone sideways or increase the browser width.",
+  "scrollframe": "<h2>D'arcy Playground</h2><p>By <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://github.com/Bertani545/darcy-playground\">Jesús Bertani Ramírez</a>.</p><p>Welcome to D'arcy Playground. Here, you can upload any picture you want and deform it using \\(\\R^2 \\to \\R^2\\) plane transformations. This page was inspired by the work of the biologist D'Arcy Wentworth Thompson, who stated that the change in plants and animals over could be explained using continuous transformations of the cartesian grid. You can learn more about him in this <a href= target=\"_blank\" rel=\"noopener noreferrer\" \"https://en.wikipedia.org/wiki/D%27Arcy_Wentworth_Thompson\">link</a>.</p><h2>How to use?</h2><p>Go to \"!\" for examples.</p><p>Upload your own images (.jpg, .png, .svg, ...) using the corresponding button or drag them to the left grid and play with them! Drag the left grid and observe how the function below transforms diferent sections of the space.  When the lock is red, the image will be locked to its position in space, while everything else moves. When you click on the lock, it turns green and now the image is locked on the center of the grid and will follow any changes you make to the space.</p><p>If you want to change the initial parameters of your image, you can do so using the corresponding button.</p><p>Next to \\(f_1\\) and \\(f_2\\) you can input the expression of a \\(\\R^2\\to\\R\\) function, wich combined will transform the space on the right grid.</p><p>All regular trigonometric formulas are available: \\(\\sin, \\cos, \\tan, \\sec, \\csc, \\cot \\) with their respective hyperbolic counterpart. Also available are \\( \\asin, \\acos, \\atan \\). Other functions that you can use are \\(\\ln\\), \\(\\log_{10}\\) (as log), \\(\\exp\\), \\(\\Gamma\\) (as Gamma), \\(|\\cdot|\\) (as abs) and \\(\\sqrt{\\cdot}\\) (as sqrt). Please indicate the start and end of the parameters with parenthesis.</p><p>The available constants are \\(e\\) and \\(\\pi\\) (as \"pi\"), and the available variables are \\(x\\), \\(y\\),  and \\(t\\). </p><p>With the varaible \\(t\\) you can play with time! Use the controller to the right of the screen to start and pause the flow of time, view and modify the current value of \\(t\\), and use the settings button to input your own parameters.</p>",
+  "uploadBtn": "Upload Image",
+  "editBtn": "Edit Image",
+  "title":"Plane Transformations",
+  "loadTitle": "Load Example",
+  "ppc": "Points per Curve",
+  "width": "Width",
+  "height": "Height",
+  "posX": "X Posiition",
+  "posY": "Y Position",
+  "rotation": "Rotation in degrees",
+  "timeTitle": "Time parameters settings",
+  "timeDuration": "Duration in seconds (can be negative)"
+}
+
