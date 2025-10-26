@@ -171,6 +171,8 @@ canvas {
 
 	#f1, #f2 {
 		font-size: 1em;
+		color: black;
+		font-family: MathJax_Math;
 	}
 
 	#div-function1 {
