@@ -918,10 +918,14 @@ async function main() {
   let currLanguage = Language.initializeLanguage(`./lang/$.json`);
   await Language.setPageText();
   
-  const description = document.querySelector(".scrollframe")
-  for (let ch of description.children) {
-    mathRenderer.startUpdate(ch, ch.innerHTML);
+  function updateDescription() {
+    const description = document.querySelector(".scrollframe")
+    for (let ch of description.children) {
+      mathRenderer.startUpdate(ch, ch.innerHTML);
+    }
   }
+  updateDescription();
+  
   
   for (let transHidden of document.querySelectorAll(".translated")){
     transHidden.style.visibility = 'visible';
@@ -932,7 +936,8 @@ async function main() {
   langSelect.addEventListener("change", (e) => {
     const newLang = e.target.value;
     Language.setLanguage(newLang);
-    Language.setPageText();
+    Language.setPageText().then(updateDescription);
+    
     currLanguage = newLang;
   });
 
