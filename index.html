@@ -273,12 +273,12 @@
 						</div>
 						<div id="div-function1" class="div-func">
 						    <p class="func-name">\(f_1(x,y)=\)</p>
-						    <input type="text" id="f1" placeholder="Enter f1(x,y)" value="x"/>
+						    <input type="text" id="f1" data-i18n-placeholder="f1_placeholder" placeholder="Enter f1(x,y)" value="x"/>
 						    <div id="renderMath1" class="func-render">\[x\]</div>
 						</div>
 						<div id="div-function2" class="div-func">
 							<p class="func-name">\(f_2(x,y)=\)</p>
-						    <input type="text" id="f2" placeholder="Enter f2(x,y)" value="y">
+						    <input type="text" id="f2" data-i18n-placeholder="f2_placeholder" placeholder="Enter f2(x,y)" value="y">
 						    <div id="renderMath2" class="func-render">\[y\]</div>
 						</div>
 					</section>
@@ -301,12 +301,15 @@
 						<input 
 							type="number"
 							id="minT"
+							data-i18n-placeholder="number_input"
+							data-i18n-error="minT_error"
 							placeholder="Enter Favourite Number"
 							class="form-input time-input"
 							min="-5000"
 							max="5000"
 							step="0.0001"
 							value="0"
+							required
 						/>
 					</div>
 					<div>
@@ -314,25 +317,30 @@
 						<input 
 							type="number"
 							id="maxT"
+							data-i18n-placeholder="number_input"
 							placeholder="Enter Favourite Number"
 							class="form-input time-input"
 							min="-5000"
 							max="5000"
 							step="0.0001"
 							value="1"
+							required
 						/>
 					</div>
 					<div>
-						<label for="pointsInput" data-i18n="timeDuration" class="translated">Duration in seconds (can be negative)</label>
+						<label for="duration-input" data-i18n="timeDuration" class="translated">Duration in seconds (can be negative)</label>
 						<input 
 							type="number"
 							id="durationT"
+							data-i18n-placeholder="number_input"
 							placeholder="Enter Favourite Number"
+							data-i18n-error="duration_error"
 							class="form-input time-input"
 							min="-5000"
 							max="5000"
 							step="0.0001"
 							value="5"
+							required
 						/>
 					</div>
 					<!--No usar este tipo de submits para nuestra app-->
@@ -356,12 +364,14 @@
 						<input 
 							type="number"
 							id="pointsInput"
+							data-i18n-placeholder="number_input_integer"
 							placeholder="Enter Favourite Number"
 							class="resolution-input"
 							min="2"
 							max="1000"
 							step="1"
 							value="100"
+							required
 						/>
 					</div>
 					<!--No usar este tipo de submits para nuestra app-->
@@ -384,11 +394,13 @@
 								type="number"
 								step="0.000000000000001"
 								id="widthInput"
+								data-i18n-placeholder="number_input"
 								placeholder="Enter Favourite Number"
 								class="form-input"
 								min="0.000000000000001"
 								max="5000"
 								value="0"
+								required
 							/>
 						</div>
 						<div>
@@ -397,11 +409,13 @@
 								type="number"
 								step="0.000000000000001"
 								id="heightInput"
+								data-i18n-placeholder="number_input"
 								placeholder="Enter Favourite Number"
 								class="form-input"
 								min="0.000000000000001"
 								max="5000"
 								value="0"
+								required
 							/>
 						</div>
 						<div id="linkContainer">
@@ -455,6 +469,7 @@
 							type="number"
 							step="0.000000000000001"
 							id="positionXInput"
+							data-i18n-placeholder="number_input"
 							placeholder="Enter Favourite Number"
 							class="form-input"
 							min="-5000"
@@ -468,6 +483,7 @@
 							type="number"
 							step="0.000000000000001"
 							id="positionYInput"
+							data-i18n-placeholder="number_input"
 							placeholder="Enter Favourite Number"
 							class="form-input"
 							min="-5000"
@@ -481,6 +497,7 @@
 							type="number"
 							step="0.000001"
 							id="rotationInput"
+							data-i18n-placeholder="number_input"
 							placeholder="Enter Favourite Number"
 							class="form-input"
 							min="0"

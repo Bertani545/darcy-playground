@@ -666,16 +666,14 @@ async function main() {
     });
 
     
-
     if (allValid) {
-
       if (minT.value >= maxT.value) {
-        minT.setCustomValidity("Value of min t must be less than max t.");
+        Language.setErrorMessage(minT);
         minT.reportValidity();
         allValid = false;
       }
       if (durationT.value == 0) {
-        durationT.setCustomValidity("Duration cannot be equal to 0");
+        Language.setErrorMessage(durationT);
         durationT.reportValidity();
         allValid = false;
       }
@@ -914,29 +912,36 @@ async function main() {
     el.scrollTop = 0;
   });
 
-  // Place all the information in some language
-  let currLanguage = Language.initializeLanguage(`./lang/$.json`);
-  await Language.setPageText();
-  
   function updateDescription() {
     const description = document.querySelector(".scrollframe")
     for (let ch of description.children) {
       mathRenderer.startUpdate(ch, ch.innerHTML);
     }
   }
-  updateDescription();
-  
-  
-  for (let transHidden of document.querySelectorAll(".translated")){
-    transHidden.style.visibility = 'visible';
-  }
 
+  let currLanguage;
   const langSelect = document.getElementById("langSelect");
-  langSelect.value = currLanguage;
+
+  // Place all the information in some language
+  Language.initializeLanguage(`./lang/$.json`).then(() => {
+    Language.setPageText();
+    updateDescription();
+    currLanguage = Language.getLanguage()
+    for (let transHidden of document.querySelectorAll(".translated")){
+      transHidden.style.visibility = 'visible';
+    }
+    langSelect.value = currLanguage;
+  });
+  //Language.setPageText();
+  
+  
   langSelect.addEventListener("change", (e) => {
     const newLang = e.target.value;
-    Language.setLanguage(newLang);
-    Language.setPageText().then(updateDescription);
+    Language.setLanguage(newLang).then( () => {
+      Language.setPageText()
+      updateDescription()
+    });
+
     
     currLanguage = newLang;
   });
