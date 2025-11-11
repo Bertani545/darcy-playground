@@ -752,12 +752,6 @@ async function main() {
       button.addEventListener("click", () => {
         examplesForm.classList.remove('show-modal');
 
-        // Set the example
-        input_f1.value = currData["f_1"];
-        input_f1.dispatchEvent(new Event("input", { bubbles: true }));
-        input_f2.value = currData["f_2"];
-        input_f2.dispatchEvent(new Event("input", { bubbles: true }));
-
         for (let e of document.querySelectorAll('.imageName')){
           e.innerHTML = currData["name"]
         }
@@ -789,6 +783,12 @@ async function main() {
           
           document.getElementById('editBtn').classList.add('show-modal');
 
+          // Set the example
+          input_f1.value = currData["f_1"];
+          input_f1.dispatchEvent(new Event("input", { bubbles: true }));
+          input_f2.value = currData["f_2"];
+          input_f2.dispatchEvent(new Event("input", { bubbles: true }));
+          
           if (currData["uses_time"]) {
               const newData = {}
               newData.maxTime = parseFloatDefault(currData["maxT"]);
