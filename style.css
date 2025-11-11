@@ -758,6 +758,7 @@ a:hover {
 #examples-container button img {
 	height: 70px;
 	width: 100px;
+	object-fit: contain;
 }
 
 #examples-container button span {

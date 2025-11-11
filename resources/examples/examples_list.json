@@ -4,6 +4,7 @@
 		"08",
 		"02",
 		"09",
+		"dinosaur",
 		"yunocchi"
 	],
 	"01": {
@@ -28,9 +29,12 @@
 		"posX": 0,
 		"posY": 0,
 		"rotation": 0,
-		"f_1": "4xexp(-3x^2)",
+		"f_1": "4txexp(-3x^2)",
 		"f_2": "2yexp(-y^2)",
-		"uses_time": false
+		"uses_time": true,
+		"maxT": 1.5,
+		"minT": 0.5,
+		"duration": 5
 	},
 
 	"08": {
@@ -56,9 +60,28 @@
 		"posX": 5.9826,
 		"posY": 0,
 		"rotation": 0,
-		"f_1": "x + 2cos(atan(4y/x))",
+		"f_1": "x + 2tcos(atan(4y/x))",
 		"f_2": "0.8y",
-		"uses_time": false
+		"uses_time": true,
+		"maxT": 1.5,
+		"minT": 0,
+		"duration": 5
+	},
+
+	"dinosaur": {
+		"name": "Tyrannosaurus Rex",
+		"type": "raster",
+		"path": "./resources/examples/03.png",
+		"width": 1,
+		"posX": 0,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "xcos(t)+ysin(t)",
+		"f_2": "-xsin(t)+ycos(t)",
+		"uses_time": true,
+		"maxT": 6.2831,
+		"minT": 0,
+		"duration": 5
 	},
 
 	"yunocchi": {
