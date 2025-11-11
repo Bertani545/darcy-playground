@@ -49,3 +49,9 @@ export function setErrorMessage(el) {
   const text = translations[key] || "";
   el.setCustomValidity(text);
 }
+
+
+export function getFunctionError(){
+  const ans = translations["funcError"] || "\\text{Not a valid expression}";
+  return ans;
+}

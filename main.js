@@ -711,12 +711,16 @@ async function main() {
 
 
   input_f1.addEventListener("input", (event) => {
-    const newTexOuput = "\\[" + grid.update_f1(event.target.value) + "\\]";
+    let texVal = grid.update_f1(event.target.value);
+    if (texVal == "") texVal = Language.getFunctionError();
+    const newTexOuput = "\\[" + texVal + "\\]";
     mathRenderer.startUpdate(renderf1, newTexOuput);
   })
   
   input_f2.addEventListener("input", (event) => {
-    const newTexOuput = "\\[" + grid.update_f2(event.target.value) + "\\]";
+    let texVal = grid.update_f2(event.target.value);
+    if (texVal == "") texVal = Language.getFunctionError();
+    const newTexOuput = "\\[" + texVal + "\\]";
     mathRenderer.startUpdate(renderf2, newTexOuput);
   });
 
@@ -728,7 +732,7 @@ async function main() {
   const examplesButton = document.getElementById("examples-button");
   const examplesContainer = document.getElementById("examples-container");
   let examplesInfo;
-  await fetch('./resources/examples/examples_list.json').then(response => response.json()).then(examplesData  => {
+  fetch('./resources/examples/examples_list.json').then(response => response.json()).then(examplesData  => {
     const ids = examplesData["id_list"];
     for (let id of ids) {
       const currData = examplesData[id];
@@ -811,16 +815,16 @@ async function main() {
         }
 
         if (currData["type"] === "raster") {
-          const img = new Image();
-          img.onload = () => {
-            resizeImageToMax(img).then((newImg) => {
+          const imgHolder = new Image();
+          imgHolder.onload = () => {
+            resizeImageToMax(imgHolder).then((newImg) => {
               const resizedImg = newImg;
               // We are going to asume that 1px = 1 unit
               imageData = grid.save_Image_data(resizedImg);
               finish_setup(imageData);
             });
           }
-          img.src = currData["path"];
+          imgHolder.src = currData["path"];
         }
 
       });

@@ -350,8 +350,8 @@ export function get_GLSL_and_Tex(expression, name) {
 	if (name == "") return {};
 	const parsed = parse_input(expression);
 	if (!parsed) {
-		if (name == "f1") return {"GLSL":"float f1(vec2 p){return p.x;}", "Tex":"\\text{Not a valid expression}"};
-		if (name == "f2") return {"GLSL":"float f2(vec2 p){return p.y;}", "Tex":"\\text{Not a valid expression}"};
+		if (name == "f1") return {"GLSL":"float f1(vec2 p){return p.x;}", "Tex":""};
+		if (name == "f2") return {"GLSL":"float f2(vec2 p){return p.y;}", "Tex":""};
 		return "";
 	}
 
