@@ -19,8 +19,11 @@
 
   "number_input": "Ingresa un número decimal",
   "number_input_integer": "Ingresa un número entero",
-  
+
   "duration_error": "La duración no puede ser 0.",
   "minT_error": "El valor de min t debe ser menor que max t.",
-  "funcError": "\\text{No es una expresión válida}"
+  "funcError": "\\text{No es una expresión válida}",
+
+  "tooltipExamples": "Mostrar los Ejemplos",
+  "tooltipLanguages": "Cambiar el Idioma"
 }

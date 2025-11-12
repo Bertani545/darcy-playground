@@ -19,9 +19,12 @@
 
   "number_input": "Enter a decimal number",
   "number_input_integer": "Enter an integer",
-  
+
   "duration_error": "Duration cannot be equal to 0.",
   "minT_error": "Value of min t must be less than max t.",
-  "funcError": "\\text{Not a valid expression}"
+  "funcError": "\\text{Not a valid expression}",
+
+  "tooltipExamples": "Display Examples",
+  "tooltipLanguages": "Change Language"
 }
 

@@ -690,6 +690,15 @@ a:hover {
 
 /* ----------------- For examples ---------------- */
 
+#examples-button-container {
+	width: 50px;
+	height: 50px;
+	/*overflow: hidden;*/
+	position:absolute;
+	top: 10px;
+	left: 1rem;
+	z-index: 3;
+}
 
 #examples-button {
 	padding: 0px;
@@ -697,25 +706,19 @@ a:hover {
 	background-color: rgba(0, 0, 0, 0.9);
 	border-style: none;
 	border-radius: 5px;
-	width: 50px;
-	height: 50px;
-	overflow: hidden;
 	transition:.25s;
 	
 	z-index: 3;
 
-	position:absolute;
-	top: 10px;
-	left: 1rem;
-}
-
-#examples-button:before {
 	font-size: 40px;
 	font-weight: bold;
 	color: white;
-	content: '!';
 
+	height: 100%;
+	width: 100%;
 }
+
+
 
 
 #examples-container button{
@@ -826,4 +829,43 @@ a:hover {
 	outline: none;
   background-color: rgba(0, 0, 0, 0.9);
   color: white;
+}
+
+/* --------------------------- Hover tooltip */
+
+.tooltip {
+	position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.left-tool {
+}
+
+.right-tool {
+	right: 0;
+	transform: translateX(0); /* no centering */
+}
+
+.middle-tool {
+	left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Hidden tooltip text */
+.tooltip .tooltip-text {
+	visibility: hidden;
+  position: absolute;
+  bottom: -30px; /* Show below */
+  background-color: #333;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Show text when hovering */
+.tooltip:hover .tooltip-text {
+  visibility: visible;
 }
