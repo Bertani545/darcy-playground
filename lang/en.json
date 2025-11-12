@@ -13,10 +13,13 @@
   "rotation": "Rotation in degrees",
   "timeTitle": "Time parameters settings",
   "timeDuration": "Duration in seconds (can be negative)",
+
   "f1_placeholder": "Enter f1(x,y)",
   "f2_placeholder": "Enter f2(x,y)",
+
   "number_input": "Enter a decimal number",
   "number_input_integer": "Enter an integer",
+  
   "duration_error": "Duration cannot be equal to 0.",
   "minT_error": "Value of min t must be less than max t.",
   "funcError": "\\text{Not a valid expression}"
