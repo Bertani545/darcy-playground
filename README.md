@@ -25,7 +25,7 @@ You can review these instructions again at any time by hovering over the **?** i
 - Clicking the lock turns it **green**, which keeps the image centered and makes it move and scale together with the grid as you drag or zoom.
 - Change the size and position of the **image** by clicking on the *edit* button.
 - Next to $f_1$ and $f_2$, input your $R^2 \to R$ functions. Together, they define the transformation shown on the **right grid**, which always resizes to contain all transformed points.
-- All regular trigonometric functions are available: $\sin, \cos, \tan, \sec, \csc, \cot$, and their hyperbolic versions. Also available: $\mathbf{asin}, \mathvf{acos}, \mathbf{atan}$.
+- All regular trigonometric functions are available: $\sin, \cos, \tan, \sec, \csc, \cot$, and their hyperbolic versions. Also available: $\mathbf{asin}, \mathbf{acos}, \mathbf{atan}$.
 - Other functions that you can use are $\ln$, $\log_{10}$ (as log), $\exp$, $\Gamma$ (as Gamma), $|\cdot|$ (as abs) and $\sqrt{\cdot}$ (as sqrt).
 - Always use parentheses for function arguments.
 - The available constants are $e$ and $\pi$ (as pi)
