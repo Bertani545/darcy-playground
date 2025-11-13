@@ -1,0 +1,30 @@
+{
+  "disclaimer": "I could not find a way to make this application enjoyable to use in a vertical way, so please turn your phone sideways or increase the browser width.",
+  "scrollframe": "<h2>D'Arcy Playground</h2><p>By <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://github.com/Bertani545/darcy-playground\">Jesús Bertani Ramírez</a>.</p><p>Welcome to D'Arcy Playground. Here, you can upload any picture you want and deform it using \\(\\R^2 \\to \\R^2\\) plane transformations.</p><p> This page is inspired by the work of the biologist <b>D'Arcy Wentworth Thompson</b>, who proposed that the changes in plants and animals could be explained through continuous transformations of the Cartesian grid. You can learn more about him on his <a target=\"_blank\" rel=\"noopener noreferrer\" href=  \"https://en.wikipedia.org/wiki/D%27Arcy_Wentworth_Thompson\">wikipedia page</a>.</p><h2>How to use?</h2><ul><li>Load <b>pre-made exmaples</b> by clicking the \"!\" symbol.</li><li>Upload your own images (.jpg, .png, .svg, etc.) using the corresponding button or dragging them onto the <b>left grid</b>.</li><li> You can <b>pan and zoom</b> the left grid by dragging the mouse or using the scroll wheel. This updates the portion of the plane that the grid covers.</li><li>When the <b>lock</b> on the left grid is <b>red</b>, the image remains fixed in its position in space.</li><li>Clicking the lock turns it <b>green</b>, which keeps the image centered and makes it move and scale together with the grid as you drag or zoom</li><li>Change the size and position of the <b>image</b> by clicking on the <i>edit</i> button.</li><li>Next to \\(f_1\\) and \\(f_2\\) you can input the expressions of \\(\\R^2\\to\\R\\) functions.  Together, they define the transformation shown on the right grid, which always resizes to contain all transformed points.</li><li>All regular trigonometric functions are available: \\(\\sin, \\cos, \\tan, \\sec, \\csc, \\cot \\) with their respective hyperbolic versions. Also available are \\( \\asin, \\acos, \\atan \\).</li><li> Other functions that you can use are \\(\\ln\\), \\(\\log_{10}\\) (as log), \\(\\exp\\), \\(\\Gamma\\) (as Gamma), \\(|\\cdot|\\) (as abs) and \\(\\sqrt{\\cdot}\\) (as sqrt). </li><li>Please indicate the start and end of the parameters with parenthesis.</li><li>The available constants are \\(e\\) and \\(\\pi\\) (as pi).</li><li> The available variables are \\(x\\), \\(y\\),  and \\(t\\). </li><li>The variable \\(t\\) adds <b>time-dependence</b> to your functions. Use the controller on the right side of the screen to:</li><ul><li> Start and pause time,</li><li> View and edit the current value of \\(t\\),</li><li> Click on the settings button to ppen the <i>time settings menu</i> to define your own time parameters.</li></ul>",
+  "uploadBtn": "Upload Image",
+  "editBtn": "Edit Image",
+  "title":"Plane Transformations",
+  "loadTitle": "Load Example",
+  "ppc": "Points per Curve",
+  "width": "Width",
+  "height": "Height",
+  "posX": "X Posiition",
+  "posY": "Y Position",
+  "rotation": "Rotation in degrees",
+  "timeTitle": "Time parameters settings",
+  "timeDuration": "Duration in seconds (can be negative)",
+
+  "f1_placeholder": "Enter f1(x,y)",
+  "f2_placeholder": "Enter f2(x,y)",
+
+  "number_input": "Enter a decimal number",
+  "number_input_integer": "Enter an integer",
+
+  "duration_error": "Duration cannot be equal to 0.",
+  "minT_error": "Value of min t must be less than max t.",
+  "funcError": "\\text{Not a valid expression}",
+
+  "tooltipExamples": "Display Examples",
+  "tooltipLanguages": "Change Language"
+}
+

@@ -1,0 +1,102 @@
+{
+	"id_list": [
+		"01",
+		"08",
+		"02",
+		"09",
+		"dinosaur",
+		"yunocchi"
+	],
+	"01": {
+		"name": "Harpinia plumosa",
+		"type": "svg",
+		"path": "./resources/examples/01.svg",
+		"nPoints": 100,
+		"width": 0.481016,
+		"posX": 0.5,
+		"posY": 0.5182,
+		"rotation": 0,
+		"f_1": "0.6x",
+		"f_2": "-(x-0.5)^2+y^2",
+		"uses_time": false
+	},
+	"02": {
+		"name": "Oithona nana",
+		"type": "svg",
+		"path": "./resources/examples/02.svg",
+		"nPoints": 100,
+		"width": 1,
+		"posX": 0,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "4txexp(-3x^2)",
+		"f_2": "2yexp(-y^2)",
+		"uses_time": true,
+		"maxT": 1.5,
+		"minT": 0.5,
+		"duration": 5
+	},
+
+	"08": {
+		"name": "Argyropelecus olfersi",
+		"type": "svg",
+		"path": "./resources/examples/08.svg",
+		"nPoints": 100,
+		"width": 1,
+		"posX": 0,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "x + 0.5y",
+		"f_2": "1.4y",
+		"uses_time": false
+	},
+
+	"09": {
+		"name": "Diodon",
+		"type": "svg",
+		"path": "./resources/examples/09.svg",
+		"nPoints": 100,
+		"width": 6,
+		"posX": 5.9826,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "x + 2tcos(atan(4y/x))",
+		"f_2": "0.8y",
+		"uses_time": true,
+		"maxT": 1.5,
+		"minT": 0,
+		"duration": 5
+	},
+
+	"dinosaur": {
+		"name": "Tyrannosaurus Rex",
+		"type": "raster",
+		"path": "./resources/examples/03.png",
+		"width": 1,
+		"posX": 0,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "xcos(t)+ysin(t)",
+		"f_2": "-xsin(t)+ycos(t)",
+		"uses_time": true,
+		"maxT": 6.2831,
+		"minT": 0,
+		"duration": 5
+	},
+
+	"yunocchi": {
+		"name": "ゆのっち",
+		"type": "svg",
+		"path": "./resources/examples/yunocchi.svg",
+		"nPoints": 100,
+		"width": 1,
+		"posX": 0,
+		"posY": 0,
+		"rotation": 0,
+		"f_1": "2x",
+		"f_2": "y",
+		"uses_time": false
+	}
+
+
+}

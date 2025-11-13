@@ -1,0 +1,20 @@
+uniform float u_t;
+
+#define PI 3.14159265359
+#define E 2.718281828459
+
+float Gamma(float x) {
+	// Stirling approximation
+	x--;
+	return sqrt(2.0 * PI * x) * pow(x, x) * 1.0 / pow(E, x);
+}
+
+float cot(float x) {return 1.0 / tan(x);}
+float sec(float x) {return 1.0 / cos(x);}
+float csc(float x) {return 1.0 / sin(x);}
+
+float coth(float x) {return cosh(x) / sinh(x);}
+float sech(float x) {return 1.0 / cosh(x);}
+float csch(float x) {return 1.0 / sinh(x);}
+
+float log10(float x) {return log(x) *0.434294481903;}
