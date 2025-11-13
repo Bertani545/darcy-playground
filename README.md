@@ -20,6 +20,7 @@ You can review these instructions again at any time by hovering over the **?** i
 
 - Load *pre-made examples* by clicking the **!** symbol.
 - Upload your own images (`.jpg`, `.png`, `.svg`, etc.) using the upload button or by dragging them onto the **left grid**.
+	- **Note**: SVG circle and elliptical arcs ('A'/ 'a' commands) are not yet supported.
 - You can **pan and zoom** the left grid by dragging the mouse or using the scroll wheel. This updates the portion of the plane that the grid covers.
 - When the **lock** on the left grid is **red**, the image remains fixed in its position in space.
 - Clicking the lock turns it **green**, which keeps the image centered and makes it move and scale together with the grid as you drag or zoom.
