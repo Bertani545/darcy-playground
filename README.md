@@ -4,9 +4,9 @@ By **Jesús Bertani Ramírez**
 
 Welcome to the D'Arcy Playground repository.
 
-The goal of the (page build from this repository)[https://bertani545.github.io/darcy-playground/]) is to let anyone experiment with transformations of the plane ($\mathbb{R}^2 \to \mathbb{R}^2$) and see their effects on the plane, including deforming any image interactively.
+The goal of the [page build from this repository](https://bertani545.github.io/darcy-playground/) is to let anyone experiment with transformations of the plane ($\mathbb{R}^2 \to \mathbb{R}^2$) and see their effects on the plane, including deforming any image interactively.
 
-As the name sugests, this page is inspired by the work of the biologist **D'Arcy Wentworth Thompson**, who proposed that the changes in plants and animals could be explained through continuous transformations of the Cartesian grid. You can learn more about him on his [Wikipedia page](https://en.wikipedia.org/wiki/D%27Arcy_Wentworth_Thompson\)
+As the name sugests, this page is inspired by the work of the biologist **D'Arcy Wentworth Thompson**, who proposed that the changes in plants and animals could be explained through continuous transformations of the Cartesian grid. You can learn more about him on his [Wikipedia page](https://en.wikipedia.org/wiki/D%27Arcy_Wentworth_Thompson)
 
 This page was created as a *spiritual succesor* to a classic software tool from many years ago, which you can find [here](https://mathshistory.st-andrews.ac.uk/Darcy/darcy/). 
 
